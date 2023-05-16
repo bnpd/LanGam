@@ -12,10 +12,16 @@ p {margin: 5px 0 0 0;}
 button {
   background-color: darkblue;
   color: white;
-  height: 40px; /*da line-height von flexbox-childs bei flex-direction: row ignoriert wird*/
-  line-height: 34px; /*Da height von flexbox-childs ignoriert wird wenn flex-direction: column*/
+  height: 40px;
+  line-height: 34px;
   margin-top: 10px;
   border-radius: 10px;
+}
+
+#btnInstall {
+  background-color: aliceblue;
+  color: darkblue;
+  border-color: aliceblue;
 }
 
 .divInputWithBtn {
@@ -47,6 +53,16 @@ input {
   transform: translateY(-2px);
 }
 
+
+/* Changes for Mobile*/
+@media only screen and (max-width: 767px) {
+  #divTask, #solutionField {font-size: xx-large;}
+  #answbtn {
+    height: 60px;
+    line-height: 52px;
+    font-size: x-large;
+  }
+}
 
 
 /* Changes for PC*/
