@@ -3,10 +3,10 @@ h1 {color:darkblue; margin: 10px;}
 h4 {margin: 5px 0;}
 p {margin: 5px 0 0 0;}
 
-.columnsOnDesktop {display: flex; flex-direction: column;}
+#divTask {display: flex; flex-direction: row; flex-wrap: wrap; width: fit-content; margin: auto;}
 #answbtn {margin: 5px auto; outline: none;}
 .boxBig {display: block; border-color: darkblue; padding: 20px; border-width: 3px; border-style: solid; background-color: lightblue; border-radius: 10px; margin: 5px;}
-#divTask, #solutionField {margin: 5px 0; font-weight: bold;}
+#divTask, #solutionField {font-weight: bold;}
 .pointer {cursor:pointer;}
 
 button {
