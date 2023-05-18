@@ -11,6 +11,7 @@ if ('serviceWorker' in navigator) {
 }
 
 var divTask
+var emValidationError
 var answbtn
 var solutionField
 var loginbox
@@ -29,6 +30,7 @@ window.addEventListener("load", init)
 function init() {
 	loginbox = document.getElementById("loginbox")
 	contentbox = document.getElementById('contentbox')
+	emValidationError = document.getElementById('emValidationError')
 	if (!user) {
 		showLoginPrompt()
 		const iUsername = document.getElementById('iUsername')
@@ -75,9 +77,9 @@ function init() {
 function showLoginPrompt(validation_error=false) {
 	loginbox.style.display = 'block'
 	contentbox.style.display = 'none'
-	let emValidationError = document.getElementById('emValidationError')
 	if (validation_error) {
 		emValidationError.style.visibility = 'visible'
+		emValidationError.innerText = validation_error
 	} else {
 		emValidationError.style.visibility = 'hidden'
 	}
@@ -179,12 +181,11 @@ function backendGet(path, callback, error_msg) {
 		if (xhr.status == 200) {
 			callback(xhr.responseText)
 		} else if (xhr.responseText.includes('User does not exist')) {
-			showLoginPrompt(true)
-			return
+			showLoginPrompt('Sorry, user seems not to exist 😶‍🌫')
 		} else {
-			try {
-				window.alert(error_msg + ': ' + xhr.responseXML.textContent)
-			} catch (Exception) {
+			try { // backend returned 404
+				showLoginPrompt('Sorry, there is a network communications problem 🗣️🙉\nTry again in a sec')
+			} catch (Exception) { // backend return other error
 				window.alert(error_msg + ': ' + xhr.responseText)
 			}
 		}
