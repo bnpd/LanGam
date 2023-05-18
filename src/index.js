@@ -63,11 +63,9 @@ function init() {
 			showSolution()
 		} else if (phase == "solutionShown") {
 			solutionField.style.visibility="hidden"
-			console.log(failedWords);
 			Promise.all(currentTask.split(' ').map(word => {
 				return sendReview(word, failedWords.has(word) ? 1 : 4) // TODO: allow all qualities 0-5
 			})).then(() => {
-				console.log('THEN');
 				failedWords.clear()
 				getTask()
 			})
@@ -152,8 +150,8 @@ function setSolution(solution) {
 }
 
 function showSurvey() {
-	if (surveys_available.length===0) return
 	let keys = Object.keys(surveys_available)
+	if (keys.length===0) return
 	currentMetric = keys[Math.floor(Math.random()*keys.length)]
 	spanSurveyQuestion.innerText = surveys_available[currentMetric]
 	delete surveys_available[currentMetric]
