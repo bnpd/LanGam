@@ -75,8 +75,8 @@ function init() {
 			requestNewWords()
 		}
 	})
-	iRating.addEventListener('click', () => {
-		replySurvey(iRating.value())
+	iRating.addEventListener('change', () => {
+		replySurvey(iRating.value)
 	})
 	getTask()
 }
