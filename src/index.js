@@ -30,8 +30,7 @@ function init() {
 	loginbox = document.getElementById("loginbox")
 	contentbox = document.getElementById('contentbox')
 	if (!user) {
-		loginbox.style.display = 'block'
-		contentbox.style.display = 'none'
+		showLoginPrompt()
 		const iUsername = document.getElementById('iUsername')
 		document.getElementById("btnLogin").addEventListener("click", () => { // submit on button press
 			user = iUsername.value
@@ -70,6 +69,18 @@ function init() {
 		}
 	})
 	getTask()
+}
+
+
+function showLoginPrompt(validation_error=false) {
+	loginbox.style.display = 'block'
+	contentbox.style.display = 'none'
+	let emValidationError = document.getElementById('emValidationError')
+	if (validation_error) {
+		emValidationError.style.visibility = 'visible'
+	} else {
+		emValidationError.style.visibility = 'hidden'
+	}
 }
 
 
@@ -168,9 +179,14 @@ function backendGet(path, callback, error_msg) {
 		if (xhr.status == 200) {
 			callback(xhr.responseText)
 		} else if (xhr.responseText.includes('User does not exist')) {
-			document.getElementById('navcontent').innerHTML='<h1>Sorry, you got an invalid link.<br>Contact me for a new one.<br>Nothing to see here 😶‍🌫️</h1>'
+			showLoginPrompt(true)
+			return
 		} else {
-			window.alert(error_msg + ': ' + xhr.responseText)
+			try {
+				window.alert(error_msg + ': ' + xhr.responseXML.textContent)
+			} catch (Exception) {
+				window.alert(error_msg + ': ' + xhr.responseText)
+			}
 		}
 	}
 	xhr.open("GET", backend + path, true)
