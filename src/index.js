@@ -9,16 +9,19 @@ if ('serviceWorker' in navigator) {
 		});
 	});
 }
-
-var divTask
-var emValidationError
-var answbtn
-var solutionField
-var loginbox
-var contentbox
+var divTask, divBottombar, spanSurveyQuestion, emValidationError, answbtn, solutionField, loginbox, contentbox, iRating
 var currentTask=''
 var phase = "promting" // or "solutionShown"
 var failedWords = new Set()
+var currentMetric=''
+var surveys_available = {
+	interestingness: 'The tasks are interesting',
+	enjoyability: 'I am enjoying this',
+	flow: 'I am in the flow',
+	learning: 'I am learning a lot',
+	callengingness: 'This is challenging',
+	confusion: 'I am confused'
+}
 const answbtnTxtWhilePrompting = "Show solution"
 const answbtnTxtWhileSolutionShown = "Next question"
 const answbtnTxtWhileDone = 'Learn new words'
@@ -51,8 +54,10 @@ function init() {
 
 	divTask = document.getElementById('divTask')
 	answbtn = document.getElementById("answbtn")
+	iRating = document.getElementById('iRating')
+	divBottombar = document.getElementById('divBottombar')
+	spanSurveyQuestion = document.getElementById('spanSurveyQuestion')
 	solutionField = document.getElementById("solutionField")
-
 	answbtn.addEventListener("click", () => {
 		if (phase == "promting") {
 			showSolution()
@@ -69,6 +74,9 @@ function init() {
 		} else if (phase == "done") {
 			requestNewWords()
 		}
+	})
+	iRating.addEventListener('click', () => {
+		replySurvey(iRating.value())
 	})
 	getTask()
 }
@@ -143,9 +151,27 @@ function setSolution(solution) {
 	solutionField.innerHTML = solution
 }
 
+function showSurvey() {
+	if (surveys_available.length===0) return
+	let keys = Object.keys(surveys_available)
+	currentMetric = keys[Math.floor(Math.random()*keys.length)]
+	spanSurveyQuestion.innerText = surveys_available[currentMetric]
+	delete surveys_available[currentMetric]
+	divBottombar.style.visibility = 'visible'
+}
+
+
+function replySurvey(rating) {
+	divBottombar.style.visibility = 'hidden'
+	backendGet('/rate/'+user+'/'+currentMetric+'/'+rating, ()=>{}, null)
+}
+
 
 function sendReview(word, quality){
 	return new Promise((resolve, _reject) => {
+		if (Math.random()<0.25) {
+			showSurvey()
+		}
 		backendGet('/review/'+user+'/'+word+'/'+quality, resolve, "Error sending your results")
 	})
 }
@@ -160,6 +186,7 @@ function getTask(){
 	backendGet('/due_task/'+user, responseText => {
 		if (!responseText) {
 			noTask()
+			showSurvey()
 		} else {
 			setTask(responseText)
 			getSolution()
@@ -186,7 +213,9 @@ function backendGet(path, callback, error_msg) {
 			try { // backend returned 404
 				showLoginPrompt('Sorry, there is a network communications problem 🗣️🙉\nTry again in a sec')
 			} catch (Exception) { // backend return other error
-				window.alert(error_msg + ': ' + xhr.responseText)
+				if (error_msg) {
+					window.alert(error_msg + ': ' + xhr.responseText)
+				}
 			}
 		}
 	}

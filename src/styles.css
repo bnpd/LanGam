@@ -43,7 +43,29 @@ button {
   display: none;
 }
 
-input {
+
+#divBottombar {
+  height: 50px;
+  width: 50vw;
+  position: fixed;
+  z-index: 5;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  display: block;
+  border-style: solid;
+  background-color: lightblue;
+  border-radius: 15px 15px 0 0;
+  padding: 5px 5px 5px 15px;
+}
+
+#iRating {
+  height: 50px;
+  transform: scaleX(1.5) scaleY(2) translateX(25%);
+}
+
+
+input[type="text"] {
   padding: 12px 20px;
   height: 45px;
   margin: 8px 0;
