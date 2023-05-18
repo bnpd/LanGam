@@ -68,6 +68,6 @@ input {
 
 /* Changes for PC*/
 @media only screen and (min-width: 768px) {
-  #contentbox {width: 70vw; margin: 20px auto;}
+  body {width: 60vw; margin: 20px auto;}
   .columnsOnDesktop {flex-direction: row}
 }
