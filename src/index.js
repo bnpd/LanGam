@@ -144,7 +144,7 @@ function getSolution(){
 
 
 function getTask(){
-	backendGet('/todays_tasks/'+user, responseText => {
+	backendGet('/due_task/'+user, responseText => {
 		if (!responseText) {
 			noTask()
 		} else {
