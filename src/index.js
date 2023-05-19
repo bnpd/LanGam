@@ -1,4 +1,5 @@
 'use strict';
+import config from './config.js'
 
 // register Service Worker for PWA
 if ('serviceWorker' in navigator) {
@@ -25,7 +26,6 @@ var surveys_available = {
 const answbtnTxtWhilePrompting = "Show solution"
 const answbtnTxtWhileSolutionShown = "Next question"
 const answbtnTxtWhileDone = 'Learn new words'
-const backend = "https://allai-backend.onrender.com"  // "http://127.0.0.1:5000"
 var user = new URLSearchParams(window.location.search).get('u')
 
 // Initialize
@@ -217,7 +217,7 @@ function backendGet(path, callback, error_msg) {
 			}
 		}
 	}
-	xhr.open("GET", backend + path, true)
+	xhr.open("GET", config.backend + path, true)
 	xhr.send(null)
 }
 
