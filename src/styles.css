@@ -49,15 +49,51 @@ button {
   width: 50vw;
   position: fixed;
   z-index: 5;
-  bottom: 0;
   left: 50%;
   transform: translateX(-50%);
   display: block;
+  visibility: hidden;
   font-weight: bold;
   border-style: solid;
   background-color: lightsalmon;
   border-radius: 15px 15px 0 0;
   padding: 0 10px;
+}
+
+#divBottombar.hidden {
+  animation-duration: 1s;
+  animation-name: slideout;
+  bottom: -150px;
+  visibility: hidden;
+}
+
+#divBottombar.visible {
+  animation-duration: 1s;
+  animation-name: slidein;
+  bottom: 0;
+  visibility: visible;
+}
+
+@keyframes slideout {
+  from {
+    bottom: 0;
+    visibility: visible;
+  }
+
+  to {
+    bottom: -150px;
+    visibility: visible;
+  }
+}
+
+@keyframes slidein {
+  from {
+    bottom: -150px;
+  }
+
+  to {
+    bottom: 0;
+  }
 }
 
 #iRating {

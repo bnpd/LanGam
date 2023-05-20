@@ -59,9 +59,9 @@ function init() {
 	labelSurveyQuestion = document.getElementById('labelSurveyQuestion')
 	solutionField = document.getElementById("solutionField")
 	answbtn.addEventListener("click", () => {
-		if (phase == "promting") {
+		if (phase === "promting") {
 			showSolution()
-		} else if (phase == "solutionShown") {
+		} else if (phase === "solutionShown") {
 			solutionField.style.visibility="hidden"
 			Promise.all(currentTask.split(' ').map(word => {
 				return sendReview(word, failedWords.has(word) ? 1 : 4) // TODO: allow all qualities 0-5
@@ -69,13 +69,19 @@ function init() {
 				failedWords.clear()
 				getTask()
 			})
-		} else if (phase == "done") {
+		} else if (phase === "done") {
 			requestNewWords()
 		}
 	})
-	iRating.addEventListener('change', () => {
-		replySurvey(iRating.value)
+	iRating.addEventListener('input', () => {
+		labelSurveyQuestion.innerText = 'Thanks!'
 	})
+	for (const event of ['touchend', 'mouseup']) {
+		iRating.addEventListener(event, () => {
+			replySurvey(iRating.value)
+		})
+	}
+
 	getTask()
 }
 
@@ -152,19 +158,25 @@ function setSolution(solution) {
 function showSurvey() {
 	let keys = Object.keys(surveys_available)
 	if (keys.length===0) return
+	iRating.value = 3  // reset value to neutral
 	currentMetric = keys[Math.floor(Math.random()*keys.length)]
 	labelSurveyQuestion.innerText = surveys_available[currentMetric]
 	delete surveys_available[currentMetric]
-	divBottombar.style.visibility = 'visible'
+	divBottombar.className = 'visible'
 }
 
 
 function replySurvey(rating) {
-	divBottombar.style.visibility = 'hidden'
+	divBottombar.className = 'hidden'
 	backendGet('/rate/'+user+'/'+currentMetric+'/'+rating, ()=>{}, null)
 }
 
-
+/**
+ * Send reults of user reviewing a word
+ * @param word Word that was reviewed
+ * @param quality Quality of recall
+ * @returns {Promise<unknown>} Promise that is resolved when send was successful
+ */
 function sendReview(word, quality){
 	return new Promise((resolve, _reject) => {
 		if (Math.random()<0.25) {
