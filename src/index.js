@@ -10,7 +10,7 @@ if ('serviceWorker' in navigator) {
 		});
 	});
 }
-var divTask, divBottombar, spanSurveyQuestion, emValidationError, answbtn, solutionField, loginbox, contentbox, iRating
+var divTask, divBottombar, labelSurveyQuestion, emValidationError, answbtn, solutionField, loginbox, contentbox, iRating
 var currentTask=''
 var phase = "promting" // or "solutionShown"
 var failedWords = new Set()
@@ -56,7 +56,7 @@ function init() {
 	answbtn = document.getElementById("answbtn")
 	iRating = document.getElementById('iRating')
 	divBottombar = document.getElementById('divBottombar')
-	spanSurveyQuestion = document.getElementById('spanSurveyQuestion')
+	labelSurveyQuestion = document.getElementById('labelSurveyQuestion')
 	solutionField = document.getElementById("solutionField")
 	answbtn.addEventListener("click", () => {
 		if (phase == "promting") {
@@ -153,7 +153,7 @@ function showSurvey() {
 	let keys = Object.keys(surveys_available)
 	if (keys.length===0) return
 	currentMetric = keys[Math.floor(Math.random()*keys.length)]
-	spanSurveyQuestion.innerText = surveys_available[currentMetric]
+	labelSurveyQuestion.innerText = surveys_available[currentMetric]
 	delete surveys_available[currentMetric]
 	divBottombar.style.visibility = 'visible'
 }

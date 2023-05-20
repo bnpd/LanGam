@@ -45,7 +45,7 @@ button {
 
 
 #divBottombar {
-  height: 50px;
+  height: fit-content;
   width: 50vw;
   position: fixed;
   z-index: 5;
@@ -53,17 +53,23 @@ button {
   left: 50%;
   transform: translateX(-50%);
   display: block;
+  font-weight: bold;
   border-style: solid;
-  background-color: lightblue;
+  background-color: lightsalmon;
   border-radius: 15px 15px 0 0;
-  padding: 5px 5px 5px 15px;
+  padding: 0 10px;
 }
 
 #iRating {
-  height: 50px;
-  transform: scaleX(1.5) scaleY(2) translateX(25%);
+  height: 40px;
+  width: 67%;
+  transform: scaleX(1.5) scaleY(2);
 }
 
+.space-between {
+  display: flex;
+  justify-content: space-between;
+}
 
 input[type="text"] {
   padding: 12px 20px;
