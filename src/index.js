@@ -35,6 +35,11 @@ function init() {
 	contentbox = document.getElementById('contentbox')
 	emValidationError = document.getElementById('emValidationError')
 	if (!user) {
+		user = localStorage.getItem('username')
+	} else {
+		localStorage.setItem('username', user)
+	}
+	if (!user) {
 		showLoginPrompt()
 		const iUsername = document.getElementById('iUsername')
 		document.getElementById("btnLogin").addEventListener("click", () => { // submit on button press
