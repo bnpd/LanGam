@@ -26,7 +26,8 @@ var surveys_available = {
 const answbtnTxtWhilePrompting = "Show solution"
 const answbtnTxtWhileSolutionShown = "Next question"
 const answbtnTxtWhileDone = 'Learn new words'
-var user = new URLSearchParams(window.location.search).get('u')
+let urlparams = new URLSearchParams(window.location.search)
+var user = urlparams.get('u'), target_lang=urlparams.get('tl'), native_lang=urlparams.get('nl') // temporary solution only use url params for user languages
 
 // Initialize
 window.addEventListener("load", init)
@@ -36,8 +37,12 @@ function init() {
 	emValidationError = document.getElementById('emValidationError')
 	if (!user) {
 		user = localStorage.getItem('username')
+		target_lang = localStorage.getItem('target_lang')
+		native_lang = localStorage.getItem('native_lang')
 	} else {
 		localStorage.setItem('username', user)
+		localStorage.setItem('target_lang', target_lang)
+		localStorage.setItem('native_lang', native_lang)
 	}
 	if (!user) {
 		showLoginPrompt()
@@ -138,7 +143,7 @@ function setTask(task) {
 					aDict.innerHTML = '📕'
 					aDict.className = 'a-'+word
 					aDict.addEventListener("click", () => {
-						window.open('https://translate.google.com/?sl=da&tl=en&text='+word,'popup','width=600,height=800')
+						window.open('https://translate.google.com/?sl='+target_lang+'&tl='+native_lang+'&text='+word,'popup','width=600,height=800')
 					})
 					divTask.insertBefore(aDict, each)
 				})
