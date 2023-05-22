@@ -28,6 +28,7 @@ const answbtnTxtWhileSolutionShown = "Next question"
 const answbtnTxtWhileDone = 'Learn new words'
 let urlparams = new URLSearchParams(window.location.search)
 var user = urlparams.get('u'), target_lang=urlparams.get('tl'), native_lang=urlparams.get('nl') // temporary solution only use url params for user languages
+var voice = null
 
 // Initialize
 window.addEventListener("load", init)
@@ -71,6 +72,7 @@ function init() {
 	answbtn.addEventListener("click", () => {
 		if (phase === "promting") {
 			showSolution()
+			try_speak(currentTask)
 		} else if (phase === "solutionShown") {
 			solutionField.style.visibility="hidden"
 			Promise.all(currentTask.split(' ').map(word => {
@@ -92,7 +94,31 @@ function init() {
 		})
 	}
 
+	// run setVoice when voices are loaded (onvoiceschanged)
+	if (
+	  typeof speechSynthesis !== "undefined" &&
+	  speechSynthesis.onvoiceschanged !== undefined
+	) {
+	  speechSynthesis.onvoiceschanged = setVoice
+	}
+
 	getTask()
+}
+
+function setVoice() {
+	console.log(speechSynthesis.getVoices())
+	let voices_in_lang = speechSynthesis.getVoices().filter(voice=>{return voice.lang.split('-')[0].big()===target_lang.big()})
+	if (voices_in_lang.length!==0) {
+		voice = voices_in_lang[0]
+	}
+}
+
+function try_speak(str) {
+	if (voice != null) {
+		let utterance = new SpeechSynthesisUtterance(str)
+		utterance.voice = voice
+		speechSynthesis.speak(utterance)
+	}
 }
 
 
@@ -136,6 +162,7 @@ function setTask(task) {
 					})
 				})
 			} else {
+				try_speak(word)
 				failedWords.add(word)
 				Array.from(document.getElementsByClassName('span-'+word)).map(each => {
 					each.style.color = "red"
