@@ -76,6 +76,7 @@ function init() {
 		} else if (phase === "solutionShown") {
 			solutionField.style.visibility="hidden"
 			Promise.all(currentTask.split(' ').map(word => {
+				word = word.replace(/\xa0/g, '')  // remove nbsp which sometime was added after the word
 				return sendReview(word, failedWords.has(word) ? 1 : 4) // TODO: allow all qualities 0-5
 			})).then(() => {
 				failedWords.clear()
@@ -147,6 +148,7 @@ function setTask(task) {
 	phase = "promting"
 	answbtn.innerHTML = answbtnTxtWhilePrompting
 	task.split(' ').map(word => {
+		word = word.replace(/\xa0/g, '')  // remove nbsp which sometime was added after the word
 		let span = document.createElement("span")
 		span.innerHTML = word
 		span.className = 'pointer span-'+word
