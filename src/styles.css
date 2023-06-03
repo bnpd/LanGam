@@ -19,7 +19,7 @@ button {
   border-radius: 10px;
 }
 
-#btnInstall {
+#btnInstall, #btnNotifications {
   background-color: aliceblue;
   color: darkblue;
   border-color: aliceblue;

@@ -7,7 +7,7 @@
 
 	<!-- Installability -->
 	<link rel="manifest" href="manifest.json">
-	<script src="install.js"></script>
+	<script type="module" src="install.js"></script>
 	<!-- Add iOS meta tags and icons -->
 	<meta name="apple-mobile-web-app-capable" content="yes">
 	<meta name="apple-mobile-web-app-status-bar-style" content="black">
@@ -44,6 +44,7 @@
 		<p>When you have selected a word, you can click on the 📕 next to it to open a translation</p>
 	</div>
 	<button id="btnInstall" hidden>Install as app</button>
+	<button id="btnNotifications" hidden>Set a reminder</button>
 	<div id="divBottombar">
 		<h4><label id="labelSurveyQuestion" for="iRating"></label></h4>
 		<div class="space-between">

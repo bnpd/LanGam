@@ -1,4 +1,4 @@
-'use strict';
+'use strict'
 import config from './config.js'
 
 // register Service Worker for PWA
@@ -6,9 +6,9 @@ if ('serviceWorker' in navigator) {
 	window.addEventListener('load', () => {
 		navigator.serviceWorker.register('/sw.js')
 		.then((reg) => {
-			console.log('Service worker registered.', reg);
-		});
-	});
+			console.log('Service worker registered.', reg)
+		})
+	})
 }
 var divTask, divBottombar, labelSurveyQuestion, emValidationError, answbtn, solutionField, loginbox, contentbox, iRating
 var currentTask=''
@@ -270,5 +270,54 @@ function backendGet(path, callback, error_msg) {
 	}
 	xhr.open("GET", config.backend + path, true)
 	xhr.send(null)
+}
+
+
+// Push Notifications
+var btnNotifications
+window.addEventListener('load', function () {
+    btnNotifications = document.getElementById('btnNotifications')
+    if (Notification.permission === 'default') {
+        btnNotifications.removeAttribute('hidden')
+        btnNotifications.addEventListener('click', requestNotifications)
+    }
+})
+
+function requestNotifications(evt) {
+    subscribeUserToPush().then(subscription => sendSubscriptionToBackEnd(subscription, user)).then(()=>
+  	evt.srcElement.setAttribute('hidden', true))
+}
+
+function subscribeUserToPush() {
+  return navigator.serviceWorker.ready
+    .then(registration => {
+      const subscribeOptions = {
+        userVisibleOnly: true,
+        applicationServerKey: config.webpush_public_key,
+      }
+      return registration.pushManager.subscribe(subscribeOptions)
+    })
+    .then(pushSubscription => {
+      console.log(
+        'Received PushSubscription: ',
+        JSON.stringify(pushSubscription),
+      )
+      return pushSubscription
+    })
+}
+
+function sendSubscriptionToBackEnd(subscription, username) {
+  return fetch(config.backend+'/api/webpush-subscribe/'+username, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(subscription),
+  }).then(function (response) {
+    if (!response.ok) {
+      throw new Error('Server error.')
+    }
+	return true
+  })
 }
 
