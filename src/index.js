@@ -75,6 +75,8 @@ function init() {
 			try_speak(currentTask)
 		} else if (phase === "solutionShown") {
 			solutionField.style.visibility="hidden"
+			divTask.style.visibility="hidden"
+			answbtn.className = 'loading-indicator'
 			Promise.all(currentTask.split(' ').map(word => {
 				word = word.replace(/\xa0/g, '')  // remove nbsp which sometime was added after the word
 				return sendReview(word, failedWords.has(word) ? 1 : 4) // TODO: allow all qualities 0-5
@@ -83,6 +85,7 @@ function init() {
 				getTask()
 			})
 		} else if (phase === "done") {
+			answbtn.className = 'loading-indicator'
 			requestNewWords()
 		}
 	})
@@ -145,6 +148,7 @@ function showSolution() {
 function setTask(task) {
 	currentTask = task  // save in global to be accessible in answbtn eventListener
 	divTask.textContent = '' // delete previous task
+	divTask.style.visibility="visible"
 	phase = "promting"
 	answbtn.innerHTML = answbtnTxtWhilePrompting
 	task.split(' ').map(word => {
@@ -186,6 +190,7 @@ function noTask() {
 	phase = 'done'
 	currentTask = ''
 	divTask.textContent = 'Done for today 🤓'
+	divTask.style.visibility="visible"
 	answbtn.innerHTML = answbtnTxtWhileDone
 }
 
@@ -233,6 +238,7 @@ function getSolution(){
 
 function getTask(){
 	backendGet('/due_task/'+user, responseText => {
+		answbtn.className = ''
 		if (!responseText) {
 			noTask()
 			showSurvey()
