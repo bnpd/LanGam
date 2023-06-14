@@ -121,6 +121,7 @@ function try_speak(str) {
 	if (voice != null) {
 		let utterance = new SpeechSynthesisUtterance(str)
 		utterance.voice = voice
+		utterance.lang = target_lang.big()
 		speechSynthesis.speak(utterance)
 	}
 }
