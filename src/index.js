@@ -111,7 +111,8 @@ function init() {
 
 function setVoice() {
 	console.log(speechSynthesis.getVoices())
-	let voices_in_lang = speechSynthesis.getVoices().filter(voice=>{return voice.lang.split('-')[0].big()===target_lang.big()})
+    const separator = speechSynthesis.getVoices()[0].lang.includes('-') ? '-' : '_'
+	let voices_in_lang = speechSynthesis.getVoices().filter(voice=>{return voice.lang.split(separator)[0].big()===target_lang.big()})
 	if (voices_in_lang.length!==0) {
 		voice = voices_in_lang[0]
 	}
