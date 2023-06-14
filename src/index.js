@@ -105,6 +105,9 @@ function init() {
 	) {
 	  speechSynthesis.onvoiceschanged = setVoice
 	}
+	if (speechSynthesis.getVoices()) {
+		setVoice()  // if we were too slow and the voice has already been set before speechSynthesis.onvoiceschanged = setVoice, just call setVoice immediately
+	}
 
 	getTask()
 }
