@@ -1,6 +1,7 @@
 'use strict'
 
 const CACHE_NAME = 'static-cache'
+import config from './config.js'
 
 const FILES_TO_CACHE = [
   '/index.html',
@@ -58,36 +59,9 @@ self.addEventListener('push', evt => {
 })
 
 self.addEventListener('notificationclick', function (event) {
-  event.notification.close();
-//   event.waitUntil(clients.matchAll({
-    //     type: "window",
-    //     includeUncontrolled: true
-    // }).then(function (clientList) {
-    //     if (data.WebUrl) {
-    //         let client = null;
-    //
-    //         for (let i = 0; i < clientList.length; i++) {
-    //             let item = clientList[i];
-    //
-    //             if (item.url) {
-    //                 client = item;
-    //                 break;
-    //             }
-    //         }
-    //
-    //         if (client && 'navigate' in client) {
-    //             client.focus();
-    //             event.notification.close();
-    //             return client.navigate(data.WebUrl);
-    //         }
-    //         else {
-    //             event.notification.close();
-    //             // if client doesn't have navigate function, try to open a new browser window
-    //             return clients.openWindow(data.WebUrl);
-    //         }
-    //     }
-    // }))
-  clients.focus()
+    event.notification.close();
+    clients.openWindow(config.frontend);
+    clients.focus()
 })
 
 
