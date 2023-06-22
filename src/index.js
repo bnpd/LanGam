@@ -36,7 +36,7 @@ function init() {
 	loginbox = document.getElementById("loginbox")
 	contentbox = document.getElementById('contentbox')
 	emValidationError = document.getElementById('emValidationError')
-	if (!user) {
+	if (!user) { // overwrite stored user if user provided in url
 		user = localStorage.getItem('username')
 		target_lang = localStorage.getItem('target_lang')
 		native_lang = localStorage.getItem('native_lang')
@@ -45,19 +45,11 @@ function init() {
 		localStorage.setItem('target_lang', target_lang)
 		localStorage.setItem('native_lang', native_lang)
 	}
+	document.getElementById("btnRetryConnection").addEventListener("click", () => { // submit on button press
+		init()
+	})
 	if (!user) {
-		showLoginPrompt()
-		const iUsername = document.getElementById('iUsername')
-		document.getElementById("btnLogin").addEventListener("click", () => { // submit on button press
-			user = iUsername.value
-			init()
-		})
-		iUsername.addEventListener("keyup", ({key}) => { // submit on enter
-			if (key === "Enter") {
-				user = iUsername.value
-				init()
-			}
-		})
+		showLoginPrompt('Sorry, your link seems to be defective, please ask me for a new one 💥🔗')
 		return
 	}
 	loginbox.style.display = 'none'
@@ -109,6 +101,7 @@ function init() {
 		setVoice()  // if we were too slow and the voice has already been set before speechSynthesis.onvoiceschanged = setVoice, just call setVoice immediately
 	}
 
+	console.log('gettask')
 	getTask()
 }
 

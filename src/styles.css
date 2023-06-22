@@ -7,7 +7,7 @@ p {margin: 5px 0 0 0;}
 #answbtn {margin: 5px auto; outline: none;}
 .boxBig {display: block; border-color: darkblue; padding: 20px; border-width: 3px; border-style: solid; background-color: lightblue; border-radius: 10px; margin: 5px;}
 #divTask, #solutionField {font-weight: bold;}
-#emValidationError {color: orangered; font-weight: bold;}
+#emValidationError {color: orangered; font-weight: bold; display: block}
 .pointer {cursor:pointer;}
 
 button {
@@ -27,20 +27,6 @@ button {
 
 #pNotifications {
   color: darkblue;
-}
-
-.divInputWithBtn {
-  margin: 10px auto;
-  display: block;
-  border-radius: 15px 15px 0 0;
-  padding: 5px 5px 5px 15px;
-}
-
-.divInputWithBtn > button {
-  border-left: 0;
-  margin-left: 0;
-  height: 45px;
-  border-radius: 0 5px 5px 0;
 }
 
 #loginbox {
@@ -109,17 +95,6 @@ button {
 .space-between {
   display: flex;
   justify-content: space-between;
-}
-
-input[type="text"] {
-  padding: 12px 20px;
-  height: 45px;
-  margin: 8px 0;
-  box-sizing: border-box;
-  border: none;
-  border-bottom: 3px solid darkblue;
-  border-radius: 5px 0 0 5px;
-  transform: translateY(-2px);
 }
 
 /* Loading indicator */
