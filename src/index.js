@@ -291,6 +291,7 @@ window.addEventListener('load', function () {
     btnNotifications = document.getElementById('btnNotifications')
     if (Notification.permission === 'default') {
         btnNotifications.removeAttribute('hidden')
+		document.getElementById('pNotifications').removeAttribute('hidden')
         btnNotifications.addEventListener('click', requestNotifications)
     }
 })

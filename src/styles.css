@@ -25,6 +25,10 @@ button {
   border-color: aliceblue;
 }
 
+#pNotifications {
+  color: darkblue;
+}
+
 .divInputWithBtn {
   margin: 10px auto;
   display: block;
