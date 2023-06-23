@@ -26,8 +26,9 @@ var surveys_available = {
 const answbtnTxtWhilePrompting = "Show solution"
 const answbtnTxtWhileSolutionShown = "Next question"
 const answbtnTxtWhileDone = 'Learn new words'
+const preprocessingRegex = /[^\p{L}']/gu
 let urlparams = new URLSearchParams(window.location.search)
-var user = urlparams.get('u'), target_lang=urlparams.get('tl'), native_lang=urlparams.get('nl') // temporary solution only use url params for user languages
+var user = urlparams.get('u'), target_lang=urlparams.get('tl'), native_lang=urlparams.get('nl'), method=urlparams.get('mtd') // temporary solution only use url params for user languages
 var voice = null
 
 // Initialize
@@ -49,9 +50,14 @@ function init() {
 		init()
 	})
 	if (!user) {
-		showLoginPrompt('Sorry, your link seems to be defective, please ask me for a new one 💥🔗')
+		showLoginPrompt('Sorry, your link seems to be defective, please ask Benjamin for a new one 💥🔗')
 		return
 	}
+
+	if (method === 'focus') {
+		document.getElementById('pMethodExplanation').innerHTML = 'Please tap the current word if you do not know it yet or cannot remember what it means. <span class="out-of-focus">Opaque</span> words are only for context.'
+	}
+
 	loginbox.style.display = 'none'
 	contentbox.style.display = 'block'
 
@@ -70,7 +76,7 @@ function init() {
 			divTask.style.visibility="hidden"
 			answbtn.className = 'loading-indicator'
 			Promise.all(currentTask.split(' ').map(word => {
-				word = word.replace(/\xa0/g, '')  // remove nbsp which sometime was added after the word
+				word = word.toLowerCase().replace(preprocessingRegex, '') // preprocess word to remove e.g. adjacent commas and lowercase it. Only unicode letters + ' allowed
 				return sendReview(word, failedWords.has(word) ? 1 : 4) // TODO: allow all qualities 0-5
 			})).then(() => {
 				failedWords.clear()
@@ -144,19 +150,27 @@ function showSolution() {
 }
 
 
-function setTask(task) {
-	currentTask = task  // save in global to be accessible in answbtn eventListener
+function setTask(task, focused_word=null) {
+	task = task.replace(/\xa0/g, '') // remove nbsp just in case its a problem here too
+	focused_word = focused_word ? focused_word.replace(/\xa0/g, '') : focused_word // remove nbsp just in case its a problem here too
+	currentTask = focused_word ? focused_word : task // save in global to be accessible in answbtn eventListener
 	divTask.textContent = '' // delete previous task
 	divTask.style.visibility="visible"
 	phase = "promting"
 	answbtn.innerHTML = answbtnTxtWhilePrompting
 	task.split(' ').map(word => {
-		word = word.replace(/\xa0/g, '')  // remove nbsp which sometime was added after the word
 		let span = document.createElement("span")
 		span.innerHTML = word
-		span.className = 'pointer span-'+word
 		span.style.marginRight="0.5em"
 		divTask.appendChild(span)
+
+		word = word.toLowerCase().replace(preprocessingRegex, '') // preprocess word to remove e.g. adjacent commas and lowercase it. Only unicode letters + ' allowed
+		if (focused_word && word !== focused_word) {
+			span.className = 'out-of-focus'
+			return // no need to make clickable and implement fail_word logic if not relevant
+		}
+
+		span.className = 'pointer span-'+word
 		span.addEventListener("click", () => {
 			if (failedWords.has(word)) {
 				failedWords.delete(word)
@@ -238,11 +252,24 @@ function getSolution(){
 function getTask(){
 	backendGet('/due_task/'+user, responseText => {
 		answbtn.className = ''
-		if (!responseText) {
+
+		let task = null
+		let word = null
+		try { // for single word method where a word in the task has to be focused
+			let json = JSON.parse(responseText)
+			task = json.task
+			if (json.hasOwnProperty('word')) {
+				word = json.word
+			}
+		} catch (error) {
+			console.log(error)
+		}
+
+		if (!task) {
 			noTask()
 			showSurvey()
 		} else {
-			setTask(responseText)
+			setTask(task, word)
 			getSolution()
 		}
 	}, "Error loading the task")
