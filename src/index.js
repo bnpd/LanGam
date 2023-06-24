@@ -41,10 +41,12 @@ function init() {
 		user = localStorage.getItem('username')
 		target_lang = localStorage.getItem('target_lang')
 		native_lang = localStorage.getItem('native_lang')
+		method = localStorage.getItem('method')
 	} else {
 		localStorage.setItem('username', user)
 		localStorage.setItem('target_lang', target_lang)
 		localStorage.setItem('native_lang', native_lang)
+		localStorage.setItem('method', method)
 	}
 	document.getElementById("btnRetryConnection").addEventListener("click", () => { // submit on button press
 		init()
@@ -107,7 +109,7 @@ function init() {
 		setVoice()  // if we were too slow and the voice has already been set before speechSynthesis.onvoiceschanged = setVoice, just call setVoice immediately
 	}
 
-	console.log('gettask')
+	console.log(native_lang)
 	getTask()
 }
 
@@ -208,8 +210,13 @@ function noTask() {
 }
 
 
-function setSolution(solution) {
-	solutionField.innerHTML = solution
+function setSolution(solution, word_translation=null) {
+	answbtn.removeAttribute('disabled', '')
+	if (word_translation && solution.toLowerCase().includes(word_translation.toLowerCase())) {
+		solutionField.innerHTML = '<span class="out-of-focus">' + solution.replace(new RegExp(word_translation, "ig"), '</span>' + word_translation + '<span class="out-of-focus">') + '</span>'
+	} else {
+		solutionField.innerHTML = solution
+	}
 }
 
 function showSurvey() {
@@ -245,7 +252,23 @@ function sendReview(word, quality){
 
 
 function getSolution(){
-	backendGet('/current_solution/'+user, responseText => setSolution(responseText), 'Error loading the solution')
+	answbtn.setAttribute('disabled', "")
+	backendGet('/current_solution/'+user, responseText => {
+		let task = null
+		let word = null
+		try { // for single word method where a word in the task has to be focused
+			let json = JSON.parse(responseText)
+			task = json.task
+			if (json.hasOwnProperty('word')) {
+				word = json.word
+			}
+		} catch (error) {
+			console.log(error)
+		}
+		console.log(task)
+		console.log(word)
+		setSolution(task, word)
+	}, 'Error loading the solution')
 }
 
 
