@@ -28,7 +28,7 @@ const answbtnTxtWhileSolutionShown = "Next question"
 const answbtnTxtWhileDone = 'Learn new words'
 const preprocessingRegex = /[^\p{L}']/gu
 let urlparams = new URLSearchParams(window.location.search)
-var user = urlparams.get('u'), target_lang=urlparams.get('tl').toLowerCase(), native_lang=urlparams.get('nl').toLowerCase(), method=urlparams.get('mtd') // temporary solution only use url params for user languages
+var user = urlparams.get('u'), target_lang=urlparams.get('tl'), native_lang=urlparams.get('nl'), method=urlparams.get('mtd') // temporary solution only use url params for user languages
 var voice = null
 
 // Initialize
@@ -43,6 +43,8 @@ function init() {
 		native_lang = localStorage.getItem('native_lang')
 		method = localStorage.getItem('method')
 	} else {
+		target_lang = target_lang.toLowerCase()
+		native_lang = native_lang.toLowerCase()
 		localStorage.setItem('username', user)
 		localStorage.setItem('target_lang', target_lang)
 		localStorage.setItem('native_lang', native_lang)
