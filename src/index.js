@@ -26,7 +26,7 @@ var surveys_available = {
 const answbtnTxtWhilePrompting = "Show solution"
 const answbtnTxtWhileSolutionShown = "Next question"
 const answbtnTxtWhileDone = 'Learn new words'
-const preprocessingRegex = /[^\p{L}']/gu
+const preprocessingRegex = /[^\p{L}\p{N}']/gu
 let urlparams = new URLSearchParams(window.location.search)
 var user = urlparams.get('u'), target_lang=urlparams.get('tl'), native_lang=urlparams.get('nl'), method=urlparams.get('mtd') // temporary solution only use url params for user languages
 var voice = null
@@ -71,13 +71,14 @@ function init() {
 	divBottombar = document.getElementById('divBottombar')
 	labelSurveyQuestion = document.getElementById('labelSurveyQuestion')
 	solutionField = document.getElementById("solutionField")
+	answbtn.className = 'loading-indicator'
 	answbtn.addEventListener("click", () => {
 		if (phase === "promting") {
 			showSolution()
 			try_speak(currentTask)
 		} else if (phase === "solutionShown") {
-			solutionField.style.visibility="hidden"
 			divTask.style.visibility="hidden"
+			solutionField.innerText = ''
 			answbtn.className = 'loading-indicator'
 			Promise.all(currentTask.split(' ').map(word => {
 				word = word.toLowerCase().replace(preprocessingRegex, '') // preprocess word to remove e.g. adjacent commas and lowercase it. Only unicode letters + ' allowed
@@ -208,12 +209,16 @@ function noTask() {
 	currentTask = ''
 	divTask.textContent = 'Done for today 🤓'
 	divTask.style.visibility="visible"
+	solutionField.className = ''
+	solutionField.innerText = ''
 	answbtn.innerHTML = answbtnTxtWhileDone
 }
 
 
 function setSolution(solution, word_translation=null) {
 	answbtn.removeAttribute('disabled', '')
+	solutionField.style.visibility="hidden"
+	solutionField.className = ''
 	if (word_translation && solution.toLowerCase().includes(word_translation.toLowerCase())) {
 		solutionField.innerHTML = '<span class="out-of-focus">' + solution.replace(new RegExp(word_translation, "ig"), '</span>' + word_translation + '<span class="out-of-focus">') + '</span>'
 	} else {
@@ -254,6 +259,7 @@ function sendReview(word, quality){
 
 
 function getSolution(){
+	solutionField.className = 'loading-indicator'
 	answbtn.setAttribute('disabled', "")
 	backendGet('/current_solution/'+user, responseText => {
 		let task = null
