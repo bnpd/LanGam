@@ -58,7 +58,7 @@ function init() {
 		return
 	}
 
-	if (method === 'focus') {
+	if (method === 'single') {
 		document.getElementById('pMethodExplanation').innerHTML = 'Please tap the current word if you do not know it yet or cannot remember what it means. <span class="out-of-focus">Opaque</span> words are only for context.'
 	}
 
