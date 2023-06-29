@@ -344,12 +344,14 @@ window.addEventListener('load', function () {
         btnNotifications.removeAttribute('hidden')
 		document.getElementById('pNotifications').removeAttribute('hidden')
         btnNotifications.addEventListener('click', requestNotifications)
-    }
+    } else if (Notification.permission === 'granted') {
+		requestNotifications()
+	}
 })
 
 function requestNotifications(evt) {
     subscribeUserToPush().then(subscription => sendSubscriptionToBackEnd(subscription, user)).then(()=>
-  	evt.srcElement.setAttribute('hidden', true))
+  	btnNotifications.setAttribute('hidden', true))
 }
 
 function subscribeUserToPush() {
