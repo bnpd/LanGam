@@ -78,7 +78,7 @@ function init() {
 		if (phase === "promting") {
 			showSolution()
 			if (sound) {
-				try_speak(word)
+				try_speak(currentTask)
 			}
 		} else if (phase === "solutionShown") {
 			divTask.style.visibility="hidden"
