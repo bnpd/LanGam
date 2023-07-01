@@ -24,7 +24,7 @@ button {
   pointer-events: none;
 }
 
-#btnInstall, #btnNotifications {
+#btnInstall, #btnNotifications, #btnSound {
   background-color: aliceblue;
   color: darkblue;
   border-color: aliceblue;

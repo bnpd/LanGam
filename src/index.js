@@ -10,7 +10,7 @@ if ('serviceWorker' in navigator) {
 		})
 	})
 }
-var divTask, divBottombar, labelSurveyQuestion, emValidationError, answbtn, solutionField, loginbox, contentbox, iRating
+var divTask, divBottombar, labelSurveyQuestion, emValidationError, answbtn, solutionField, loginbox, contentbox, iRating, btnSound
 var currentTask=''
 var phase = "promting" // or "solutionShown"
 var failedWords = new Set()
@@ -30,6 +30,7 @@ const preprocessingRegex = /[^\p{L}\p{N}']/gu
 let urlparams = new URLSearchParams(window.location.search)
 var user = urlparams.get('u'), target_lang=urlparams.get('tl'), native_lang=urlparams.get('nl'), method=urlparams.get('mtd') // temporary solution only use url params for user languages
 var voice = null
+var sound = true
 
 // Initialize
 window.addEventListener("load", init)
@@ -51,7 +52,7 @@ function init() {
 		localStorage.setItem('method', method)
 	}
 	document.getElementById("btnRetryConnection").addEventListener("click", () => { // submit on button press
-		init()
+		location.reload()
 	})
 	if (!user) {
 		showLoginPrompt('Sorry, your link seems to be defective, please ask Benjamin for a new one 💥🔗')
@@ -68,6 +69,7 @@ function init() {
 	divTask = document.getElementById('divTask')
 	answbtn = document.getElementById("answbtn")
 	iRating = document.getElementById('iRating')
+	btnSound = document.getElementById('btnSound')
 	divBottombar = document.getElementById('divBottombar')
 	labelSurveyQuestion = document.getElementById('labelSurveyQuestion')
 	solutionField = document.getElementById("solutionField")
@@ -75,7 +77,9 @@ function init() {
 	answbtn.addEventListener("click", () => {
 		if (phase === "promting") {
 			showSolution()
-			try_speak(currentTask)
+			if (sound) {
+				try_speak(word)
+			}
 		} else if (phase === "solutionShown") {
 			divTask.style.visibility="hidden"
 			solutionField.innerText = ''
@@ -91,6 +95,14 @@ function init() {
 			answbtn.className = 'loading-indicator'
 			requestNewWords()
 		}
+	})
+	// Set sound variable and toggle icon from localStorage if previously saved
+	sound = localStorage.getItem('sound') ? JSON.parse(localStorage.getItem('sound')) : sound
+	btnSound.innerText = sound ? '🔊' : '🔈'
+	btnSound.addEventListener('click', () => {
+		sound = ! sound
+		localStorage.setItem('sound', sound)
+		btnSound.innerText = sound ? '🔊' : '🔈'
 	})
 	iRating.addEventListener('input', () => {
 		labelSurveyQuestion.innerText = 'Thanks!'
@@ -186,7 +198,9 @@ function setTask(task, focused_word=null) {
 					})
 				})
 			} else {
-				try_speak(word)
+				if (sound) {
+					try_speak(word)
+				}
 				failedWords.add(word)
 				Array.from(document.getElementsByClassName('span-'+word)).map(each => {
 					each.style.color = "red"
