@@ -1,5 +1,9 @@
 'use strict'
 import config from './config.js'
+import DocumentC from './DocumentC.js'
+import TranslatableText from './TranslatableText.js'
+
+// debug in DEV browser: http://localhost/?u=pl1&tl=pl&nl=en
 
 // register Service Worker for PWA
 if ('serviceWorker' in navigator) {
@@ -10,19 +14,10 @@ if ('serviceWorker' in navigator) {
 		})
 	})
 }
-var divTask, divBottombar, labelSurveyQuestion, emValidationError, answbtn, solutionField, loginbox, contentbox, iRating, btnSound
+var divTask, emValidationError, answbtn, solutionField, loginbox, contentbox, iRating, btnSound
 var currentTask=''
 var phase = "promting" // or "solutionShown"
 var failedWords = new Set()
-var currentMetric=''
-var surveys_available = {
-	interestingness: 'The tasks are interesting',
-	enjoyability: 'I am enjoying this',
-	flow: 'I am in the flow',
-	learning: 'I am learning a lot',
-	callengingness: 'This is challenging',
-	confusion: 'I am confused'
-}
 const answbtnTxtWhilePrompting = "Show solution"
 const answbtnTxtWhileSolutionShown = "Next question"
 const answbtnTxtWhileDone = 'Learn new words'
@@ -64,14 +59,11 @@ function init() {
 	}
 
 	loginbox.style.display = 'none'
-	contentbox.style.display = 'block'
+	contentbox.style.removeProperty('display')
 
 	divTask = document.getElementById('divTask')
 	answbtn = document.getElementById("answbtn")
-	iRating = document.getElementById('iRating')
 	btnSound = document.getElementById('btnSound')
-	divBottombar = document.getElementById('divBottombar')
-	labelSurveyQuestion = document.getElementById('labelSurveyQuestion')
 	solutionField = document.getElementById("solutionField")
 	answbtn.className = 'loading-indicator'
 	answbtn.addEventListener("click", () => {
@@ -104,14 +96,6 @@ function init() {
 		localStorage.setItem('sound', sound)
 		btnSound.innerText = sound ? '🔊' : '🔈'
 	})
-	iRating.addEventListener('input', () => {
-		labelSurveyQuestion.innerText = 'Thanks!'
-	})
-	for (const event of ['touchend', 'mouseup']) {
-		iRating.addEventListener(event, () => {
-			replySurvey(iRating.value)
-		})
-	}
 
 	// run setVoice when voices are loaded (onvoiceschanged)
 	if (
@@ -161,60 +145,69 @@ function showLoginPrompt(validation_error=false) {
 
 
 function showSolution() {
-	solutionField.style.visibility="visible"
+	solutionField.removeAttribute('style')
 	phase = "solutionShown"
 	answbtn.innerHTML = answbtnTxtWhileSolutionShown
 }
 
 
-function setTask(task, focused_word=null) {
+/**
+ * Set a document as the currently shown task
+ * @param {DocumentC} doc Document cnotaining the task
+ */
+function setTask(doc) {
+	let task = doc.title.text + '\n' + doc.text.text
 	task = task.replace(/\xa0/g, '') // remove nbsp just in case its a problem here too
-	focused_word = focused_word ? focused_word.replace(/\xa0/g, '') : focused_word // remove nbsp just in case its a problem here too
-	currentTask = focused_word ? focused_word : task // save in global to be accessible in answbtn eventListener
+	currentTask = task // save in global to be accessible in answbtn eventListener
 	divTask.textContent = '' // delete previous task
 	divTask.style.visibility="visible"
 	phase = "promting"
 	answbtn.innerHTML = answbtnTxtWhilePrompting
-	task.split(' ').map(word => {
-		let span = document.createElement("span")
-		span.innerHTML = word
-		span.style.marginRight="0.5em"
-		divTask.appendChild(span)
+	let row = 1
+	task.split('\n').map(paragraph =>{
+		if (!paragraph.trim()) return // if it was only some kind of whitespace, don't bother
+		const p = document.createElement('p')		
+		paragraph.split(' ').map(word => {
+			if (!word.trim()) return // if it was only some kind of whitespace, don't bother
+			let span = document.createElement("span")
+			span.innerHTML = word+' '
+			span.style.marginRight="0.5em"
+			p.appendChild(span)
+			p.style.gridRow = row
+			word = word.toLowerCase().replace(preprocessingRegex, '') // preprocess word to remove e.g. adjacent commas and lowercase it. Only unicode letters + ' allowed
 
-		word = word.toLowerCase().replace(preprocessingRegex, '') // preprocess word to remove e.g. adjacent commas and lowercase it. Only unicode letters + ' allowed
-		if (focused_word && word !== focused_word) {
-			span.className = 'out-of-focus'
-			return // no need to make clickable and implement fail_word logic if not relevant
-		}
-
-		span.className = 'pointer span-'+word
-		span.addEventListener("click", () => {
-			if (failedWords.has(word)) {
-				failedWords.delete(word)
-				Array.from(document.getElementsByClassName('span-'+word)).map(each => {
-					each.style.color = ""
-					Array.from(document.getElementsByClassName('a-'+word)).map(eachA => { // remove corresponding dictionary links for all occurrences of the word
-						divTask.removeChild(eachA)
+			span.className = 'pointer span-'+word
+			span.addEventListener("click", () => {
+				if (failedWords.has(word)) {
+					failedWords.delete(word)
+					Array.from(document.getElementsByClassName('span-'+word)).forEach(each => {
+						each.style.color = ""
+						Array.from(document.getElementsByClassName('a-'+word)).forEach(eachA => { // remove corresponding dictionary links for all occurrences of the word
+							eachA.parentElement.removeChild(eachA)
+						})
 					})
-				})
-			} else {
-				if (sound) {
-					try_speak(word)
+				} else {
+					if (sound) {
+						try_speak(word)
+					}
+					failedWords.add(word)
+					Array.from(document.getElementsByClassName('span-'+word)).forEach(each => {
+						each.style.color = "red"
+						let aDict = document.createElement('a')
+						aDict.innerHTML = '📕'
+						aDict.className = 'a-'+word
+						aDict.addEventListener("click", () => {
+							window.open('https://translate.google.com/?sl='+target_lang+'&tl='+native_lang+'&text='+word,'popup','width=600,height=800')
+						})
+						each.parentElement.insertBefore(aDict, each)
+					})
 				}
-				failedWords.add(word)
-				Array.from(document.getElementsByClassName('span-'+word)).map(each => {
-					each.style.color = "red"
-					let aDict = document.createElement('a')
-					aDict.innerHTML = '📕'
-					aDict.className = 'a-'+word
-					aDict.addEventListener("click", () => {
-						window.open('https://translate.google.com/?sl='+target_lang+'&tl='+native_lang+'&text='+word,'popup','width=600,height=800')
-					})
-					divTask.insertBefore(aDict, each)
-				})
-			}
+			})
 		})
+		divTask.appendChild(p)
+		row++
 	})
+
 }
 
 
@@ -223,37 +216,25 @@ function noTask() {
 	currentTask = ''
 	divTask.textContent = 'Done for today 🤓'
 	divTask.style.visibility="visible"
-	solutionField.className = ''
 	solutionField.innerText = ''
 	answbtn.innerHTML = answbtnTxtWhileDone
 }
 
 
-function setSolution(solution, word_translation=null) {
+function setSolution(solution) {
+	solution = solution.replace('\r', '').replace('\n\n', '\n')
 	answbtn.removeAttribute('disabled', '')
-	solutionField.style.visibility="hidden"
-	solutionField.className = ''
-	if (word_translation && solution.toLowerCase().includes(word_translation.toLowerCase())) {
-		solutionField.innerHTML = '<span class="out-of-focus">' + solution.replace(new RegExp(word_translation, "ig"), '</span>' + word_translation + '<span class="out-of-focus">') + '</span>'
-	} else {
-		solutionField.innerHTML = solution
-	}
-}
+	solutionField.style.display="none"
 
-function showSurvey() {
-	let keys = Object.keys(surveys_available)
-	if (keys.length===0) return
-	iRating.value = 3  // reset value to neutral
-	currentMetric = keys[Math.floor(Math.random()*keys.length)]
-	labelSurveyQuestion.innerText = surveys_available[currentMetric]
-	delete surveys_available[currentMetric]
-	divBottombar.className = 'visible'
-}
-
-
-function replySurvey(rating) {
-	divBottombar.className = 'hidden'
-	backendGet('/rate/'+user+'/'+currentMetric+'/'+rating, ()=>{}, null)
+	let row = 1
+	solution.split('\n').map(paragraph => {
+		if (!paragraph.trim()) return // if it was only some kind of whitespace, don't bother
+		const p = document.createElement('p')
+		p.style.gridRow = row
+		p.innerText = paragraph
+		solutionField.appendChild(p)
+		row++
+	});
 }
 
 /**
@@ -264,58 +245,46 @@ function replySurvey(rating) {
  */
 function sendReview(word, quality){
 	return new Promise((resolve, _reject) => {
-		if (Math.random()<0.25) {
-			showSurvey()
-		}
 		backendGet('/review/'+user+'/'+word+'/'+quality, resolve, "Error sending your results")
 	})
 }
 
 
-function getSolution(){
-	solutionField.className = 'loading-indicator'
-	answbtn.setAttribute('disabled', "")
-	backendGet('/current_solution/'+user, responseText => {
-		let task = null
-		let word = null
-		try { // for single word method where a word in the task has to be focused
-			let json = JSON.parse(responseText)
-			task = json.task
-			if (json.hasOwnProperty('word')) {
-				word = json.word
-			}
-		} catch (error) {
-			console.log(error)
-		}
-		console.log(task)
-		console.log(word)
-		setSolution(task, word)
-	}, 'Error loading the solution')
-}
+// function getSolution(){
+// 	solutionField.className = 'loading-indicator'
+// 	answbtn.setAttribute('disabled', "")
+// 	backendGet('/current_solution/'+user, responseText => {
+// 		let translation = null
+// 		try { // for single word method where a word in the task has to be focused
+// 			let json = JSON.parse(responseText)
+// 			translation = json.title + '\n\n' + json.text
+// 		} catch (error) {
+// 			console.log(error)
+// 		}
+// 		console.log(translation)
+// 		setSolution(translation)
+// 	}, 'Error loading the solution')
+// }
 
 
 function getTask(){
 	backendGet('/due_task/'+user, responseText => {
 		answbtn.className = ''
 
-		let task = null
-		let word = null
-		try { // for single word method where a word in the task has to be focused
-			let json = JSON.parse(responseText)
-			task = json.task
-			if (json.hasOwnProperty('word')) {
-				word = json.word
-			}
-		} catch (error) {
-			console.log(error)
-		}
-
-		if (!task) {
+		if (!responseText) {
 			noTask()
-			showSurvey()
 		} else {
-			setTask(task, word)
-			getSolution()
+			let doc = null
+			try { // for single word method where a word in the task has to be focused
+				let json = JSON.parse(responseText)
+				doc = DocumentC.fromJson(json)
+			} catch (error) {
+				console.log(error)
+			}
+
+			setTask(doc)
+			//getSolution()
+			setSolution(doc.title.translations[native_lang] + '\n\n' + doc.text.translations[native_lang])
 		}
 	}, "Error loading the task")
 }

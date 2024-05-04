@@ -1,14 +1,56 @@
-body {text-align: center; background-color: #dddddd;}
-h1 {color:darkblue; margin: 10px;}
-h4 {margin: 5px 0;}
-p {margin: 5px 0 0 0;}
+body {
+  text-align: justify;
+  background-color: #dddddd;
+  font-family: system-ui, Arial, Helvetica, sans-serif;
+}
 
-#divTask {display: flex; flex-direction: row; flex-wrap: wrap; width: fit-content; margin: auto;}
-#answbtn {margin: 5px auto; outline: none;}
-.boxBig {display: block; border-color: darkblue; padding: 20px; border-width: 3px; border-style: solid; background-color: lightblue; border-radius: 10px; margin: 5px;}
-#divTask, #solutionField {font-weight: bold;}
-#emValidationError {color: orangered; font-weight: bold; display: block}
-.pointer {cursor:pointer;}
+h1 {
+  color: darkblue;
+  margin: 10px;
+}
+
+h4 {
+  margin: 5px 0;
+}
+
+p {
+  margin: 5px 0 0 0;
+}
+
+#answbtn {
+  margin: 5px auto;
+  outline: none;
+  grid-column: span 2; /* Make the button span across both columns */
+}
+
+.boxBig {
+  border-color: darkblue;
+  padding: 20px;
+  border-width: 3px;
+  border-style: solid;
+  background-color: lightblue;
+  border-radius: 10px;
+  margin: 5px;
+
+  display: grid;
+  grid-template-columns: 1fr 1fr; /* Create two columns of equal width */
+  grid-gap: 10px; /* Add gap between columns */
+}
+
+.content-column {
+  display: contents;
+}
+
+
+#emValidationError {
+  color: orangered;
+  font-weight: bold;
+  display: block
+}
+
+.pointer {
+  cursor: pointer;
+}
 
 button {
   background-color: darkblue;
@@ -24,7 +66,9 @@ button {
   pointer-events: none;
 }
 
-#btnInstall, #btnNotifications, #btnSound {
+#btnInstall,
+#btnNotifications,
+#btnSound {
   background-color: aliceblue;
   color: darkblue;
   border-color: aliceblue;
@@ -97,15 +141,11 @@ button {
   transform: scaleX(1.5) scaleY(2);
 }
 
-.space-between {
-  display: flex;
-  justify-content: space-between;
-}
-
 /* Loading indicator */
 .loading-indicator {
   visibility: hidden;
 }
+
 .loading-indicator:after {
   content: " ";
   display: block;
@@ -118,10 +158,12 @@ button {
   animation: loading-indicator 1.2s linear infinite;
   visibility: visible;
 }
+
 @keyframes loading-indicator {
   0% {
     transform: rotate(0deg);
   }
+
   100% {
     transform: rotate(360deg);
   }
@@ -130,17 +172,28 @@ button {
 
 /* Changes for Mobile*/
 @media only screen and (max-width: 767px) {
-  #divTask, #solutionField {font-size: xx-large;}
+
+  #divTask,
+  #solutionField {
+    font-size: large;
+  }
+
   #answbtn {
     height: 60px;
     line-height: 52px;
-    font-size: x-large;
+    font-size: medium;
   }
 }
 
 
 /* Changes for PC*/
 @media only screen and (min-width: 768px) {
-  body {width: 60vw; margin: 20px auto;}
-  .columnsOnDesktop {flex-direction: row}
+  body {
+    width: 60vw;
+    margin: 20px auto;
+  }
+
+  .columnsOnDesktop {
+    flex-direction: row
+  }
 }
