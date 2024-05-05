@@ -1,0 +1,13 @@
+# Exported from Render on 2024-05-05T20:21:21Z
+services:
+- type: web
+  name: ALLai-frontend
+  runtime: static
+  repo: https://github.com/bnpd/ALLai-frontend
+  envVars:
+  - key: config.js
+    sync: false
+  staticPublishPath: .
+  autoDeploy: false
+  rootDir: src
+version: "1"
