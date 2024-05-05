@@ -59,7 +59,7 @@ self.addEventListener('push', evt => {
 
 self.addEventListener('notificationclick', event => {
     event.notification.close()
-    clients.openWindow('https://allai-frontend.onrender.com')
+    clients.openWindow('https://allai-frontend-1.onrender.com')
     clients.focus()
 })
 

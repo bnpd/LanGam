@@ -224,7 +224,7 @@ function noTask() {
 function setSolution(solution) {
 	solution = solution.replace('\r', '').replace('\n\n', '\n')
 	answbtn.removeAttribute('disabled', '')
-	solutionField.style.display="none"
+	solutionField.style.visibility="hidden"
 
 	let row = 1
 	solution.split('\n').map(paragraph => {

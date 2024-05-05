@@ -1,7 +1,7 @@
 body {
-  text-align: justify;
   background-color: #dddddd;
   font-family: system-ui, Arial, Helvetica, sans-serif;
+  text-align: center;
 }
 
 h1 {
@@ -17,10 +17,23 @@ p {
   margin: 5px 0 0 0;
 }
 
+#divTask, #solutionField {
+  height: 30vh;
+  overflow-y: scroll;
+  overflow-x: hidden;
+}
+
+#solutionField {
+  opacity: 50%;
+}
+
 #answbtn {
   margin: 5px auto;
   outline: none;
-  grid-column: span 2; /* Make the button span across both columns */
+}
+
+#contentbox {
+  text-align: justify;
 }
 
 .boxBig {
@@ -31,14 +44,6 @@ p {
   background-color: lightblue;
   border-radius: 10px;
   margin: 5px;
-
-  display: grid;
-  grid-template-columns: 1fr 1fr; /* Create two columns of equal width */
-  grid-gap: 10px; /* Add gap between columns */
-}
-
-.content-column {
-  display: contents;
 }
 
 
@@ -176,12 +181,13 @@ button {
   #divTask,
   #solutionField {
     font-size: large;
+    line-height: 1.8em;
   }
 
   #answbtn {
-    height: 60px;
-    line-height: 52px;
-    font-size: medium;
+    height: 50px;
+    line-height: 45px;
+    font-size: large;
   }
 }
 
