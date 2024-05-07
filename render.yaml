@@ -8,6 +8,6 @@ services:
   - key: config.js
     sync: false
   staticPublishPath: .
-  autoDeploy: false
+  autoDeploy: true
   rootDir: src
 version: "1"

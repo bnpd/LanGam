@@ -76,10 +76,8 @@ function init() {
 			divTask.style.visibility="hidden"
 			solutionField.innerText = ''
 			answbtn.className = 'loading-indicator'
-			Promise.all(currentTask.split(' ').map(word => {
-				word = word.toLowerCase().replace(preprocessingRegex, '') // preprocess word to remove e.g. adjacent commas and lowercase it. Only unicode letters + ' allowed
-				return sendReview(word, failedWords.has(word) ? 1 : 4) // TODO: allow all qualities 0-5
-			})).then(() => {
+			sendReview(failedWords)
+			.then(() => {
 				failedWords.clear()
 				getTask()
 			})
@@ -163,51 +161,59 @@ function setTask(doc) {
 	divTask.style.visibility="visible"
 	phase = "promting"
 	answbtn.innerHTML = answbtnTxtWhilePrompting
-	let row = 1
-	task.split('\n').map(paragraph =>{
-		if (!paragraph.trim()) return // if it was only some kind of whitespace, don't bother
-		const p = document.createElement('p')		
-		paragraph.split(' ').map(word => {
-			if (!word.trim()) return // if it was only some kind of whitespace, don't bother
-			let span = document.createElement("span")
-			span.innerHTML = word+' '
-			span.style.marginRight="0.5em"
-			p.appendChild(span)
-			p.style.gridRow = row
-			word = word.toLowerCase().replace(preprocessingRegex, '') // preprocess word to remove e.g. adjacent commas and lowercase it. Only unicode letters + ' allowed
-
-			span.className = 'pointer span-'+word
-			span.addEventListener("click", () => {
-				if (failedWords.has(word)) {
-					failedWords.delete(word)
-					Array.from(document.getElementsByClassName('span-'+word)).forEach(each => {
-						each.style.color = ""
-						Array.from(document.getElementsByClassName('a-'+word)).forEach(eachA => { // remove corresponding dictionary links for all occurrences of the word
-							eachA.parentElement.removeChild(eachA)
+	for (const translatableText of [doc.title, doc.text]) {
+		let char_index = 0		
+		translatableText.text.split('\n').map(paragraph =>{
+			if (paragraph.trim()) { // only proceed if it wasn't only some kind of whitespace
+				const p = document.createElement('p')		
+				paragraph.split(' ').map(word => {
+					if (word.trim()) { // only proceed if it wasn't only some kind of whitespace
+						let span = document.createElement("span")
+						span.innerHTML = word+' '
+						span.style.marginRight="0.5em"
+						p.appendChild(span)
+						let token = translatableText.tokens[char_index]?.word
+						if (!token) {
+							console.log(char_index);
+							console.log(translatableText.tokens);
+						}
+						
+						span.className = 'pointer span-'+token
+						span.addEventListener("click", () => {
+							if (failedWords.has(token)) {
+								failedWords.delete(token)
+								Array.from(document.getElementsByClassName('span-'+token)).forEach(each => {
+									each.style.color = ""
+									Array.from(document.getElementsByClassName('a-'+token)).forEach(eachA => { // remove corresponding dictionary links for all occurrences of the word
+										eachA.parentElement.removeChild(eachA)
+									})
+								})
+							} else {
+								if (sound) {
+									try_speak(token)
+								}
+								failedWords.add(token)
+								Array.from(document.getElementsByClassName('span-'+token)).forEach(each => {
+									each.style.color = "red"
+									let aDict = document.createElement('a')
+									aDict.innerHTML = '📕'
+									aDict.className = 'a-'+token
+									aDict.addEventListener("click", () => {
+										window.open('https://translate.google.com/?sl='+target_lang+'&tl='+native_lang+'&text='+token,'popup','width=600,height=800')
+									})
+									each.parentElement.insertBefore(aDict, each)
+								})
+							}
 						})
-					})
-				} else {
-					if (sound) {
-						try_speak(word)
 					}
-					failedWords.add(word)
-					Array.from(document.getElementsByClassName('span-'+word)).forEach(each => {
-						each.style.color = "red"
-						let aDict = document.createElement('a')
-						aDict.innerHTML = '📕'
-						aDict.className = 'a-'+word
-						aDict.addEventListener("click", () => {
-							window.open('https://translate.google.com/?sl='+target_lang+'&tl='+native_lang+'&text='+word,'popup','width=600,height=800')
-						})
-						each.parentElement.insertBefore(aDict, each)
-					})
-				}
-			})
+					char_index += word.length + 1 // length plus the whitespace, or if last word in paragraph, newline
+				})
+				divTask.appendChild(p)
+			} else {
+				char_index += paragraph.length + 1 // length plus the newline (since we didn't go into the if, we didnt catch newline above)
+			}
 		})
-		divTask.appendChild(p)
-		row++
-	})
-
+	}
 }
 
 
@@ -237,15 +243,27 @@ function setSolution(solution) {
 	});
 }
 
+// /**
+//  * Send reults of user reviewing a word
+//  * @param word Word that was reviewed
+//  * @param quality Quality of recall
+//  * @returns {Promise<unknown>} Promise that is resolved when send was successful
+//  */
+// function sendReview_(word, quality){
+// 	return new Promise((resolve, _reject) => {
+// 		backendGet('/review/'+user+'/'+word+'/'+quality, resolve, "Error sending your results")
+// 	})
+// }
+
 /**
- * Send reults of user reviewing a word
- * @param word Word that was reviewed
- * @param quality Quality of recall
+ * Send user marked words to backend
+ * @param failedWords Words user marked in current task
  * @returns {Promise<unknown>} Promise that is resolved when send was successful
  */
-function sendReview(word, quality){
+function sendReview(failedWords){
+	failedWords = [...failedWords].map(w => w.replace(preprocessingRegex, '')) // preprocess words to remove e.g. adjacent commas and lowercase it. Only unicode letters + ' allowed. NOTE: We are also removing punctuation and lowercasing in the backend again
 	return new Promise((resolve, _reject) => {
-		backendGet('/review/'+user+'/'+word+'/'+quality, resolve, "Error sending your results")
+		backendPost('/review/'+user, JSON.stringify(failedWords), resolve, "Error sending your results")
 	})
 }
 
@@ -277,6 +295,7 @@ function getTask(){
 			let doc = null
 			try { // for single word method where a word in the task has to be focused
 				let json = JSON.parse(responseText)
+				console.log(json);
 				doc = DocumentC.fromJson(json)
 			} catch (error) {
 				console.log(error)
@@ -316,6 +335,23 @@ function backendGet(path, callback, error_msg) {
 	}
 	xhr.open("GET", config.backend + path, true)
 	xhr.send(null)
+}
+
+
+function backendPost(path, payload, callback, error_msg) {
+	return fetch(config.backend + path, {
+	  method: 'POST',
+	  headers: {
+		'Content-Type': 'application/json',
+	  },
+	  body: payload,
+	}).then(function (response) {
+	  if (!response.ok) {
+		throw new Error('Post error.' + error_msg)
+	  }
+	  return true
+	})
+
 }
 
 
