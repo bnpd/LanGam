@@ -21,7 +21,7 @@ var failedWords = new Set()
 const answbtnTxtWhilePrompting = "Show solution"
 const answbtnTxtWhileSolutionShown = "Next question"
 const answbtnTxtWhileDone = 'Learn new words'
-const preprocessingRegex = /[^\p{L}\p{N}']/gu
+const NON_CLICKABLE_POS_IDS = new Set([97, 99, 101])
 let urlparams = new URLSearchParams(window.location.search)
 var user = urlparams.get('u'), target_lang=urlparams.get('tl'), native_lang=urlparams.get('nl'), method=urlparams.get('mtd') // temporary solution only use url params for user languages
 var voice = null
@@ -52,10 +52,6 @@ function init() {
 	if (!user) {
 		showLoginPrompt('Sorry, your link seems to be defective, please ask Benjamin for a new one 💥🔗')
 		return
-	}
-
-	if (method === 'single') {
-		document.getElementById('pMethodExplanation').innerHTML = 'Please tap the current word if you do not know it yet or cannot remember what it means. <span class="out-of-focus">Opaque</span> words are only for context.'
 	}
 
 	loginbox.style.display = 'none'
@@ -154,66 +150,79 @@ function showSolution() {
  * @param {DocumentC} doc Document cnotaining the task
  */
 function setTask(doc) {
+	
+	// these three lines might not be needed anymore
 	let task = doc.title.text + '\n' + doc.text.text
 	task = task.replace(/\xa0/g, '') // remove nbsp just in case its a problem here too
 	currentTask = task // save in global to be accessible in answbtn eventListener
+
+
 	divTask.textContent = '' // delete previous task
 	divTask.style.visibility="visible"
 	phase = "promting"
 	answbtn.innerHTML = answbtnTxtWhilePrompting
 	for (const translatableText of [doc.title, doc.text]) {
-		let char_index = 0		
-		translatableText.text.split('\n').map(paragraph =>{
-			if (paragraph.trim()) { // only proceed if it wasn't only some kind of whitespace
-				const p = document.createElement('p')		
-				paragraph.split(' ').map(word => {
-					if (word.trim()) { // only proceed if it wasn't only some kind of whitespace
-						let span = document.createElement("span")
-						span.innerHTML = word+' '
-						span.style.marginRight="0.5em"
-						p.appendChild(span)
-						let token = translatableText.tokens[char_index]?.word
-						if (!token) {
-							console.log(char_index);
-							console.log(translatableText.tokens);
+		let p = document.createElement('p')		
+		let char_index = 0	
+		for (const start_char in translatableText.tokens) {
+			let span = document.createElement("span")
+			while (char_index < start_char) { // insert whitespace and newlines
+				if (translatableText.text[char_index] == '\n' && p.childElementCount > 0) {
+					// next paragraph
+					divTask.appendChild(p)
+					p = document.createElement('p')
+				} else {
+					p.append(' ')
+				}
+				char_index++
+			}
+			// now we are where we should be, so can insert new span with token
+
+			let token_obj = translatableText.tokens[char_index]
+			let token_word = token_obj?.word
+			if (!token_word) {
+				console.log(char_index);
+				console.log(translatableText.tokens);
+			}
+
+			if (!token_word.trim()) continue // only proceed if it wasn't only some kind of whitespace
+			span.textContent = token_word
+			//span.style.marginRight="0.5em"
+			p.appendChild(span)
+			char_index += token_word.length
+
+			if (!NON_CLICKABLE_POS_IDS.has(token_obj.pos)) {
+				span.className = 'pointer span-'+token_word
+				span.addEventListener("click", () => {
+					if (failedWords.has(token_word)) {
+						failedWords.delete(token_word)
+						Array.from(document.getElementsByClassName('span-'+token_word)).forEach(each => {
+							each.style.color = ""
+							Array.from(document.getElementsByClassName('a-'+token_word)).forEach(eachA => { // remove corresponding dictionary links for all occurrences of the word
+								eachA.parentElement.removeChild(eachA)
+							})
+						})
+					} else {
+						if (sound) {
+							try_speak(token_word)
 						}
-						
-						span.className = 'pointer span-'+token
-						span.addEventListener("click", () => {
-							if (failedWords.has(token)) {
-								failedWords.delete(token)
-								Array.from(document.getElementsByClassName('span-'+token)).forEach(each => {
-									each.style.color = ""
-									Array.from(document.getElementsByClassName('a-'+token)).forEach(eachA => { // remove corresponding dictionary links for all occurrences of the word
-										eachA.parentElement.removeChild(eachA)
-									})
-								})
-							} else {
-								if (sound) {
-									try_speak(token)
-								}
-								failedWords.add(token)
-								Array.from(document.getElementsByClassName('span-'+token)).forEach(each => {
-									each.style.color = "red"
-									let aDict = document.createElement('a')
-									aDict.innerHTML = '📕'
-									aDict.className = 'a-'+token
-									aDict.addEventListener("click", () => {
-										window.open('langki://word/?w='+token)
-										//window.open('https://translate.google.com/?sl='+target_lang+'&tl='+native_lang+'&text='+token,'popup','width=600,height=800')
-									})
-									each.parentElement.insertBefore(aDict, each)
-								})
-							}
+						failedWords.add(token_word)
+						Array.from(document.getElementsByClassName('span-'+token_word)).forEach(each => {
+							each.style.color = "red"
+							let aDict = document.createElement('a')
+							aDict.innerHTML = '📕'
+							aDict.className = 'a-'+token_word
+							aDict.addEventListener("click", () => {
+								window.open('langki://word/?w='+token_word)
+								//window.open('https://translate.google.com/?sl='+target_lang+'&tl='+native_lang+'&text='+token,'popup','width=600,height=800')
+							})
+							each.parentElement.insertBefore(aDict, each)
 						})
 					}
-					char_index += word.length + 1 // length plus the whitespace, or if last word in paragraph, newline
 				})
-				divTask.appendChild(p)
-			} else {
-				char_index += paragraph.length + 1 // length plus the newline (since we didn't go into the if, we didnt catch newline above)
 			}
-		})
+		}
+		divTask.appendChild(p)
 	}
 }
 
