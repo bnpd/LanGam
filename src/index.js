@@ -199,7 +199,7 @@ function setTask(doc) {
 									aDict.innerHTML = '📕'
 									aDict.className = 'a-'+token
 									aDict.addEventListener("click", () => {
-										window.open('https://www.langki.com/?word='+token)
+										window.open('langki://word/?w='+token)
 										//window.open('https://translate.google.com/?sl='+target_lang+'&tl='+native_lang+'&text='+token,'popup','width=600,height=800')
 									})
 									each.parentElement.insertBefore(aDict, each)
