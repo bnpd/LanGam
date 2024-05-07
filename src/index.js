@@ -261,9 +261,8 @@ function setSolution(solution) {
  * @returns {Promise<unknown>} Promise that is resolved when send was successful
  */
 function sendReview(failedWords){
-	failedWords = [...failedWords].map(w => w.replace(preprocessingRegex, '')) // preprocess words to remove e.g. adjacent commas and lowercase it. Only unicode letters + ' allowed. NOTE: We are also removing punctuation and lowercasing in the backend again
 	return new Promise((resolve, _reject) => {
-		backendPost('/review/'+user, JSON.stringify(failedWords), resolve, "Error sending your results")
+		backendPost('/review/'+user, JSON.stringify([...failedWords]), resolve, "Error sending your results")
 	})
 }
 
@@ -349,7 +348,7 @@ function backendPost(path, payload, callback, error_msg) {
 	  if (!response.ok) {
 		throw new Error('Post error.' + error_msg)
 	  }
-	  return true
+	  callback()
 	})
 
 }
