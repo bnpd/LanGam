@@ -1,7 +1,7 @@
 'use strict'
-import config from './config.js'
-import DocumentC from './DocumentC.js'
-import TranslatableText from './TranslatableText.js'
+import DocumentC from './lib/DocumentC.js'
+import { backendPost, backendGet, requestNotifications } from './lib/backend.js'
+import TranslatableText from './lib/TranslatableText.js'
 
 // debug in DEV browser: http://localhost/?u=pl1&tl=pl&nl=en
 
@@ -272,7 +272,7 @@ function setSolution(solution) {
  */
 function sendReview(failedWords){
 	return new Promise((resolve, _reject) => {
-		backendPost('/review/'+user, JSON.stringify([...failedWords]), resolve, "Error sending your results")
+		backendPost('/review/'+user, JSON.stringify([...failedWords]), resolve)
 	})
 }
 
@@ -302,7 +302,7 @@ function getTask(){
 			noTask()
 		} else {
 			let doc = null
-			try { // for single word method where a word in the task has to be focused
+			try { 
 				let json = JSON.parse(responseText)
 				console.log(json);
 				doc = DocumentC.fromJson(json)
@@ -314,55 +314,12 @@ function getTask(){
 			//getSolution()
 			setSolution(doc.title.translations[native_lang] + '\n\n' + doc.text.translations[native_lang])
 		}
-	}, "Error loading the task")
+	}, showLoginPrompt)
 }
 
 function requestNewWords() {
-	backendGet('/new_words/'+user, () => getTask(), "Sorry, there was an error while looking for new words for you")
+	backendGet('/new_words/'+user, () => getTask(), showLoginPrompt)
 }
-
-
-function backendGet(path, callback, error_msg) {
-	var xhr = new XMLHttpRequest()
-	xhr.onreadystatechange = function xhrHandler() {
-		if (xhr.readyState != 4) {
-			return
-		}
-		if (xhr.status == 200) {
-			callback(xhr.responseText)
-		} else if (xhr.responseText.includes('User does not exist')) {
-			showLoginPrompt('Sorry, user seems not to exist 😶‍🌫')
-		} else {
-			try { // backend returned 404
-				showLoginPrompt('Sorry, there is a network communications problem 🗣️🙉\nTry again in a sec')
-			} catch (Exception) { // backend return other error
-				if (error_msg) {
-					window.alert(error_msg + ': ' + xhr.responseText)
-				}
-			}
-		}
-	}
-	xhr.open("GET", config.backend + path, true)
-	xhr.send(null)
-}
-
-
-function backendPost(path, payload, callback, error_msg) {
-	return fetch(config.backend + path, {
-	  method: 'POST',
-	  headers: {
-		'Content-Type': 'application/json',
-	  },
-	  body: payload,
-	}).then(function (response) {
-	  if (!response.ok) {
-		throw new Error('Post error.' + error_msg)
-	  }
-	  callback()
-	})
-
-}
-
 
 // Push Notifications
 var btnNotifications
@@ -371,47 +328,10 @@ window.addEventListener('load', function () {
     if (Notification.permission === 'default') {
         btnNotifications.removeAttribute('hidden')
 		document.getElementById('pNotifications').removeAttribute('hidden')
-        btnNotifications.addEventListener('click', requestNotifications)
+        btnNotifications.addEventListener('click', () => requestNotifications(user).then(() => btnNotifications.setAttribute('hidden', true)))
     } else if (Notification.permission === 'granted') {
-		requestNotifications()
+		requestNotifications(user).then(() => btnNotifications.setAttribute('hidden', true))
 	}
 })
 
-function requestNotifications(evt) {
-    subscribeUserToPush().then(subscription => sendSubscriptionToBackEnd(subscription, user)).then(()=>
-  	btnNotifications.setAttribute('hidden', true))
-}
-
-function subscribeUserToPush() {
-  return navigator.serviceWorker.ready
-    .then(registration => {
-      const subscribeOptions = {
-        userVisibleOnly: true,
-        applicationServerKey: config.webpush_public_key,
-      }
-      return registration.pushManager.subscribe(subscribeOptions)
-    })
-    .then(pushSubscription => {
-      console.log(
-        'Received PushSubscription: ',
-        JSON.stringify(pushSubscription),
-      )
-      return pushSubscription
-    })
-}
-
-function sendSubscriptionToBackEnd(subscription, username) {
-  return fetch(config.backend+'/api/webpush-subscribe/'+username, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(subscription),
-  }).then(function (response) {
-    if (!response.ok) {
-      throw new Error('Server error.')
-    }
-	return true
-  })
-}
 

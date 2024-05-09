@@ -1,0 +1,61 @@
+<!DOCTYPE html >
+<html>
+  <head>
+    <meta charset="utf-8"/>
+    <link rel="stylesheet" href="lists.css">
+    <title>Your vocab - AllAI</title>
+    <script type="module" src="lists.js" charset="utf-8"></script>
+  </head>
+  <body>
+    <nav>
+      <a href="index.html" id="aManageLists">Back</a>
+    </nav>
+    <div id="divMultiLearn">
+      <label for="iLearnMultiple">Mark everything as learned up to rank: &nbsp;</label>
+      <input type="text" name="iLearnMultiple" id="iLearnMultiple" placeholder="e.g. 500"
+      ><button id="btnLearnMultiple">Mark learned</button>
+      <span id="pLearnedSuccessfully"></span>
+    </div>
+    <div>
+      <div id="divLeft">
+        <h1>
+          Spaced Repetition
+          <button id="btnExportSearchList">Export</button>
+        </h1>
+        <ul id="ulSearchList"></ul>
+      </div>
+      <div id="divRight">
+          <h1>
+            Seen
+            <span id="spanNKnown"></span>
+            <button id="btnExportKnownList">Export</button>
+            <span class="tooltip">
+              <span>
+                <button id="btnToggleImportMenu">Import ▾</button>
+                <div id="divImportMenu">
+                  <input type="file" id="iImportKnownList"><br>
+                  <button id="btnOpenDialogPasteKnownList">Paste</button>
+                </div>
+              </span>
+              <span id="spanTooltiptext" class="tooltiptext" style="font-size: 0.5em; line-height: normal;">
+                Consider exporting a backup before importing!<br>
+                Imported words will be added to your known words. If you want to replace your currently known words, reset your progress in the settings first.
+              </span>
+            </span>
+          </h1>
+          <ul id="ulKnownList"></ul>
+      </div>
+    </div>
+
+    <div id="divDialogImportPasteKnownList" class="background-blur">
+      <div class="dialog-inner">
+        <h2>
+          Paste a list or text to learn all words in it
+          <button id=btnCloseDialogPasteKnownList>×</button>
+        </h2>
+        <textarea name="iPasteKnownList" id="iPasteKnownList" rows="40" cols="50"></textarea>
+        <button id="btnSubmitPasteKnownList">Mark learned</button>
+      </div>
+    </div>
+  </body>
+</html>
