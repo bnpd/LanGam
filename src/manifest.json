@@ -1,6 +1,7 @@
 {
   "name": "All AI",
   "short_name": "All AI",
+  "description": "This app will make learning Polish fun! You can read simple texts about different aspects of Polish culture and chat with AI characters about them.",
   "icons": [{
       "src": "/images/icons/icon-192x192.png",
       "sizes": "192x192",
@@ -13,5 +14,27 @@
   "start_url": "/",
   "display": "standalone",
   "background_color": "#3E4EB8",
-  "theme_color": "#2F3BA2"
+  "theme_color": "#2F3BA2",
+  "lang": "en-US",
+  "categories": [
+    "education"
+  ],
+  "screenshots": [
+    {
+      "src": "/images/screenshot1.png",
+      "sizes": "864x1606",
+      "type": "image/png",
+      "label": "Main Page on an Smartphone",
+      "form_factor": "wide",
+      "platform": "web"
+    },
+    {
+      "src": "/images/screenshot1.png",
+      "sizes": "864x1606",
+      "type": "image/png",
+      "label": "Main Page on an Smartphone",
+      "form_factor": "narrow",
+      "platform": "android"
+    }
+  ]
 }
