@@ -26,6 +26,7 @@ let urlparams = new URLSearchParams(window.location.search)
 var user = urlparams.get('u'), target_lang=urlparams.get('tl'), native_lang=urlparams.get('nl'), method=urlparams.get('mtd') // temporary solution only use url params for user languages
 var voice = null
 var sound = true
+const TTS_SPEED = 0.8
 
 // Initialize
 window.addEventListener("load", init)
@@ -120,6 +121,7 @@ function try_speak(str) {
 		let utterance = new SpeechSynthesisUtterance(str)
 		utterance.voice = voice
 		utterance.lang = voice.lang
+		utterance.rate = TTS_SPEED
 		console.log(voice)
 		speechSynthesis.speak(utterance)
 	}
