@@ -103,8 +103,8 @@ function init() {
 		setVoice()  // if we were too slow and the voice has already been set before speechSynthesis.onvoiceschanged = setVoice, just call setVoice immediately
 	}
 
-	console.log(native_lang)
-	getTask()
+	
+	getTask(urlparams.get('doc'))
 }
 
 function setVoice() {
@@ -255,17 +255,6 @@ function setSolution(solution) {
 	});
 }
 
-// /**
-//  * Send reults of user reviewing a word
-//  * @param word Word that was reviewed
-//  * @param quality Quality of recall
-//  * @returns {Promise<unknown>} Promise that is resolved when send was successful
-//  */
-// function sendReview_(word, quality){
-// 	return new Promise((resolve, _reject) => {
-// 		backendGet('/review/'+user+'/'+word+'/'+quality, resolve, "Error sending your results")
-// 	})
-// }
 
 /**
  * Send user marked words to backend
@@ -279,25 +268,8 @@ function sendReview(failedWords){
 }
 
 
-// function getSolution(){
-// 	solutionField.className = 'loading-indicator'
-// 	answbtn.setAttribute('disabled', "")
-// 	backendGet('/current_solution/'+user, responseText => {
-// 		let translation = null
-// 		try { // for single word method where a word in the task has to be focused
-// 			let json = JSON.parse(responseText)
-// 			translation = json.title + '\n\n' + json.text
-// 		} catch (error) {
-// 			console.log(error)
-// 		}
-// 		console.log(translation)
-// 		setSolution(translation)
-// 	}, 'Error loading the solution')
-// }
-
-
-function getTask(){
-	backendGet('/due_task/'+user, responseText => {
+function getTask(docId){
+	backendGet(docId ? `/task/${user}/${docId}` : `/due_task/${user}`, responseText => {
 		answbtn.className = ''
 
 		if (!responseText) {
@@ -317,6 +289,9 @@ function getTask(){
 			setSolution(doc.title.translations[native_lang] + '\n\n' + doc.text.translations[native_lang])
 		}
 	}, showLoginPrompt)
+	if (!docId) {
+		window.history.pushState({}, document.title, "/" ); // remove URL param docId since we are no longer in that document (otherwise would've been param to this function)
+	}
 }
 
 function requestNewWords() {

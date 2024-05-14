@@ -43,7 +43,6 @@ export function backendGet(path, callback, error_handler_function) {
 	xhr.send(null)
 }
 export function backendPost(path, payload, callback) {
-	console.log(payload);
 	return fetch(config.backend + path, {
 		method: 'POST',
 		headers: {
@@ -54,7 +53,7 @@ export function backendPost(path, payload, callback) {
 		if (!response.ok) {
 			throw new Error('Post error.' + response.text())
 		}
-		callback(response.text())
+		callback(response)
 	})
 }
 

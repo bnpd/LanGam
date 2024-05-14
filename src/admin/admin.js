@@ -35,17 +35,20 @@ document.addEventListener("DOMContentLoaded", function() {
         };
 
         backendPost('/new_document/'+target_lang, payload, async response => {
-            for (const tv of [tvTitle, tvBody, tvQuestion, iType, iTopic, iDifficulty]) {
-                tv.value = ''
-            }
-            response.then(csv => {
+            // for (const tv of [tvTitle, tvBody, tvQuestion, iType, iTopic, iDifficulty]) {
+            //     tv.value = ''
+            // }
+            response.json().then(json => {
                 var link = document.createElement('a');
-                link.setAttribute('href', 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv));
+                link.setAttribute('href', 'data:text/csv;charset=utf-8,' + encodeURIComponent(json.csv));
                 link.setAttribute('download', "new_document");
                 link.hidden = true;
                 document.body.appendChild(link);
                 link.click();            
                 document.body.removeChild(link);
+                
+                // display that document now
+                window.location = '/?doc=' + json.docId
             })
         });
 
