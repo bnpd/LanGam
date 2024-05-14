@@ -43,17 +43,18 @@ export function backendGet(path, callback, error_handler_function) {
 	xhr.send(null)
 }
 export function backendPost(path, payload, callback) {
+	console.log(payload);
 	return fetch(config.backend + path, {
 		method: 'POST',
 		headers: {
 			'Content-Type': 'application/json',
 		},
-		body: payload,
+		body: JSON.stringify(payload),
 	}).then(function (response) {
 		if (!response.ok) {
-			throw new Error('Post error.' + response.text)
+			throw new Error('Post error.' + response.text())
 		}
-		callback()
+		callback(response.text())
 	})
 }
 

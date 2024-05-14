@@ -274,7 +274,7 @@ function setSolution(solution) {
  */
 function sendReview(failedWords){
 	return new Promise((resolve, _reject) => {
-		backendPost('/review/'+user, JSON.stringify([...failedWords]), resolve)
+		backendPost('/review/'+user, [...failedWords], resolve)
 	})
 }
 
