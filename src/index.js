@@ -15,7 +15,7 @@ if ('serviceWorker' in navigator) {
 	})
 }
 var divTask, emValidationError, answbtn, solutionField, loginbox, contentbox, iRating, btnSound
-var currentTask=''
+var currentTask=undefined
 var phase = "promting" // or "solutionShown"
 var failedWords = new Set()
 const answbtnTxtWhilePrompting = "Show solution"
@@ -67,7 +67,7 @@ function init() {
 		if (phase === "promting") {
 			showSolution()
 			if (sound) {
-				try_speak(currentTask)
+				try_speak((currentTask.title.text + '\n' + currentTask.text.text).replace(/\xa0/g, '')) // remove nbsp just in case its a problem
 			}
 		} else if (phase === "solutionShown") {
 			divTask.style.visibility="hidden"
@@ -152,11 +152,7 @@ function showSolution() {
  * @param {DocumentC} doc Document cnotaining the task
  */
 function setTask(doc) {
-	
-	// these three lines might not be needed anymore
-	let task = doc.title.text + '\n' + doc.text.text
-	task = task.replace(/\xa0/g, '') // remove nbsp just in case its a problem here too
-	currentTask = task // save in global to be accessible in answbtn eventListener
+	currentTask = doc // save in global to be accessible in answbtn eventListener (for tts)
 
 
 	divTask.textContent = '' // delete previous task
@@ -231,7 +227,7 @@ function setTask(doc) {
 
 function noTask() {
 	phase = 'done'
-	currentTask = ''
+	currentTask = null
 	divTask.textContent = 'Done for today 🤓'
 	divTask.style.visibility="visible"
 	solutionField.innerText = ''
@@ -263,7 +259,9 @@ function setSolution(solution) {
  */
 function sendReview(failedWords){
 	return new Promise((resolve, _reject) => {
-		backendPost('/review/'+user, [...failedWords], resolve)
+		let review = {docId: currentTask.docId, failedTokens: [...failedWords]}
+		backendPost('/review/'+user, review, resolve)
+		// TODO: on reject or timeout, save review to localStorage an retry regularly and on next app open
 	})
 }
 

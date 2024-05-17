@@ -1,6 +1,7 @@
 export default
 class DocumentC {
-    constructor(title, text, content_type, topic, difficulty, question) {
+    constructor(docId, title, text, content_type, topic, difficulty, question) {
+        this.docId = docId
         this.title = title;
         this.text = text;
         this.content_type = content_type;
@@ -10,8 +11,8 @@ class DocumentC {
     }
 
     static fromJson(json) {
-        const { title, text, content_type, topic, difficulty, question } = json;
-        return new DocumentC(title, text, content_type, topic, difficulty, question);
+        const { docId, title, text, content_type, topic, difficulty, question } = json;
+        return new DocumentC(docId, title, text, content_type, topic, difficulty, question);
     }
 
 
