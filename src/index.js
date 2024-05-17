@@ -76,6 +76,8 @@ function init() {
 			sendReview(failedWords)
 			.then(() => {
 				failedWords.clear()
+				divTask.scrollTop = 0
+				solutionField.scrollTop = 0
 				getTask()
 			})
 		} else if (phase === "done") {
@@ -102,6 +104,10 @@ function init() {
 	if (speechSynthesis.getVoices() && speechSynthesis.getVoices().length) {
 		setVoice()  // if we were too slow and the voice has already been set before speechSynthesis.onvoiceschanged = setVoice, just call setVoice immediately
 	}
+
+	divTask.addEventListener('scroll', function() {
+		syncScroll(divTask, solutionField);
+	});
 
 	
 	getTask(urlparams.get('doc'))
@@ -309,4 +315,28 @@ window.addEventListener('load', function () {
 	}
 })
 
+
+// scroll sync from divTask to solutionField
+
+function syncScroll(source, target) {
+	// find all paragraphs contained in the text in source and target
+    var sourceParagraphs = source.querySelectorAll('p');
+    var targetParagraphs = target.querySelectorAll('p');
+
+    // Find the current paragraph index in the source div
+    var currentIndex = findCurrentParagraphIndex(source.scrollTop, sourceParagraphs, source);
+
+    // Scroll the target div to the same paragraph index
+    target.scrollTop = targetParagraphs[currentIndex].offsetTop-targetParagraphs[0].offsetTop;
+ }
+
+// Function to find the index of the current paragraph based on scroll position
+function findCurrentParagraphIndex(scrollTop, paragraphs, parentEl) {
+    for (var i = 0; i < paragraphs.length; i++) {
+      if (paragraphs[i].offsetTop-paragraphs[0].offsetTop >= scrollTop-0.5*parentEl.offsetHeight) {
+        return i;
+      }
+    }
+    return 0; // Default to the first paragraph if not found
+}
 
