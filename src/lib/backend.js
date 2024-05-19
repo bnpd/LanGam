@@ -12,9 +12,7 @@ export async function getVocab(user){
 			let doc = null
 			try { 
 				let json = JSON.parse(responseText)
-				console.log(JSON.parse(json['scheduled']));
-				console.log(JSON.parse(json['all_forms']));
-				resolve([JSON.parse(json['scheduled']), JSON.parse(json['all_forms'])])
+				resolve([json['scheduled'], json['all_forms']])
 			} catch (error) {
 				console.error(error)
 				reject(error)
