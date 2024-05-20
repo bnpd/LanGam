@@ -57,6 +57,7 @@ async function init() {
 				try_speak((state.currentTask.title.text + '\n' + state.currentTask.text.text).replace(/\xa0/g, '')) // remove nbsp just in case its a problem
 			}
 		} else if (state.phase === "solutionShown") {
+			speechSynthesis.cancel()
 			divTask.style.visibility="hidden"
 			solutionField.innerText = ''
 			answbtn.className = 'loading-indicator'
@@ -76,6 +77,13 @@ async function init() {
 	// toggle sound state
 	btnSound.addEventListener('click', () => {
 		state.sound = ! state.sound
+		if (state.sound) {
+			if (state.phase === "solutionShown") {
+				try_speak((state.currentTask.title.text + '\n' + state.currentTask.text.text).replace(/\xa0/g, '')); // remove nbsp just in case its a problem
+			}
+		} else {
+			speechSynthesis.cancel()
+		}
 	})
 
 	// run setVoice when voices are loaded (onvoiceschanged)
@@ -93,31 +101,28 @@ async function init() {
 		syncScroll(divTask, solutionField);
 	});
 
+	// load task (restore saved state or next due task or given by doc url parameter)
 	let urldoc = urlparams.get('doc') || urlparams.get('queuedDoc');
 	window.history.pushState({}, document.title, "/" ); // remove URL param docId since we are no longer in that document (otherwise would've been param to this function)
-	if (urldoc) {
-		if (state.reviews.length > 0) {
-			// we have a saved state from last session to restore
-			console.log(state);
-			await nextTask(state.currentTask.docId);
+	if (state.reviews.length > 0) {
+		// we have a saved state from last session to restore
+		console.log(state);
+		await nextTask(state.currentTask.docId);
 
-			// click words, which will add them to state.failedWords and mark them on the page
-			let targetFailedWords = structuredClone(state.failedWords);
-			state.failedWords.clear()
-			for (const word of targetFailedWords) { // mark words that were marked in last session
-				for (const el of document.getElementsByClassName('span-'+word)) {
-					el.click()
-				}
+		// click words, which will add them to state.failedWords and mark them on the page
+		let targetFailedWords = structuredClone(state.failedWords);
+		state.failedWords.clear()
+		for (const word of targetFailedWords) { // mark words that were marked in last session
+			for (const el of document.getElementsByClassName('span-'+word)) {
+				el.click()
 			}
-
-			if (urldoc != state.currentTask.docId) {
-				window.history.pushState({}, document.title, "/?queuedDoc=" + urldoc); //= urlparams.set('queuedDoc', urldoc)
-			}			
-		} else {
-			nextTask(urldoc); 
 		}
+
+		if (urldoc && urldoc != state.currentTask.docId) {
+			window.history.pushState({}, document.title, "/?queuedDoc=" + urldoc); //= urlparams.set('queuedDoc', urldoc)
+		}			
 	} else {
-		nextTask()
+		nextTask(urldoc); 
 	}
 }
 
