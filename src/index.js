@@ -1,7 +1,8 @@
 'use strict'
 import DocumentC from './lib/DocumentC.js'
-import { backendPost, backendGet, requestNotifications } from './lib/backend.js'
+import { backendPost, backendGet, requestNotifications, getTask } from './lib/backend.js'
 import TranslatableText from './lib/TranslatableText.js'
+import AppState from './lib/AppState.js'
 
 // debug in DEV browser: http://localhost/?u=pl1&tl=pl&nl=en
 
@@ -15,42 +16,29 @@ if ('serviceWorker' in navigator) {
 	})
 }
 var divTask, emValidationError, answbtn, solutionField, loginbox, contentbox, iRating, btnSound
-var currentTask=undefined
-var phase = "promting" // or "solutionShown"
-var failedWords = new Set()
 const answbtnTxtWhilePrompting = "Show solution"
 const answbtnTxtWhileSolutionShown = "Next question"
 const answbtnTxtWhileDone = 'Learn new words'
 const NON_CLICKABLE_POS_IDS = new Set([97, 99, 101])
 let urlparams = new URLSearchParams(window.location.search)
-var user = urlparams.get('u'), target_lang=urlparams.get('tl'), native_lang=urlparams.get('nl'), method=urlparams.get('mtd') // temporary solution only use url params for user languages
 var voice = null
-var sound = true
-const TTS_SPEED = 0.8
+var state
 
 // Initialize
 window.addEventListener("load", init)
-function init() {
+async function init() {
+	btnSound = document.getElementById('btnSound')
+
+	state = new AppState(urlparams, btnSound)
+	await state.loadCurrentTaskFromReviews()
+
 	loginbox = document.getElementById("loginbox")
 	contentbox = document.getElementById('contentbox')
 	emValidationError = document.getElementById('emValidationError')
-	if (!user) { // overwrite stored user if user provided in url
-		user = localStorage.getItem('username')
-		target_lang = localStorage.getItem('target_lang')
-		native_lang = localStorage.getItem('native_lang')
-		method = localStorage.getItem('method')
-	} else {
-		target_lang = target_lang.toLowerCase()
-		native_lang = native_lang.toLowerCase()
-		localStorage.setItem('username', user)
-		localStorage.setItem('target_lang', target_lang)
-		localStorage.setItem('native_lang', native_lang)
-		localStorage.setItem('method', method)
-	}
 	document.getElementById("btnRetryConnection").addEventListener("click", () => { // submit on button press
 		location.reload()
 	})
-	if (!user) {
+	if (!state.user) {
 		showLoginPrompt('Sorry, your link seems to be defective, please ask Benjamin for a new one 💥🔗')
 		return
 	}
@@ -60,38 +48,34 @@ function init() {
 
 	divTask = document.getElementById('divTask')
 	answbtn = document.getElementById("answbtn")
-	btnSound = document.getElementById('btnSound')
 	solutionField = document.getElementById("solutionField")
 	answbtn.className = 'loading-indicator'
 	answbtn.addEventListener("click", () => {
-		if (phase === "promting") {
+		if (state.phase === "promting") {
 			showSolution()
-			if (sound) {
-				try_speak((currentTask.title.text + '\n' + currentTask.text.text).replace(/\xa0/g, '')) // remove nbsp just in case its a problem
+			if (state.sound) {
+				try_speak((state.currentTask.title.text + '\n' + state.currentTask.text.text).replace(/\xa0/g, '')) // remove nbsp just in case its a problem
 			}
-		} else if (phase === "solutionShown") {
+		} else if (state.phase === "solutionShown") {
 			divTask.style.visibility="hidden"
 			solutionField.innerText = ''
 			answbtn.className = 'loading-indicator'
-			sendReview(failedWords)
-			.then(() => {
-				failedWords.clear()
+			sendPendingReviews()
+			.then(async () => {
 				divTask.scrollTop = 0
 				solutionField.scrollTop = 0
-				getTask()
+				nextTask(new URLSearchParams(window.location.search).get('queuedDoc'))
+				window.history.pushState({}, document.title, "/" )
 			})
-		} else if (phase === "done") {
+		} else if (state.phase === "done") {
 			answbtn.className = 'loading-indicator'
 			requestNewWords()
 		}
 	})
-	// Set sound variable and toggle icon from localStorage if previously saved
-	sound = localStorage.getItem('sound') ? JSON.parse(localStorage.getItem('sound')) : sound
-	btnSound.innerText = sound ? '🔊' : '🔈'
+
+	// toggle sound state
 	btnSound.addEventListener('click', () => {
-		sound = ! sound
-		localStorage.setItem('sound', sound)
-		btnSound.innerText = sound ? '🔊' : '🔈'
+		state.sound = ! state.sound
 	})
 
 	// run setVoice when voices are loaded (onvoiceschanged)
@@ -109,14 +93,37 @@ function init() {
 		syncScroll(divTask, solutionField);
 	});
 
-	
-	getTask(urlparams.get('doc'))
+	let urldoc = urlparams.get('doc') || urlparams.get('queuedDoc');
+	window.history.pushState({}, document.title, "/" ); // remove URL param docId since we are no longer in that document (otherwise would've been param to this function)
+	if (urldoc) {
+		if (state.reviews.length > 0) {
+			// we have a saved state from last session to restore
+			console.log(state);
+			await nextTask(state.currentTask.docId);
+
+			// click words, which will add them to state.failedWords and mark them on the page
+			let targetFailedWords = structuredClone(state.failedWords);
+			state.failedWords.clear()
+			for (const word of targetFailedWords) { // mark words that were marked in last session
+				for (const el of document.getElementsByClassName('span-'+word)) {
+					el.click()
+				}
+			}
+
+			if (urldoc != state.currentTask.docId) {
+				window.history.pushState({}, document.title, "/?queuedDoc=" + urldoc); //= urlparams.set('queuedDoc', urldoc)
+			}			
+		} else {
+			nextTask(urldoc); 
+		}
+	} else {
+		nextTask()
+	}
 }
 
 function setVoice() {
-	console.log(speechSynthesis.getVoices())
     const separator = speechSynthesis.getVoices()[0].lang.includes('-') ? '-' : '_'
-	let voices_in_lang = speechSynthesis.getVoices().filter(voice=>{return voice.lang.split(separator)[0].big()===target_lang.big()})
+	let voices_in_lang = speechSynthesis.getVoices().filter(voice=>{return voice.lang.split(separator)[0].big()===state.target_lang.big()})
 	if (voices_in_lang.length!==0) {
 		voice = voices_in_lang[0]
 	}
@@ -127,8 +134,7 @@ function try_speak(str) {
 		let utterance = new SpeechSynthesisUtterance(str)
 		utterance.voice = voice
 		utterance.lang = voice.lang
-		utterance.rate = TTS_SPEED
-		console.log(voice)
+		utterance.rate = state.tts_speed
 		speechSynthesis.speak(utterance)
 	}
 }
@@ -148,7 +154,7 @@ function showLoginPrompt(validation_error=false) {
 
 function showSolution() {
 	solutionField.removeAttribute('style')
-	phase = "solutionShown"
+	state.phase = "solutionShown"
 	answbtn.innerHTML = answbtnTxtWhileSolutionShown
 }
 
@@ -158,12 +164,11 @@ function showSolution() {
  * @param {DocumentC} doc Document cnotaining the task
  */
 function setTask(doc) {
-	currentTask = doc // save in global to be accessible in answbtn eventListener (for tts)
-
+	state.currentTask = doc // save in global to be accessible in answbtn eventListener (for tts)
 
 	divTask.textContent = '' // delete previous task
 	divTask.style.visibility="visible"
-	phase = "promting"
+	state.phase = "promting"
 	answbtn.innerHTML = answbtnTxtWhilePrompting
 	for (const translatableText of [doc.title, doc.text]) {
 		let p = document.createElement('p')		
@@ -198,8 +203,8 @@ function setTask(doc) {
 			if (!NON_CLICKABLE_POS_IDS.has(token_obj.pos)) {
 				span.className = 'pointer span-'+token_word
 				span.addEventListener("click", () => {
-					if (failedWords.has(token_word)) {
-						failedWords.delete(token_word)
+					if (state.failedWords.has(token_word)) {
+						state.failedWords.delete(token_word)
 						Array.from(document.getElementsByClassName('span-'+token_word)).forEach(each => {
 							each.style.color = ""
 							Array.from(document.getElementsByClassName('a-'+token_word)).forEach(eachA => { // remove corresponding dictionary links for all occurrences of the word
@@ -207,10 +212,10 @@ function setTask(doc) {
 							})
 						})
 					} else {
-						if (sound) {
+						if (state.sound) {
 							try_speak(token_word)
 						}
-						failedWords.add(token_word)
+						state.failedWords.add(token_word)
 						Array.from(document.getElementsByClassName('span-'+token_word)).forEach(each => {
 							each.style.color = "red"
 							let aDict = document.createElement('a')
@@ -218,7 +223,7 @@ function setTask(doc) {
 							aDict.className = 'a-'+token_word
 							aDict.addEventListener("click", () => {
 								window.open('langki://word/?w='+token_word)
-								//window.open('https://translate.google.com/?sl='+target_lang+'&tl='+native_lang+'&text='+token,'popup','width=600,height=800')
+								//window.open('https://translate.google.com/?sl='+state.target_lang+'&tl='+state.native_lang+'&text='+token,'popup','width=600,height=800')
 							})
 							each.parentElement.insertBefore(aDict, each)
 						})
@@ -232,8 +237,8 @@ function setTask(doc) {
 
 
 function noTask() {
-	phase = 'done'
-	currentTask = null
+	state.phase = 'done'
+	state.currentTask = null
 	divTask.textContent = 'Done for today 🤓'
 	divTask.style.visibility="visible"
 	solutionField.innerText = ''
@@ -259,47 +264,35 @@ function setSolution(solution) {
 
 
 /**
- * Send user marked words to backend
- * @param failedWords Words user marked in current task
+ * Send user marked words to backend, by dequeuing them from state.reviews
  * @returns {Promise<unknown>} Promise that is resolved when send was successful
  */
-function sendReview(failedWords){
+function sendPendingReviews(){
 	return new Promise((resolve, _reject) => {
-		let review = {docId: currentTask.docId, failedTokens: [...failedWords]}
-		backendPost('/review/'+user, review, resolve)
-		// TODO: on reject or timeout, save review to localStorage an retry regularly and on next app open
+		if (state.reviews.length == 0) {
+			return resolve()
+		}
+		const review = state.reviews.at(0)
+		const json = {docId: review[0], failedTokens: [...review[1]]}
+		backendPost('/review/'+state.user, json, _success => {
+			state.reviews.dequeue()
+			sendPendingReviews().then(resolve)
+		})
+		// TODO: on reject or timeout, retry regularly and on next app open
 	})
 }
 
 
-function getTask(docId){
-	backendGet(docId ? `/task/${user}/${docId}` : `/due_task/${user}`, responseText => {
-		answbtn.className = ''
-
-		if (!responseText) {
-			noTask()
-		} else {
-			let doc = null
-			try { 
-				let json = JSON.parse(responseText)
-				console.log(json);
-				doc = DocumentC.fromJson(json)
-			} catch (error) {
-				console.log(error)
-			}
-
-			setTask(doc)
-			//getSolution()
-			setSolution(doc.title.translations[native_lang] + '\n\n' + doc.text.translations[native_lang])
-		}
-	}, showLoginPrompt)
-	if (!docId) {
-		window.history.pushState({}, document.title, "/" ); // remove URL param docId since we are no longer in that document (otherwise would've been param to this function)
-	}
+async function nextTask(docId){
+	console.log(docId);
+	let doc = await getTask(state.user, docId)
+	answbtn.className = ''
+	setTask(doc)
+	setSolution(doc.title.translations[state.native_lang] + '\n\n' + doc.text.translations[state.native_lang])
 }
 
 function requestNewWords() {
-	backendGet('/new_words/'+user, () => getTask(), showLoginPrompt)
+	backendGet('/new_words/'+state.user, () => nextTask(), showLoginPrompt)
 }
 
 // Push Notifications
@@ -309,9 +302,9 @@ window.addEventListener('load', function () {
     if (Notification.permission === 'default') {
         btnNotifications.removeAttribute('hidden')
 		document.getElementById('pNotifications').removeAttribute('hidden')
-        btnNotifications.addEventListener('click', () => requestNotifications(user).then(() => btnNotifications.setAttribute('hidden', true)))
+        btnNotifications.addEventListener('click', () => requestNotifications(state.user).then(() => btnNotifications.setAttribute('hidden', true)))
     } else if (Notification.permission === 'granted') {
-		requestNotifications(user).then(() => btnNotifications.setAttribute('hidden', true))
+		requestNotifications(state.user).then(() => btnNotifications.setAttribute('hidden', true))
 	}
 })
 

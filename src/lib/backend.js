@@ -1,8 +1,11 @@
 'use strict';
 import config from '../config.js';
+import DocumentC from './DocumentC.js'
 
 // backend constants
 function EndpointGetVocab(user) {return '/vocab/'+user;}
+function EndpointGetTask(user, docId) {return `/task/${user}/${docId}`;}
+function EndpointGetDueTask(user) {return `/due_task/${user}`;}
 
 
 // backend endpoints
@@ -18,6 +21,22 @@ export async function getVocab(user){
 				reject(error)
 			}
 		}, console.error)		
+	})
+}
+
+export async function getTask(user, docId){
+	return new Promise((resolve, reject) => {
+		backendGet(docId ? EndpointGetTask(user, docId) : EndpointGetDueTask(user), responseText => {
+			let doc = null
+			try { 
+				let json = JSON.parse(responseText)
+				console.log(json);
+				resolve(DocumentC.fromJson(json))
+			} catch (error) {
+				console.error(error)
+				reject(error)
+			}
+		}, console.error)
 	})
 }
 
@@ -40,7 +59,7 @@ export function backendGet(path, callback, error_handler_function) {
 	xhr.open("GET", config.backend + path, true)
 	xhr.send(null)
 }
-export function backendPost(path, payload, callback) {
+export function backendPost(path, payload, onSuccess) {
 	return fetch(config.backend + path, {
 		method: 'POST',
 		headers: {
@@ -51,7 +70,7 @@ export function backendPost(path, payload, callback) {
 		if (!response.ok) {
 			throw new Error('Post error.' + response.text())
 		}
-		callback(response)
+		onSuccess(response)
 	})
 }
 
