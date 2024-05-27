@@ -107,7 +107,7 @@ async function init() {
 	if (state.reviews.length > 0) {
 		// we have a saved state from last session to restore
 		console.log(state);
-		await nextTask(state.currentTask.docId);
+		await nextTask(state.currentTask?.docId);
 
 		// click words, which will add them to state.failedWords and mark them on the page
 		let targetFailedWords = structuredClone(state.failedWords);
@@ -118,7 +118,7 @@ async function init() {
 			}
 		}
 
-		if (urldoc && urldoc != state.currentTask.docId) {
+		if (urldoc && urldoc != state.currentTask?.docId) {
 			window.history.pushState({}, document.title, "/?queuedDoc=" + urldoc); //= urlparams.set('queuedDoc', urldoc)
 		}			
 	} else {

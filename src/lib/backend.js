@@ -36,7 +36,7 @@ export async function getTask(user, docId){
 				console.error(error)
 				reject(error)
 			}
-		}, console.error)
+		}, reject)
 	})
 }
 
@@ -53,7 +53,7 @@ export function backendGet(path, callback, error_handler_function) {
 		} else if (xhr.responseText.includes('User does not exist')) {
 			error_handler_function('Sorry, user seems not to exist 😶‍🌫')
 		} else {
-			error_handler_function('Sorry, there is a network communications problem 🗣️🙉\nTry again in a sec')
+			error_handler_function(xhr.responseText)
 		}
 	}
 	xhr.open("GET", config.backend + path, true)

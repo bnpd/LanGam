@@ -120,8 +120,14 @@ class AppState {
     async loadCurrentTaskFromReviews() {
         if (this.reviews.length > 0) {
             const savedDocId = this.reviews.at(-1)[0];
-            let doc = await getTask(this.user, savedDocId)
-            this._currentTask = doc
+            await getTask(this.user, savedDocId)
+            .then(doc => {
+                this._currentTask = doc
+            })
+            .catch(e => {
+                console.error(e)
+                this.reviews.pop() // remove the offending last element from the queue
+            })
         }
     }
 }
