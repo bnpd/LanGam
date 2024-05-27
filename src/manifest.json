@@ -36,5 +36,19 @@
       "form_factor": "narrow",
       "platform": "android"
     }
+  ],
+  "shortcuts": [
+    {
+      "name": "Admin",
+      "short_name": "Admin",
+      "description": "Admin View",
+      "url": "/admin/admin.html"
+    },
+    {
+      "name": "Your vocab",
+      "short_name": "Your vocab",
+      "description": "Your vocab and progress",
+      "url": "/lists.html"
+    }
   ]
 }
