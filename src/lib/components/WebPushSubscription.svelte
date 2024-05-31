@@ -1,21 +1,22 @@
-<script>
+<script lang="ts">
 import { onMount } from 'svelte';
 import { requestNotifications } from './backend';
 
 let notificationSupported = false;
-let notificationPermission = 'default';
+let notificationPermission: NotificationPermission;
   
 export let user;
 
 onMount(() => {
-  if (Notification.permission === 'granted') {
+  notificationPermission = Notification.permission
+  if (notificationPermission === 'granted') {
           requestNotifications(user)
     }
 });
 </script>
 
 {#if notificationPermission === 'default'}
-  <button id="btnNotifications" on:click={() => requestNotifications(user)}>
+  <button id="btnNotifications" on:click={() => requestNotifications(user).then(() => {notificationPermission = Notification.permission})}>
     Set a reminder
   </button>
 {/if}

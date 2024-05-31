@@ -75,6 +75,9 @@ export function backendPost(path, payload, onSuccess) {
 }
 
 // Push Notifications
+/**
+ * @param {String} user
+ */
 export function requestNotifications(user) {
 	return subscribeUserToPush().then(subscription => sendSubscriptionToBackEnd(subscription, user));
 }

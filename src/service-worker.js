@@ -3,8 +3,7 @@
 const CACHE_NAME = 'static-cache'
 
 const FILES_TO_CACHE = [
-  '/index.html',
-  '/styles.css'
+  'src/routes/global.css'
 ]
 
 self.addEventListener('install', (evt) => {

@@ -10,8 +10,9 @@
 
     let loading = true
     let solutionText = ''
-    var voice = null
-    var state
+    var voice: SpeechSynthesisVoice
+    var state: AppState
+    var phase = "prompting"; // or "solutionShown"
 
     onMount(async () => {
         let urlparams = new URLSearchParams(window.location.search)
@@ -19,6 +20,7 @@
 
         state = new AppState(urlparams)
 	    await state.loadCurrentTaskFromReviews()
+
 
         if (!user) {
             user = localStorage.getItem('username');
@@ -96,12 +98,12 @@
     }
 
     function onAnswbtnClick () {
-		if (state.phase === "promting") {
-            state.phase = "solutionShown"
+		if (phase === "prompting") {
+            phase = "solutionShown"
 			if (state.sound) {
 				trySpeak((state.currentTask.title.text + '\n' + state.currentTask.text.text).replace(/\xa0/g, '')) // remove nbsp just in case its a problem
 			}
-		} else if (state.phase === "solutionShown") {
+		} else if (phase === "solutionShown") {
 			speechSynthesis.cancel()
             loading = true
 
@@ -118,7 +120,7 @@
     function onSoundClick() {
 		state.sound = ! state.sound
 		if (state.sound) {
-			if (state.phase === "solutionShown") {
+			if (phase === "solutionShown") {
 				trySpeak((state.currentTask.title.text + '\n' + state.currentTask.text.text).replace(/\xa0/g, '')); // remove nbsp just in case its a problem
 			}
 		} else {
@@ -149,6 +151,7 @@
     async function nextTask(docId){
         let doc = await getTask(state.user, docId)
         loading = false
+        phase = "prompting"
         state.currentTask = doc
         solutionText = doc.title.translations[state.native_lang] + '\n\n' + doc.text.translations[state.native_lang]
     }
@@ -160,12 +163,12 @@
 
 <!-- Main Application -->
 <h1>Automated Language Learning AI</h1>
-<ReaderComponent state={state} trySpeak={trySpeak} solutionText={solutionText} taskVisible={!loading}/>
+<ReaderComponent state={state} phase={phase} trySpeak={trySpeak} solutionText={solutionText} taskVisible={!loading}/>
 <button id="btnInstall" hidden>Install as app</button>
 <button id="answbtn" class:loading on:click={onAnswbtnClick}>
-    {#if state?.phase == 'prompting'}
+    {#if phase === 'prompting'}
         {answbtnTxtWhilePrompting}
-    {:else if state?.phase == 'solutionShown'}
+    {:else if phase === 'solutionShown'}
         {answbtnTxtWhileSolutionShown}
     {/if}
 </button>

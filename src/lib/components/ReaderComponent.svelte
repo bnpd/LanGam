@@ -6,6 +6,7 @@
   let divTask
 
   export let state
+  export let phase
   export let trySpeak
   export let solutionText
   export let taskVisible
@@ -45,7 +46,7 @@
 
     divTask.textContent = '' // delete previous task
     divTask.style.visibility="visible"
-    state.phase = "promting"
+    phase = "prompting"
     for (const translatableText of [doc.title, doc.text]) {
       let p = document.createElement('p')		
       let char_index = 0	
@@ -134,5 +135,5 @@
 <div class="boxBig" id="contentbox">
     <div id="divTask" class:hidden={!taskVisible} bind:this={divTask} on:scroll={() => syncScroll(divTask, solutionField)}></div>
     <hr>
-    <div id="solutionField" bind:this={solutionField} class:hidden={state?.phase !== "solutionShown"}>{solutionText}</div>
+    <div id="solutionField" bind:this={solutionField} class:hidden={phase !== "solutionShown"}>{solutionText}</div>
 </div>

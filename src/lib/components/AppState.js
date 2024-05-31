@@ -4,7 +4,6 @@ export default
 class AppState {
     constructor(urlparams) {
         // UUI elements that only depend on the state
-        this._phase = "promting"; // or "solutionShown"
 
         this._user = urlparams.get('u');
         this._target_lang = urlparams.get('tl');
@@ -31,15 +30,6 @@ class AppState {
         if (this.failedWords?.size == 0) {
             this.reviews?.pop()
         }
-    }
-
-    // Getter and Setter for phase
-    get phase() {
-        return this._phase;
-    }
-
-    set phase(value) {
-        this._phase = value;
     }
 
     // Getter and Setter for user
