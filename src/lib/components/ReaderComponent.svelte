@@ -1,18 +1,28 @@
 <script lang="ts">
-  const NON_CLICKABLE_POS_IDS = new Set([97, 99, 101])
+	import DocumentC from "$lib/DocumentC";
+	import Token from "$lib/Token";
+	import { onMount } from "svelte";
+	import type AppState from "./AppState";
+	import TokenComponent from "./TokenComponent.svelte";
+  import { currentTask, failedWords } from '../stores';
+
+  const NON_CLICKABLE_POS_IDS = new Set([-1, 97, 99, 101]) // added -1 for whitespace
 
 
-  let solutionField
-  let divTask
+  let solutionField: HTMLDivElement
+  let divTask: HTMLDivElement
+  let taskParagraphs: Array<Array<any>> = []
+  let solutionParagraphs: Array<string> = []
 
-  export let state
-  export let phase
-  export let trySpeak
+  export let phase: string
+  export let trySpeak: Function
   export let solutionText
   export let taskVisible
 
-  $: if(state?.currentTask) setTask(state?.currentTask)
+
+  $: if($currentTask && divTask && solutionField) setTask($currentTask)
   $: if(solutionText) setSolution(solutionText)
+
 
   function syncScroll(source, target) {
     // find all paragraphs contained in the text in source and target
@@ -40,30 +50,26 @@
    * Set a document as the currently shown task
    * @param {DocumentC} doc Document cnotaining the task
    */
-  export function setTask(doc) {
+  export function setTask(doc: DocumentC) {    
     divTask.scrollTop = 0
     solutionField.scrollTop = 0
 
     divTask.textContent = '' // delete previous task
     divTask.style.visibility="visible"
     phase = "prompting"
+
+    let space = new Token(' ', undefined, -1)
     for (const translatableText of [doc.title, doc.text]) {
-      let p = document.createElement('p')		
+      let paragraph = []	
       let char_index = 0	
-      for (const start_char in translatableText.tokens) {
-
-
-        // TODO: use TokenComponent //
-
-
-        let span = document.createElement("span")                                
+      for (const start_char in translatableText.tokens) {                       
         while (char_index < start_char) { // insert whitespace and newlines
-          if (translatableText.text[char_index] == '\n' && p.childElementCount > 0) {
+          if (translatableText.text[char_index] == '\n' && paragraph.length > 0) {
             // next paragraph
-            divTask.appendChild(p)
-            p = document.createElement('p')
+            taskParagraphs.push(paragraph)
+            paragraph = []
           } else {
-            p.append(' ')
+            paragraph.push(space)
           }
           char_index++
         }
@@ -77,63 +83,56 @@
         }
 
         if (!token_word.trim()) continue // only proceed if it wasn't only some kind of whitespace
-        span.textContent = token_word
-        //span.style.marginRight="0.5em"
-        p.appendChild(span)
+        paragraph.push(token_obj)
         char_index += token_word.length
-
-        if (!NON_CLICKABLE_POS_IDS.has(token_obj.pos)) {
-          span.className = 'pointer span-'+token_word
-          span.addEventListener("click", () => {
-            if (state.failedWords.has(token_word)) {
-              state.failedWords.delete(token_word)
-              Array.from(document.getElementsByClassName('span-'+token_word)).forEach(each => {
-                (each as HTMLSpanElement).style.color = ""
-                Array.from(document.getElementsByClassName('a-'+token_word)).forEach(eachA => { // remove corresponding dictionary links for all occurrences of the word
-                  eachA.parentElement.removeChild(eachA)
-                })
-              })
-            } else {
-              if (state.sound) {
-                trySpeak(token_word)
-              }
-              state.failedWords.add(token_word)
-              Array.from(document.getElementsByClassName('span-'+token_word)).forEach(each => {
-                (each as HTMLSpanElement).style.color = "red"
-                let aDict = document.createElement('a')
-                aDict.innerHTML = '📕'
-                aDict.className = 'a-'+token_word
-                aDict.addEventListener("click", () => {
-                  window.open('langki://word/?w='+token_word)
-                  //window.open('https://translate.google.com/?sl='+state.target_lang+'&tl='+state.native_lang+'&text='+token,'popup','width=600,height=800')
-                })
-                each.parentElement.insertBefore(aDict, each)
-              })
-            }
-          })
-        }
       }
-      divTask.appendChild(p)
+      taskParagraphs.push(paragraph)
     }
+    taskParagraphs = taskParagraphs
   }
 
   function setSolution(solution) {
+    solutionParagraphs = []
     solution = solution.replace('\r', '').replace('\n\n', '\n')
     let row = 1
     solution.split('\n').map(paragraph => {
       if (!paragraph.trim()) return // if it was only some kind of whitespace, don't bother
-      const p = document.createElement('p')
-      p.style.gridRow = row
-      p.innerText = paragraph
-      solutionField.appendChild(p)
-      row++
+      solutionParagraphs.push(paragraph)
     });
+    solutionParagraphs = solutionParagraphs
+  }
+
+  function onWordClick(token: Token) {
+    if ($failedWords?.has(token?.word)) {
+      $failedWords?.delete(token.word)
+    } else {
+      trySpeak(token)
+      $failedWords?.add(token.word)
+    }
+    $failedWords = $failedWords
   }
 </script>
 
-<!-- Content Box -->
 <div class="boxBig" id="contentbox">
-    <div id="divTask" class:hidden={!taskVisible} bind:this={divTask} on:scroll={() => syncScroll(divTask, solutionField)}></div>
-    <hr>
-    <div id="solutionField" bind:this={solutionField} class:hidden={phase !== "solutionShown"}>{solutionText}</div>
+  <div id="divTask" class:hidden={!taskVisible} bind:this={divTask} on:scroll={() => syncScroll(divTask, solutionField)}>
+    {#each taskParagraphs as taskWords}
+    <p>
+      {#each taskWords as token}
+        <TokenComponent 
+        word={token?.word} 
+        isFailed={$failedWords?.has(token?.word)}
+        isClickable={!NON_CLICKABLE_POS_IDS.has(token?.pos)}
+        on:click={() => {onWordClick(token)}}></TokenComponent>
+      {/each}
+    </p>
+    {/each}
+  </div>
+  <hr>
+  <div id="solutionField" bind:this={solutionField} class:hidden={phase !== "solutionShown"}>
+    {#each solutionParagraphs as para, row}
+    <p style:gridRow={row}>
+      {para}
+    </p>
+    {/each}  
+  </div>
 </div>

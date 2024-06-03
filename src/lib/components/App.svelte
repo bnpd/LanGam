@@ -1,9 +1,10 @@
 <script lang="ts">
     import { onMount } from 'svelte';
     import ReaderComponent from './ReaderComponent.svelte';
-    import AppState from './AppState';
     import WebPushSubscription from './WebPushSubscription.svelte';
     import { backendPost, getTask } from './backend';
+    import { user, nativeLang, targetLang, isSoundOn, ttsSpeed, currentTask, reviews, failedWords, reviewDocIds as reviewDocIds } from '../stores';
+	import { goto } from '$app/navigation';
 
     const answbtnTxtWhilePrompting = "Show solution"
     const answbtnTxtWhileSolutionShown = "Next question"
@@ -11,32 +12,15 @@
     let loading = true
     let solutionText = ''
     var voice: SpeechSynthesisVoice
-    var state: AppState
     var phase = "prompting"; // or "solutionShown"
 
     onMount(async () => {
         let urlparams = new URLSearchParams(window.location.search)
-        var user = urlparams.get('u'), target_lang=urlparams.get('tl'), native_lang=urlparams.get('nl'), method=urlparams.get('mtd') // temporary solution only use url params for user languages
+        if (urlparams.get('u')) $user = urlparams.get('u');
+        if (urlparams.get('tl')) $targetLang = urlparams.get('tl')?.toLowerCase();
+        if (urlparams.get('nl')) $nativeLang = urlparams.get('nl')?.toLowerCase();
 
-        state = new AppState(urlparams)
-	    await state.loadCurrentTaskFromReviews()
-
-
-        if (!user) {
-            user = localStorage.getItem('username');
-            target_lang = localStorage.getItem('target_lang');
-            native_lang = localStorage.getItem('native_lang');
-            method = localStorage.getItem('method');
-        } else {
-            target_lang = target_lang.toLowerCase();
-            native_lang = native_lang.toLowerCase();
-            localStorage.setItem('username', user);
-            localStorage.setItem('target_lang', target_lang);
-            localStorage.setItem('native_lang', native_lang);
-            localStorage.setItem('method', method);
-        }
-
-        if (!user) {
+        if (!$user) {
             console.error('Login missing.');
             return;
         }
@@ -55,23 +39,22 @@
 
         // load task (restore saved state or next due task or given by doc url parameter)
         let urldoc = urlparams.get('doc') || urlparams.get('queuedDoc');
-        window.history.pushState({}, document.title, "/" ); // remove URL param docId since we are no longer in that document (otherwise would've been param to this function)
-        if (state.reviews.length > 0) {
+        goto('/'); // remove URL param docId since we are no longer in that document (otherwise would've been param to this function)
+        if ($reviews.length > 0) {
             // we have a saved state from last session to restore
-            console.log(state);
-            await nextTask(state.currentTask?.docId);
+            await nextTask($currentTask?.docId);
 
-            // click words, which will add them to state.failedWords and mark them on the page
-            let targetFailedWords = structuredClone(state.failedWords);
-            state.failedWords.clear()
+            // click words, which will add them to $failedWords and mark them on the page
+            let targetFailedWords = structuredClone($failedWords);
+            $failedWords.clear()
             for (const word of targetFailedWords) { // mark words that were marked in last session
                 for (const el of document.getElementsByClassName('span-'+word)) {
                     (el as HTMLSpanElement).click()
                 }
             }
 
-            if (urldoc && urldoc != state.currentTask?.docId) {
-                window.history.pushState({}, document.title, "/?queuedDoc=" + urldoc); //= urlparams.set('queuedDoc', urldoc)
+            if (urldoc && urldoc != $currentTask?.docId) {
+                goto('/?queuedDoc=' + urldoc); //= urlparams.set('queuedDoc', urldoc)
             }			
         } else {
             nextTask(urldoc); 
@@ -81,18 +64,18 @@
 
     function setVoice() {
         const separator = speechSynthesis.getVoices()[0].lang.includes('-') ? '-' : '_'
-        let voices_in_lang = speechSynthesis.getVoices().filter(voice=>{return voice.lang.split(separator)[0].big()===state.target_lang.big()})
+        let voices_in_lang = speechSynthesis.getVoices().filter(voice=>{return voice.lang.split(separator)[0].big()===$targetLang.big()})
         if (voices_in_lang.length!==0) {
             voice = voices_in_lang[0]
         }
     }
 
-    function trySpeak(str) {
-        if (voice != null) {
+    function trySpeak(str: string) {
+        if ($isSoundOn && voice != null) {
             let utterance = new SpeechSynthesisUtterance(str)
             utterance.voice = voice
             utterance.lang = voice.lang
-            utterance.rate = state.tts_speed
+            utterance.rate = $ttsSpeed
             speechSynthesis.speak(utterance)
         }
     }
@@ -100,9 +83,7 @@
     function onAnswbtnClick () {
 		if (phase === "prompting") {
             phase = "solutionShown"
-			if (state.sound) {
-				trySpeak((state.currentTask.title.text + '\n' + state.currentTask.text.text).replace(/\xa0/g, '')) // remove nbsp just in case its a problem
-			}
+			trySpeak(($currentTask.title.text + '\n' + $currentTask.text.text).replace(/\xa0/g, '')) // remove nbsp just in case its a problem
 		} else if (phase === "solutionShown") {
 			speechSynthesis.cancel()
             loading = true
@@ -112,35 +93,41 @@
 			sendPendingReviews()
 			.then(async () => {
 				nextTask(new URLSearchParams(window.location.search).get('queuedDoc'))
-				window.history.pushState({}, document.title, "/" )
+				goto('/')
 			})
 		}
     }
 
     function onSoundClick() {
-		state.sound = ! state.sound
-		if (state.sound) {
-			if (phase === "solutionShown") {
-				trySpeak((state.currentTask.title.text + '\n' + state.currentTask.text.text).replace(/\xa0/g, '')); // remove nbsp just in case its a problem
-			}
+		$isSoundOn = ! $isSoundOn
+		if ($isSoundOn) {
+			trySpeak(($currentTask?.title?.text + '\n' + $currentTask?.text?.text).replace(/\xa0/g, '')); // remove nbsp just in case its a problem
 		} else {
 			speechSynthesis.cancel()
 		}
     }
 
     /**
-     * Send user marked words to backend, by dequeuing them from state.reviews
+     * Send user marked words to backend, by dequeuing them from $reviews
      * @returns {Promise<unknown>} Promise that is resolved when send was successful
      */
     function sendPendingReviews(){
         return new Promise<void>((resolve, _reject) => {
-            if (state.reviews.length == 0) {
+            if ($currentTask) {
+                $reviews.push($failedWords)
+                $reviewDocIds.push($currentTask.docId)
+                $failedWords.clear()
+                $currentTask = undefined
+            }
+
+            if ($reviews?.length == 0) {
                 return resolve()
             }
-            const review = state.reviews.at(0)
-            const json = {docId: review[0], failedTokens: [...review[1]]}
-            backendPost('/review/'+state.user, json, _success => {
-                state.reviews.dequeue()
+            const json = {docId: $reviewDocIds[0], failedTokens: [...$reviews[0]]}
+            backendPost('/review/'+$user, json, () => {
+                // onSuccessfulPost, dequeue and go on to next 
+                $reviews.shift()
+                $reviewDocIds.shift()
                 sendPendingReviews().then(resolve)
             })
             // TODO: on reject or timeout, retry regularly and on next app open
@@ -148,12 +135,12 @@
     }
 
 
-    async function nextTask(docId){
-        let doc = await getTask(state.user, docId)
+    async function nextTask(docId: string | null){
+        let doc = await getTask($user, docId)
         loading = false
         phase = "prompting"
-        state.currentTask = doc
-        solutionText = doc.title.translations[state.native_lang] + '\n\n' + doc.text.translations[state.native_lang]
+        $currentTask = doc
+        solutionText = doc.title.translations[$nativeLang] + '\n\n' + doc.text.translations[$nativeLang]
     }
 
 </script>
@@ -163,7 +150,7 @@
 
 <!-- Main Application -->
 <h1>Automated Language Learning AI</h1>
-<ReaderComponent state={state} phase={phase} trySpeak={trySpeak} solutionText={solutionText} taskVisible={!loading}/>
+<ReaderComponent phase={phase} trySpeak={trySpeak} solutionText={solutionText} taskVisible={!loading}/>
 <button id="btnInstall" hidden>Install as app</button>
 <button id="answbtn" class:loading on:click={onAnswbtnClick}>
     {#if phase === 'prompting'}
@@ -172,8 +159,8 @@
         {answbtnTxtWhileSolutionShown}
     {/if}
 </button>
-<WebPushSubscription user={state?.user}/>
-<button id="btnSound" on:click={onSoundClick}>{state?.sound ? '🔊' : '🔈'}</button>
+<WebPushSubscription user={$user}/>
+<button id="btnSound" on:click={onSoundClick}>{$isSoundOn ? '🔊' : '🔈'}</button>
 <nav>
     <a href="lists.html" id="aManageLists">See your vocabulary</a>
 </nav>

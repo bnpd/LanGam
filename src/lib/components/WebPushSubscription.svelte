@@ -2,7 +2,6 @@
 import { onMount } from 'svelte';
 import { requestNotifications } from './backend';
 
-let notificationSupported = false;
 let notificationPermission: NotificationPermission;
   
 export let user;
