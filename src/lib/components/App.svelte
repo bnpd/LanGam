@@ -162,5 +162,5 @@
 <WebPushSubscription user={$user}/>
 <button id="btnSound" on:click={onSoundClick}>{$isSoundOn ? '🔊' : '🔈'}</button>
 <nav>
-    <a href="lists.html" id="aManageLists">See your vocabulary</a>
+    <a href="/lists" id="aManageLists">See your vocabulary</a>
 </nav>
