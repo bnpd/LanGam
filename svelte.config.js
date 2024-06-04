@@ -1,11 +1,21 @@
 import adapter from '@sveltejs/adapter-auto';
 import { vitePreprocess } from '@sveltejs/vite-plugin-svelte';
+import preprocess from 'svelte-preprocess'
+
+const preprocessConfig = preprocess()
+const origMarkup = preprocessConfig.markup
+preprocessConfig.markup = async function () {
+	const res = await origMarkup.apply(this, arguments)
+	// remove whitespace
+	res.code = res.code.replace(/([>}])\s+([<{])/sg, '$1$2')
+	return res
+}
 
 /** @type {import('@sveltejs/kit').Config} */
 const config = {
 	// Consult https://kit.svelte.dev/docs/integrations#preprocessors
 	// for more information about preprocessors
-	preprocess: vitePreprocess(),
+	preprocess: [vitePreprocess(), preprocessConfig],
 
 	kit: {
 		// adapter-auto only supports some environments, see https://kit.svelte.dev/docs/adapter-auto for a list.
