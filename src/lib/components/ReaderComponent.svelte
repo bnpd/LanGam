@@ -1,5 +1,5 @@
 <script lang="ts">
-	import DocumentC from "$lib/DocumentC";
+	import type DocumentC from "$lib/DocumentC";
 	import Token from "$lib/Token";
 	import TokenComponent from "./TokenComponent.svelte";
   import { currentTask, failedWords } from '../stores';
@@ -22,7 +22,7 @@
   $: if(solutionText) setSolution(solutionText)
 
 
-  function syncScroll(source, target) {
+  function syncScroll(source: HTMLDivElement, target: HTMLDivElement) {
     // find all paragraphs contained in the text in source and target
     var sourceParagraphs = source.querySelectorAll('p');
     var targetParagraphs = target.querySelectorAll('p');
@@ -35,7 +35,7 @@
   }
 
   // Function to find the index of the current paragraph based on scroll position
-  function findCurrentParagraphIndex(scrollTop, paragraphs, parentEl) {
+  function findCurrentParagraphIndex(scrollTop: number, paragraphs: NodeListOf<HTMLParagraphElement>, parentEl: HTMLDivElement) {
     for (var i = 0; i < paragraphs.length; i++) {
       if (paragraphs[i].offsetTop-paragraphs[0].offsetTop >= scrollTop-0.5*parentEl.offsetHeight) {
         return i;
@@ -61,7 +61,7 @@
       let paragraph = []	
       let char_index = 0	
       for (const start_char in translatableText.tokens) {                       
-        while (char_index < start_char) { // insert whitespace and newlines
+        while (char_index < (start_char as unknown as number)) { // insert whitespace and newlines
           if (translatableText.text[char_index] == '\n' && paragraph.length > 0) {
             // next paragraph
             taskParagraphs.push(paragraph)
@@ -89,7 +89,7 @@
     taskParagraphs = taskParagraphs
   }
 
-  function setSolution(solution) {
+  function setSolution(solution: string) {
     solutionParagraphs = []
     solution = solution.replace('\r', '').replace('\n\n', '\n')
     let row = 1

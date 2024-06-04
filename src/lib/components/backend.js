@@ -3,15 +3,28 @@ import config from '../../config.js';
 import DocumentC from '../DocumentC.js'
 
 // backend constants
+/**
+ * @param {string} user
+ */
 function EndpointGetVocab(user) {return '/vocab/'+user;}
+/**
+ * @param {string} user
+ * @param {string} docId
+ */
 function EndpointGetTask(user, docId) {return `/task/${user}/${docId}`;}
+/**
+ * @param {string} user
+ */
 function EndpointGetDueTask(user) {return `/due_task/${user}`;}
 
 
 // backend endpoints
+/**
+ * @param {string} user
+ */
 export async function getVocab(user){
 	return new Promise((resolve, reject) => {
-		backendGet(EndpointGetVocab(user), responseText => {
+		backendGet(EndpointGetVocab(user), (/** @type {string} */ responseText) => {
 			let doc = null
 			try { 
 				let json = JSON.parse(responseText)
@@ -24,9 +37,13 @@ export async function getVocab(user){
 	})
 }
 
+/**
+ * @param {string} user
+ * @param {string | null} docId
+ */
 export async function getTask(user, docId){
 	return new Promise((resolve, reject) => {
-		backendGet(docId ? EndpointGetTask(user, docId) : EndpointGetDueTask(user), responseText => {
+		backendGet(docId ? EndpointGetTask(user, docId) : EndpointGetDueTask(user), (/** @type {string} */ responseText) => {
 			let doc = null
 			try { 
 				let json = JSON.parse(responseText)
@@ -42,6 +59,11 @@ export async function getTask(user, docId){
 
 
 // lowlevel backend communication
+/**
+ * @param {string} path
+ * @param {{ (responseText: string): void; }} callback
+ * @param {{ (...data: any[]): void; }} error_handler_function
+ */
 export function backendGet(path, callback, error_handler_function) {
 	var xhr = new XMLHttpRequest()
 	xhr.onreadystatechange = function xhrHandler() {
@@ -59,6 +81,11 @@ export function backendGet(path, callback, error_handler_function) {
 	xhr.open("GET", config.backend + path, true)
 	xhr.send(null)
 }
+/**
+ * @param {string} path
+ * @param {Object} payload
+ * @param {(arg0: Response) => void} onSuccess
+ */
 export function backendPost(path, payload, onSuccess) {
 	return fetch(config.backend + path, {
 		method: 'POST',
@@ -98,6 +125,10 @@ function subscribeUserToPush() {
 			return pushSubscription;
 		});
 }
+/**
+ * @param {PushSubscription} subscription
+ * @param {string} username
+ */
 function sendSubscriptionToBackEnd(subscription, username) {
 	return fetch(config.backend + '/api/webpush-subscribe/' + username, {
 		method: 'POST',
