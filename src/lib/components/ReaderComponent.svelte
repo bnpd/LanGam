@@ -1,8 +1,6 @@
 <script lang="ts">
 	import DocumentC from "$lib/DocumentC";
 	import Token from "$lib/Token";
-	import { onMount } from "svelte";
-	import type AppState from "./AppState";
 	import TokenComponent from "./TokenComponent.svelte";
   import { currentTask, failedWords } from '../stores';
 
@@ -119,10 +117,10 @@
     <p>
       {#each taskWords as token}
         <TokenComponent 
-        word={token?.word} 
-        isFailed={$failedWords?.has(token?.word)}
-        isClickable={!NON_CLICKABLE_POS_IDS.has(token?.pos)}
-        on:click={() => {onWordClick(token)}}></TokenComponent>
+          word={token?.word} 
+          isFailed={$failedWords?.has(token?.word)}
+          isClickable={!NON_CLICKABLE_POS_IDS.has(token?.pos)}
+          on:click={() => {onWordClick(token)}}></TokenComponent>
       {/each}
     </p>
     {/each}

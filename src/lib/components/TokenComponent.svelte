@@ -3,11 +3,14 @@
     export let isFailed: boolean;
     export let isClickable: boolean;
 </script>
-{#if isFailed}
-<a href={'langki://word/?w='+word} class={'a-'+word}>📕</a>
-{/if}
+
 {#if isClickable}
-<span class={'pointer span-'+word + (isFailed && ' clicked')} on:click>{word}</span>
+<span style:display="inline-block" class={'pointer span-'+word + (isFailed ? ' clicked' : '')} on:click>
+    {#if isFailed}
+    <a href={'langki://word/?w='+word}>📕</a>
+    {/if}
+    {word}
+</span>
 {:else}
 {word}
 {/if}
