@@ -5,6 +5,7 @@
     import { backendPost, getTask } from './backend';
     import { user, nativeLang, targetLang, isSoundOn, ttsSpeed, currentTask, reviews, failedWords, reviewDocIds } from '$lib/stores';
 	import { goto } from '$app/navigation';
+	import Install from './Install.svelte';
 
     const answbtnTxtWhilePrompting = "Show solution"
     const answbtnTxtWhileSolutionShown = "Next question"
@@ -151,7 +152,7 @@
 <!-- Main Application -->
 <h1>Automated Language Learning AI</h1>
 <ReaderComponent phase={phase} trySpeak={trySpeak} solutionText={solutionText} taskVisible={!loading}/>
-<button id="btnInstall" hidden>Install as app</button>
+<Install/>
 <button id="answbtn" class:loading on:click={onAnswbtnClick}>
     {#if phase === 'prompting'}
         {answbtnTxtWhilePrompting}
@@ -159,8 +160,6 @@
         {answbtnTxtWhileSolutionShown}
     {/if}
 </button>
-<WebPushSubscription user={$user}/>
+<button on:click={()=>goto("/lists")} id="aManageLists">See your vocabulary</button>
+<WebPushSubscription/>
 <button id="btnSound" on:click={onSoundClick}>{$isSoundOn ? '🔊' : '🔈'}</button>
-<nav>
-    <button on:click={()=>goto("/lists")} id="aManageLists">See your vocabulary</button>
-</nav>

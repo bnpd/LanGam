@@ -26,7 +26,7 @@ self.addEventListener('activate', (evt) => {
 })
 
 self.addEventListener('fetch', (evt) => {
-  console.log('[ServiceWorker] Fetch', evt.request.url)
+  //console.log('[ServiceWorker] Fetch', evt.request.url)
   // Fetch event handler here
   if (evt.request.mode !== 'navigate') {
     // Not a page navigation, bail.
