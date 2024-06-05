@@ -2,7 +2,7 @@
     import { onMount } from 'svelte';
     import ReaderComponent from './ReaderComponent.svelte';
     import WebPushSubscription from './WebPushSubscription.svelte';
-    import { backendPost, getTask } from './backend';
+    import { backendPost, getTask, getTopTasks } from './backend';
     import { user, nativeLang, targetLang, isSoundOn, ttsSpeed, currentTask, reviews, failedWords, reviewDocIds } from '$lib/stores';
 	import { goto } from '$app/navigation';
 	import Install from './Install.svelte';

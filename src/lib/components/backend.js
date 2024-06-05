@@ -15,6 +15,10 @@ function EndpointGetTask(user, docId) {return `/task/${user}/${docId}`;}
 /**
  * @param {string} user
  */
+function EndpointGetTopTasks(user) {return `/top_tasks/${user}`;}
+/**
+ * @param {string} user
+ */
 function EndpointGetDueTask(user) {return `/due_task/${user}`;}
 
 
@@ -24,16 +28,14 @@ function EndpointGetDueTask(user) {return `/due_task/${user}`;}
  */
 export async function getVocab(user){
 	return new Promise((resolve, reject) => {
-		backendGet(EndpointGetVocab(user), (/** @type {string} */ responseText) => {
-			let doc = null
+		backendGet(EndpointGetVocab(user), responseJson => {
 			try { 
-				let json = JSON.parse(responseText)
-				resolve([json['scheduled'], json['all_forms']])
+				resolve([responseJson['scheduled'], responseJson['all_forms']])
 			} catch (error) {
 				console.error(error)
 				reject(error)
 			}
-		}, console.error)		
+		})		
 	})
 }
 
@@ -43,17 +45,31 @@ export async function getVocab(user){
  */
 export async function getTask(user, docId){
 	return new Promise((resolve, reject) => {
-		backendGet(docId ? EndpointGetTask(user, docId) : EndpointGetDueTask(user), (/** @type {string} */ responseText) => {
-			let doc = null
+		backendGet(docId ? EndpointGetTask(user, docId) : EndpointGetDueTask(user), responseJson => {
 			try { 
-				let json = JSON.parse(responseText)
-				console.log(json);
-				resolve(DocumentC.fromJson(json))
+				resolve(DocumentC.fromJson(responseJson))
 			} catch (error) {
 				console.error(error)
 				reject(error)
 			}
-		}, reject)
+		})
+	})
+}
+
+/**
+ * @param {string} user
+ * @param {any} query
+ */
+export async function getTopTasks(user, query){
+	return new Promise((resolve, reject) => {
+		backendPost(EndpointGetTopTasks(user), query, responseJson => {
+			try { 
+				resolve(responseJson)
+			} catch (error) {
+				console.error(error)
+				reject(error)
+			}
+		})
 	})
 }
 
@@ -61,33 +77,21 @@ export async function getTask(user, docId){
 // lowlevel backend communication
 /**
  * @param {string} path
- * @param {{ (responseText: string): void; }} callback
- * @param {{ (...data: any[]): void; }} error_handler_function
+ * @param {{ (responseJson: any): void; }} onSuccess
  */
-export function backendGet(path, callback, error_handler_function) {
+export function backendGet(path, onSuccess) {
 	fetch(config.backend + path)
 	.then(async response => {
 	  if (!response.ok) {
-		const text = await response.text();
-		if (text.includes('User does not exist')) {
-			error_handler_function('Sorry, user seems not to exist 😶‍🌫');
-		} else {
-			error_handler_function(text);
-		}
+		throw new Error('Post error.' + await response.text())
 	  }
-	  return response.text();
+	  onSuccess(await response.json())
 	})
-	.then(data => {
-	  callback(data);
-	})
-	.catch(error => {
-	  error_handler_function(error.message);
-	});
 }
 /**
  * @param {string} path
  * @param {Object} payload
- * @param {(arg0: Response) => void} onSuccess
+ * @param {(responseJson: any) => void} onSuccess
  */
 export function backendPost(path, payload, onSuccess) {
 	return fetch(config.backend + path, {
@@ -96,11 +100,11 @@ export function backendPost(path, payload, onSuccess) {
 			'Content-Type': 'application/json',
 		},
 		body: JSON.stringify(payload),
-	}).then(function (response) {
+	}).then(async response => {
 		if (!response.ok) {
-			throw new Error('Post error.' + response.text())
+			throw new Error('Post error.' + await response.text())
 		}
-		onSuccess(response)
+		onSuccess(await response.json())
 	})
 }
 

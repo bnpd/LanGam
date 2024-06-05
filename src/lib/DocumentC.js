@@ -8,8 +8,9 @@ class DocumentC {
      * @param {string} topic
      * @param {number} difficulty
      * @param {any} question
+     * @param {string} img
      */
-    constructor(docId, title, text, content_type, topic, difficulty, question) {
+    constructor(docId, title, text, content_type, topic, difficulty, question, img) {
         this.docId = docId
         this.title = title;
         this.text = text;
@@ -17,14 +18,15 @@ class DocumentC {
         this.topic = topic;
         this.difficulty = difficulty;
         this.question = question;
+        this.img = img;
     }
 
     /**
-     * @param {{ docId: number; title: any; text: any; content_type: string; topic: string; difficulty: number; question: any; }} json
+     * @param {{ docId: number; title: any; text: any; content_type: string; topic: string; difficulty: number; question: any; img: string; }} json
      */
     static fromJson(json) {
-        const { docId, title, text, content_type, topic, difficulty, question } = json;
-        return new DocumentC(docId, title, text, content_type, topic, difficulty, question);
+        const { docId, title, text, content_type, topic, difficulty, question, img } = json;
+        return new DocumentC(docId, title, text, content_type, topic, difficulty, question, img);
     }
 
 
