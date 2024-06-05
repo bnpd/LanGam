@@ -1,53 +1,7 @@
-/* TODO: put all common CSS in one file */
-
-/* Internal links (which do not start with https): style like button */
-nav {
-    position: fixed;
-    right: 15px;
-    top: 15px;
-}
-a:not([href^="http"]) {
-    display: inline-block;
-    box-shadow: 0 2px 4px 0 rgba(0,0,0,0.2);
-    color: darkturquoise;
-    border: 3px solid skyblue;
-    box-sizing: border-box;
-    height: 30px;
-    width: fit-content;
-    padding: 0 5px;
-    margin: 10px;
-    border-radius: 5px;
-    font-weight: bold;
-    line-height: 25px;
-    text-align: center;
-    text-decoration: none;
-    margin:auto;
-}
-a:not([href^="http"]):hover {
-    background-color: skyblue;
-    color: aliceblue;
-}
-a:not([href^="http"]):active {
-  box-shadow: 0 12px 16px 0 rgba(0,0,0,0.3), 0 17px 50px 0 rgba(0,0,0,0.25);
-}
-
-
 #divLeft, #divRight {
     width: 50%;
     float: left;
-}
-
-h1, h2, h3 {
-    color: skyblue;
-    width: 100%;
     text-align: center;
-    background-color: aliceblue;
-    height: 45px;
-    line-height: 45px;
-}
-
-h1 {
-  margin-top: 0;
 }
 
 ul {
@@ -58,20 +12,20 @@ ul {
     list-style: none;
     color: rgb(0, 70, 70);
     font-size: large;
-    text-align: center;
+    overflow-x: auto;
 }
 
 li:hover {
-    background-color: aliceblue;
+    background-color: lightblue;
 }
 
 #ulSearchList > li:hover::after {
-    content: 'learn ➡';
+    content: 'remove ➡';
     right: 10px;
 }
 
 #ulKnownList > li:not(.noUnlearn):hover::before {
-    content: '⬅ unlearn';
+    content: '⬅ add';
     left: 10px;
 }
 
@@ -82,204 +36,9 @@ li:hover {
 }
 
 
-input[type=text], input[type=number], select {
-    padding: 12px 20px;
-    height: 45px;
-    margin: 8px 0;
-    box-sizing: border-box;
-    border: none;
-    border-bottom: 3px solid skyblue;
-    border-radius: 5px 0 0 5px;
-    transform: translateY(-2px);
-}
-
-
-/* Button and file input*/
-button, input[type=file] {
-    box-shadow: 0 2px 4px 0 rgba(0,0,0,0.2);
-    color: darkturquoise;
-    border: 3px solid skyblue;
-    margin: 10px;
-    border-radius: 5px;
-    font-weight: bold;
-    background-color: transparent;
-}
-
-button:hover {
-  background-color: skyblue;
-  color: aliceblue;
-}
-
-button:active {
-  box-shadow: 0 5px 8px 0 rgba(0,0,0,0.3), 0 7px 10px 0 rgba(0,0,0,0.25);
-}
-
-input[type=file]:hover {
-    background-color: skyblue;
-}
-
-input[type=file]::before {
-    color: darkturquoise;
-}
-
-input[type=file]:hover::before {
-    color: white;
-}
-
-input[type=file]:active {
-    box-shadow: 0 12px 16px 0 rgba(0,0,0,0.3), 0 17px 50px 0 rgba(0,0,0,0.25);
-}
-
-
-/* File input*/
-
-#iImportKnownList {
-    width: 58px;
-    height: 30px;
-    line-height: 25px;
-    padding: 0 5px;
-    box-sizing: border-box;
-    margin: 0;
-    transform: translateY(-3px);
-    color: transparent; /* Hide old label (x files selected) */
-}
-
-input[type=file]::-webkit-file-upload-button {
-    display: none; /* Hide browser's ugly default upload button */
-}
-#iImportKnownList::before {
-    content: "From file"; /* Show new label */
-    /* Fix non-centered label */
-    position: relative;
-    top: -1px;
-}
-
-#divImportMenu {
-    display: none;
-    position: absolute;
-    right: 0;
-    line-height: 15px;
-    z-index: 50;
-}
-
-#divImportMenu button {
-    margin-top: 5px;
-    margin-bottom: 5px;
-}
-
-h1 button, #btnSubmitPasteKnownList {
-    height: 30px;
-    transform: translateY(-4px);
-}
-
-.background-blur {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    z-index: 59;
-    width: 100vw;
-    height: 100vh;
-    backdrop-filter: blur(5px);
-}
-
-.dialog-inner {
-    z-index: 60;
-    position: fixed;
-    height: 80vh;
-    width: 50vw;
-    left: 25vw;
-    right: 25vw;
-    top: 10vh;
-    bottom: 10vh;
-    background-color: aliceblue;
-    border-radius: 20px;
-    border-width: 2px;
-    border-color: darkgray;
-    border-style: solid;
-    box-shadow: darkgrey 4px 5px 10px 0px;
-}
-
-#btnCloseDialogPasteKnownList {
-    position: absolute;
-    right: 5px;
-    border-radius: 20px;
-}
-
-#iPasteKnownList {
-    width: 90%;
-    height: 82%;
-}
-
-#iPasteKnownList, #btnSubmitPasteKnownList {
-    display: block;
-    margin: auto;
-    margin-top: 10px;
-}
-
-#btnExportKnownList, #btnToggleImportMenu {
-    margin-right: 0;
-}
-
-#btnLearnMultiple {
-    border-left: 0;
-    margin-left: 0;
-    height: 45px;
-    border-radius: 0 5px 5px 0;
-}
-
-label {
-    width: fit-content;
-    font-size: large;
-    display: inline-block;
-}
-
-#divMultiLearn {
-    background-color: aliceblue;
-    position: fixed;
-    z-index: 5;
-    bottom: 0;
-    left: 50%;
-    transform: translateX(-50%);
-    display: block;
-    border-radius: 15px 15px 0 0;
-    padding: 5px 5px 5px 15px;
-}
-
-/* Tooltip container */
-.tooltip, .tooltip-onfocus {
-    position: relative;
-}
-
-/* Tooltip text */
-.tooltiptext {
-    visibility: hidden;
-    width: 520px;
-    background-color: darkturquoise;
-    color: white;
-    text-align: center;
-    padding: 5px 5px;
-    border-radius: 5px;
-    left: 50%;
-    margin-left: -500px;
-    position: absolute;
-    z-index: 1;
-}
-
-/* Show tooltip at mouse over tooltip container */
-.tooltip:hover .tooltiptext {
-    visibility: visible;
-    top: 115%;
-}
-
-/* Tooltip arrow */
-.tooltiptext::after {
-    content: " ";
-    position: absolute;
-    bottom: 100%;
-    left: 500px;
-    margin-left: -5px;
-    border-width: 5px;
-    border-style: solid;
-    border-color: transparent transparent darkturquoise transparent;
+/* Changes for PC*/
+@media only screen and (min-width: 768px) {
+    ul {
+        width: 30%;
+    }
 }

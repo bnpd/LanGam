@@ -66,8 +66,9 @@ p {
 }
 
 button {
-  background-color: darkblue;
-  color: white;
+  background-color: aliceblue;
+  color: darkblue;
+  border-color: aliceblue;
   height: 40px;
   line-height: 34px;
   margin-top: 10px;
@@ -79,12 +80,10 @@ button {
   pointer-events: none;
 }
 
-#btnInstall,
-#btnNotifications,
-#btnSound {
-  background-color: aliceblue;
-  color: darkblue;
-  border-color: aliceblue;
+#answbtn {
+  background-color: darkblue;
+  color: white;
+  border-color: darkslategray;
 }
 
 #pNotifications {
@@ -209,9 +208,5 @@ button {
   body {
     width: 60vw;
     margin: 20px auto;
-  }
-
-  .columnsOnDesktop {
-    flex-direction: row
   }
 }

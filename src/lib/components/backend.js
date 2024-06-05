@@ -65,21 +65,24 @@ export async function getTask(user, docId){
  * @param {{ (...data: any[]): void; }} error_handler_function
  */
 export function backendGet(path, callback, error_handler_function) {
-	var xhr = new XMLHttpRequest()
-	xhr.onreadystatechange = function xhrHandler() {
-		if (xhr.readyState != 4) {
-			return
-		}
-		if (xhr.status == 200) {
-			callback(xhr.responseText)
-		} else if (xhr.responseText.includes('User does not exist')) {
-			error_handler_function('Sorry, user seems not to exist 😶‍🌫')
+	fetch(config.backend + path)
+	.then(async response => {
+	  if (!response.ok) {
+		const text = await response.text();
+		if (text.includes('User does not exist')) {
+			error_handler_function('Sorry, user seems not to exist 😶‍🌫');
 		} else {
-			error_handler_function(xhr.responseText)
+			error_handler_function(text);
 		}
-	}
-	xhr.open("GET", config.backend + path, true)
-	xhr.send(null)
+	  }
+	  return response.text();
+	})
+	.then(data => {
+	  callback(data);
+	})
+	.catch(error => {
+	  error_handler_function(error.message);
+	});
 }
 /**
  * @param {string} path

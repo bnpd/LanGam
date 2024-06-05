@@ -3,7 +3,7 @@
     import ReaderComponent from './ReaderComponent.svelte';
     import WebPushSubscription from './WebPushSubscription.svelte';
     import { backendPost, getTask } from './backend';
-    import { user, nativeLang, targetLang, isSoundOn, ttsSpeed, currentTask, reviews, failedWords, reviewDocIds as reviewDocIds } from '../stores';
+    import { user, nativeLang, targetLang, isSoundOn, ttsSpeed, currentTask, reviews, failedWords, reviewDocIds } from '$lib/stores';
 	import { goto } from '$app/navigation';
 
     const answbtnTxtWhilePrompting = "Show solution"
@@ -162,5 +162,5 @@
 <WebPushSubscription user={$user}/>
 <button id="btnSound" on:click={onSoundClick}>{$isSoundOn ? '🔊' : '🔈'}</button>
 <nav>
-    <a href="/lists" id="aManageLists">See your vocabulary</a>
+    <button on:click={()=>goto("/lists")} id="aManageLists">See your vocabulary</button>
 </nav>
