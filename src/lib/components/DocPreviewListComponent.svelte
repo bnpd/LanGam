@@ -4,10 +4,12 @@
 	import { user } from "$lib/stores";
 	import DocPreviewComponent from "./DocPreviewComponent.svelte";
 
+    export let filter = {}
+
     let docs: any[][] = []
 
     onMount(async () => {
-        docs = await getTopTasks($user, {topic: 'Adventure'})
+        docs = await getTopTasks($user, filter)
     })
 </script>
 

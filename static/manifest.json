@@ -39,6 +39,17 @@
   ],
   "shortcuts": [
     {
+      "name": "Catalog",
+      "short_name": "Explore All Texts",
+      "description": "Explore All Texts and Categories",
+      "icons": [{
+        "src": "/images/icons/icon-96x96.png",
+        "sizes": "96x96",
+        "type": "image/png"
+      }],
+      "url": "/catalog"
+    },
+    {
       "name": "Admin",
       "short_name": "Admin",
       "description": "Admin View",

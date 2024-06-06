@@ -6,7 +6,9 @@ export let docId: number;
 export let doc: DocumentC;
 </script>
 
-<h4>{doc.title.text}</h4>
-{#if doc.img}
-    <img src={doc.img} alt={doc.title.text + "Image"}>
-{/if}
+<a href={"/?doc="+docId}>
+    <h4>{doc.title.text}</h4>
+    {#if doc.img}
+        <img src={doc.img} alt={doc.title.text + "Image"}>
+    {/if}
+</a>
