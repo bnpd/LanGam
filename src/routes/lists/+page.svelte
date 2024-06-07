@@ -49,6 +49,11 @@ function reloadLists() {
 }
 </script>
 
+<svelte:head>
+	<title>Your Vocabulary - Automated Language Learning AI</title>
+  <meta name="description" content="Overview of your learned words - learn languages the fun way: talk about texts with AI.">
+</svelte:head>
+
 <div id="divLeft">
   <button id="btnExportSearchList" on:click={() => exportObject(scheduledTokens, 'Spaced Repetition Words')}>Export</button>
   <h1>
