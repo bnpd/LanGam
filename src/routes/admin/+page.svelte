@@ -50,11 +50,11 @@
 
 <form class="boxBig" on:submit|preventDefault={onSubmit}>
   <h1>Admin View</h1>
-  <textarea name="title" placeholder="Paste your text here..." on:input={onTitleInput} bind:value={title}></textarea>
-  <textarea name="text" rows="20" placeholder="" bind:value={body}></textarea>
+  <textarea name="title" placeholder="Paste your text here..." on:input={onTitleInput} bind:value={title} required></textarea>
+  <textarea name="text" rows="20" placeholder="" bind:value={body} required></textarea>
   <textarea name="question" placeholder="" bind:value={question}></textarea>
   <input type="text" name="topic" placeholder="Topic">
-  <input type="text" name="type" placeholder="Type">
+  <input type="text" name="type" placeholder="Type" required>
   <input type="text" name="difficulty" placeholder="Difficulty">
   <input type="submit">
 </form>
