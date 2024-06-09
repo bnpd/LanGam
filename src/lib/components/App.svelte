@@ -18,7 +18,7 @@
     var voice: SpeechSynthesisVoice
     var phase = "prompting"; // or "solutionShown"
     let toast: string | undefined;
-    let urldoc: string;
+    let urldoc: string | null;
 
     onMount(async () => {
         let urlparams = new URLSearchParams(window.location.search)
@@ -48,7 +48,7 @@
         
         goto('/'); // remove URL param docId since we are no longer in that document (otherwise would've been param to this function)
                 
-        if ($failedWords.size > 0) {
+        if ($failedWords.size > 0) {            
             // we have a saved state from last session to restore
             await nextTask($currentTask?.docId);
 
@@ -56,7 +56,8 @@
             let targetFailedWords = structuredClone($failedWords);
             $failedWords.clear()
             for (const word of targetFailedWords) { // mark words that were marked in last session
-                for (const el of document.getElementsByClassName('span-'+word)) {
+                let el = document.getElementsByClassName('span-'+word)[0] // we only click the first one, it will mark all of them
+                if (el) {
                     (el as HTMLSpanElement).click()
                 }
             }
