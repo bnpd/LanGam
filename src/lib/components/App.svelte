@@ -6,14 +6,19 @@
     import { user, nativeLang, targetLang, isSoundOn, ttsSpeed, currentTask, reviews, failedWords, reviewDocIds } from '$lib/stores';
 	import { goto } from '$app/navigation';
 	import Install from './Install.svelte';
+	import Toast from './Toast.svelte';
 
     const answbtnTxtWhilePrompting = "Show solution"
     const answbtnTxtWhileSolutionShown = "Next question"
+    const TOAST_REDIRECTED_SAVED_TASK = "Your selected text has been queued cause you have a saved text."
+    const TEXT_REJECT_SAVED_TASK = "Discard saved"
 
     let loading = true
     let solutionText = ''
     var voice: SpeechSynthesisVoice
     var phase = "prompting"; // or "solutionShown"
+    let toast: string | undefined;
+    let urldoc: string;
 
     onMount(async () => {
         let urlparams = new URLSearchParams(window.location.search)
@@ -39,9 +44,11 @@
         }
 
         // load task (restore saved state or next due task or given by doc url parameter)
-        let urldoc = urlparams.get('doc') || urlparams.get('queuedDoc');
+        urldoc = urlparams.get('doc') || urlparams.get('queuedDoc');
+        
         goto('/'); // remove URL param docId since we are no longer in that document (otherwise would've been param to this function)
-        if ($reviews.length > 0) {
+                
+        if ($failedWords.size > 0) {
             // we have a saved state from last session to restore
             await nextTask($currentTask?.docId);
 
@@ -56,6 +63,7 @@
 
             if (urldoc && urldoc != $currentTask?.docId) {
                 goto('/?queuedDoc=' + urldoc); //= urlparams.set('queuedDoc', urldoc)
+                toast = TOAST_REDIRECTED_SAVED_TASK;
             }			
         } else {
             nextTask(urldoc); 
@@ -93,7 +101,7 @@
 			loading = true
 			sendPendingReviews()
 			.then(async () => {
-				nextTask(new URLSearchParams(window.location.search).get('queuedDoc'))
+				nextTask(urldoc)
 				goto('/')
 			})
 		}
@@ -114,7 +122,7 @@
      */
     function sendPendingReviews(){
         return new Promise<void>((resolve, _reject) => {
-            if ($currentTask) {
+            if ($currentTask) {                
                 $reviews.push($failedWords)
                 $reviewDocIds.push($currentTask.docId)
                 $failedWords.clear()
@@ -163,3 +171,7 @@
 <button on:click={()=>goto("/lists")} id="aManageLists">See your vocabulary</button>
 <WebPushSubscription/>
 <button id="btnSound" on:click={onSoundClick}>{$isSoundOn ? '🔊' : '🔈'}</button>
+<Toast message={toast} textReject={TEXT_REJECT_SAVED_TASK} onReject={() => {
+    $failedWords = [];
+    location.reload();
+}}/>

@@ -84,7 +84,7 @@ export function backendGet(path, onSuccess) {
 	fetch(config.backend + path)
 	.then(async response => {
 	  if (!response.ok) {
-		throw new Error('Post error.' + await response.text())
+		throw new Error('Get error.' + await response.text())
 	  }
 	  onSuccess(await response.json())
 	})
