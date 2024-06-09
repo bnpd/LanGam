@@ -14,8 +14,9 @@ function EndpointGetVocab(user) {return '/vocab/'+user;}
 function EndpointGetTask(user, docId) {return `/task/${user}/${docId}`;}
 /**
  * @param {string} user
+ * @param {string} filter
  */
-function EndpointGetTopTasks(user) {return `/top_tasks/${user}`;}
+function EndpointGetTopTasks(user, filter) {return `/top_tasks/${user}?q=${filter}`;}
 /**
  * @param {string} user
  */
@@ -62,7 +63,7 @@ export async function getTask(user, docId){
  */
 export async function getTopTasks(user, query){
 	return new Promise((resolve, reject) => {
-		backendPost(EndpointGetTopTasks(user), query, responseJson => {
+		backendGet(EndpointGetTopTasks(user, JSON.stringify(query)), responseJson => {
 			try { 
 				resolve(responseJson)
 			} catch (error) {
