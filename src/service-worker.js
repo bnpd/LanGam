@@ -1,5 +1,4 @@
 /// <reference types="@sveltejs/kit" />
-import { goto } from '$app/navigation';
 import { build, files, version } from '$service-worker';
 import config from './config.js';
 
@@ -39,7 +38,7 @@ self.addEventListener('fetch', (event) => {
 	if (
 		event.request.method !== 'GET'
 		|| url.origin === config.backend
-	) return;
+	) {console.log('bail: ' + event.request.method + url.origin); return};
 
 	async function respond() {
 		const cache = await caches.open(CACHE);
@@ -76,9 +75,10 @@ self.addEventListener('fetch', (event) => {
 				return response;
 			}
 
-			// if there's no cache, then just error out
+			// if there's no cache, then just show offline page
 			// as there is nothing we can do to respond to this request
-			goto('/catalog'); //TODO: move toast saying that you are offline to this component and filter catalog to only show cached documents
+			console.log('Serving offline page');
+			return cache.match('offline.html') 
 		}
 	}
 

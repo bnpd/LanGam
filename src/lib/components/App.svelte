@@ -120,7 +120,7 @@
 			}, _offline => {
                 toast = "You are offline. Response will be sent later."
                 setTimeout(() => {
-                    goto('/catalog')                    
+                    goto('/catalog') //TODO: filter catalog to only show cached documents      
                 }, 1000);
             })
 		}
