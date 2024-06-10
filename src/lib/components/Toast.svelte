@@ -7,6 +7,8 @@
 
     function hide() {
         message=undefined
+        onReject=undefined
+        textReject=undefined
     }
 </script>
 

@@ -36,12 +36,18 @@ function createPersistentStore(key: string, initialValue: any) {
 
     if (typeof localStorage !== 'undefined') {
         if (initialValue instanceof Set) {
-            store.subscribe((value) => {
-                localStorage.setItem(key, JSON.stringify([...value]));
+            store.subscribe((value) => {                
+                localStorage.setItem(key, JSON.stringify(Array.from(value)));
             });            
         } else {
             store.subscribe((value) => {
-                localStorage.setItem(key, JSON.stringify(value));
+                console.log(value);
+                if (value instanceof Array && value.length > 0 && value[0] instanceof Set) {
+                    console.log(value.map(el => Array.from(el)));                    
+                    localStorage.setItem(key, JSON.stringify(value.map(el => Array.from(el)))); 
+                } else {
+                    localStorage.setItem(key, JSON.stringify(value));
+                }
             });
         }
     }

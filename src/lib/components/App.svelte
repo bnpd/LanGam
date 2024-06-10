@@ -18,7 +18,8 @@
     var voice: SpeechSynthesisVoice
     var phase = "prompting"; // or "solutionShown"
     let toast: string | undefined;
-    let urldoc: string | null;
+    let textRejectToast: string | undefined;
+    
 
     onMount(async () => {
         let urlparams = new URLSearchParams(window.location.search)
@@ -44,7 +45,7 @@
         }
 
         // load task (restore saved state or next due task or given by doc url parameter)
-        urldoc = urlparams.get('doc') || urlparams.get('queuedDoc');
+        let urldoc = urlparams.get('doc') || urlparams.get('queuedDoc');
         
         goto('/'); // remove URL param docId since we are no longer in that document (otherwise would've been param to this function)
                 
@@ -65,6 +66,7 @@
             if (urldoc && urldoc != $currentTask?.docId) {
                 goto('/?queuedDoc=' + urldoc); //= urlparams.set('queuedDoc', urldoc)
                 toast = TOAST_REDIRECTED_SAVED_TASK;
+                textRejectToast = TEXT_REJECT_SAVED_TASK
             }			
         } else {
             nextTask(urldoc); 
@@ -100,11 +102,27 @@
 
 			solutionText = ''
 			loading = true
+
+            if ($currentTask) {
+                $reviews.push(structuredClone($failedWords))
+                $reviews = $reviews
+                $reviewDocIds.push($currentTask.docId)
+                $reviewDocIds = $reviewDocIds
+                $failedWords.clear()
+                $failedWords = $failedWords
+                $currentTask = undefined
+            }         
+
 			sendPendingReviews()
-			.then(async () => {
-				nextTask(urldoc)
+			.then(async _done => {        
+				nextTask(getUrlDoc())
 				goto('/')
-			})
+			}, _offline => {
+                toast = "You are offline. Response will be sent later."
+                setTimeout(() => {
+                    goto('/catalog')                    
+                }, 1000);
+            })
 		}
     }
 
@@ -117,31 +135,34 @@
 		}
     }
 
-    /**
-     * Send user marked words to backend, by dequeuing them from $reviews
-     * @returns {Promise<unknown>} Promise that is resolved when send was successful
-     */
-    function sendPendingReviews(){
-        return new Promise<void>((resolve, _reject) => {
-            if ($currentTask) {                
-                $reviews.push($failedWords)
-                $reviewDocIds.push($currentTask.docId)
-                $failedWords.clear()
-                $currentTask = undefined
-            }
+    function getUrlDoc() {
+        const urlparams = new URLSearchParams(window.location.search) 
+        return urlparams.get('doc') || urlparams.get('queuedDoc')
+    }
 
-            if ($reviews?.length == 0) {
-                return resolve()
+    /**
+     * Send queued reviews to backend
+     * @returns {Promise<unknown>} Promise that is resolved when send was successful or rejected if offline
+     */
+    async function sendPendingReviews(){
+        const times = $reviewDocIds.length
+        for (let i = 0; i < times; i++) {
+            const json = {docId: $reviewDocIds[0], failedTokens: Array.from($reviews[0])}
+            console.log(JSON.stringify(json));
+            try {
+                await backendPost('/review/'+$user, json)                
+            } catch (offlineError) {
+                return Promise.reject(offlineError)
             }
-            const json = {docId: $reviewDocIds[0], failedTokens: [...$reviews[0]]}
-            backendPost('/review/'+$user, json, () => {
-                // onSuccessfulPost, dequeue and go on to next 
-                $reviews.shift()
-                $reviewDocIds.shift()
-                sendPendingReviews().then(resolve)
-            })
-            // TODO: on reject or timeout, retry regularly and on next app open
-        })
+            // onSuccessfulPost, dequeue
+            console.log('SHOULDNT GET HWERE WHEN OFFLINE');
+            
+            $reviews.shift()
+            $reviews = $reviews
+            $reviewDocIds.shift()
+            $reviewDocIds = $reviewDocIds 
+        }
+        return 
     }
 
 
@@ -172,7 +193,7 @@
 <button on:click={()=>goto("/lists")} id="aManageLists">See your vocabulary</button>
 <WebPushSubscription/>
 <button id="btnSound" on:click={onSoundClick}>{$isSoundOn ? '🔊' : '🔈'}</button>
-<Toast message={toast} textReject={TEXT_REJECT_SAVED_TASK} onReject={() => {
+<Toast message={toast} textReject={textRejectToast} onReject={() => {
     $failedWords = [];
     location.reload();
 }}/>

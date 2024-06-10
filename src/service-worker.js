@@ -1,4 +1,5 @@
 /// <reference types="@sveltejs/kit" />
+import { goto } from '$app/navigation';
 import { build, files, version } from '$service-worker';
 import config from './config.js';
 
@@ -34,7 +35,6 @@ self.addEventListener('activate', (event) => {
 
 self.addEventListener('fetch', (event) => {
 	const url = new URL(event.request.url);
-	console.log(url.host);
 	// ignore POST requests etc
 	if (
 		event.request.method !== 'GET'
@@ -78,7 +78,7 @@ self.addEventListener('fetch', (event) => {
 
 			// if there's no cache, then just error out
 			// as there is nothing we can do to respond to this request
-			throw err;
+			goto('/catalog'); //TODO: move toast saying that you are offline to this component and filter catalog to only show cached documents
 		}
 	}
 

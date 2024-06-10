@@ -92,21 +92,21 @@ export function backendGet(path, onSuccess) {
 /**
  * @param {string} path
  * @param {Object} payload
- * @param {(responseJson: any) => void} onSuccess
  */
-export function backendPost(path, payload, onSuccess) {
-	return fetch(config.backend + path, {
-		method: 'POST',
-		headers: {
-			'Content-Type': 'application/json',
-		},
-		body: JSON.stringify(payload),
-	}).then(async response => {
-		if (!response.ok) {
-			throw new Error('Post error.' + await response.text())
-		}
-		onSuccess(await response.json())
-	})
+export async function backendPost(path, payload) {
+    const response = await fetch(config.backend + path, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+    });
+
+    if (!response.ok) {
+        throw new Error('Post error: ' + await response.text());
+    }
+
+    return await response.json();
 }
 
 // Push Notifications

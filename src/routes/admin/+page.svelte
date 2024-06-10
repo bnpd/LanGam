@@ -8,25 +8,24 @@
   let body = '';
   let question = '';
 
-  function onSubmit(event: SubmitEvent) {
+  async function onSubmit(event: SubmitEvent) {
     const formDataEntries = new FormData(event.target as HTMLFormElement);
     const payload = {};
     for (const [key, value] of formDataEntries.entries()) {
       payload[key] = value as string;
     }
     
-    backendPost('/new_document/'+$targetLang, payload, async (json: { csv: string; docId: string; }) => {
-      var link = document.createElement('a');
-      link.setAttribute('href', 'data:text/csv;charset=utf-8,' + encodeURIComponent(json.csv));
-      link.setAttribute('download', "new_document");
-      link.hidden = true;
-      document.body.appendChild(link);
-      link.click();            
-      document.body.removeChild(link);
-      
-      // display that document now
-      goto('/?doc=' + json.docId)
-    });
+    let json = await backendPost('/new_document/'+$targetLang, payload)
+    var link = document.createElement('a');
+    link.setAttribute('href', 'data:text/csv;charset=utf-8,' + encodeURIComponent(json.csv));
+    link.setAttribute('download', "new_document");
+    link.hidden = true;
+    document.body.appendChild(link);
+    link.click();            
+    document.body.removeChild(link);
+    
+    // display that document now
+    goto('/?doc=' + json.docId)
   }
 
   function onTitleInput() {    
