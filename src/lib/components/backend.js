@@ -28,16 +28,13 @@ function EndpointGetDueTask(user) {return `/due_task/${user}`;}
  * @param {string} user
  */
 export async function getVocab(user){
-	return new Promise((resolve, reject) => {
-		backendGet(EndpointGetVocab(user), responseJson => {
-			try { 
-				resolve([responseJson['scheduled'], responseJson['all_forms']])
-			} catch (error) {
-				console.error(error)
-				reject(error)
-			}
-		})		
-	})
+	try { 
+		const responseJson = await backendGet(EndpointGetVocab(user))
+		return [responseJson['scheduled'], responseJson['all_forms']]
+	} catch (error) {
+		console.error(error)
+		return Promise.reject(error)
+	}
 }
 
 /**
@@ -45,16 +42,13 @@ export async function getVocab(user){
  * @param {string | null} docId
  */
 export async function getTask(user, docId){
-	return new Promise((resolve, reject) => {
-		backendGet(docId ? EndpointGetTask(user, docId) : EndpointGetDueTask(user), responseJson => {
-			try { 
-				resolve(DocumentC.fromJson(responseJson))
-			} catch (error) {
-				console.error(error)
-				reject(error)
-			}
-		})
-	})
+	try { 
+		const responseJson = await backendGet(docId ? EndpointGetTask(user, docId) : EndpointGetDueTask(user)) 
+		return DocumentC.fromJson(responseJson)
+	} catch (error) {
+		console.error(error)
+		return Promise.reject(error)
+	}
 }
 
 /**
@@ -62,33 +56,23 @@ export async function getTask(user, docId){
  * @param {any} query
  */
 export async function getTopTasks(user, query){
-	return new Promise((resolve, reject) => {
-		backendGet(EndpointGetTopTasks(user, JSON.stringify(query)), responseJson => {
-			try { 
-				resolve(responseJson)
-			} catch (error) {
-				console.error(error)
-				reject(error)
-			}
-		})
-	})
+	return backendGet(EndpointGetTopTasks(user, JSON.stringify(query)))
 }
 
 
 // lowlevel backend communication
 /**
  * @param {string} path
- * @param {{ (responseJson: any): void; }} onSuccess
  */
-export function backendGet(path, onSuccess) {
-	fetch(config.backend + path)
-	.then(async response => {
-	  if (!response.ok) {
+export async function backendGet(path) {
+	const response = await fetch(config.backend + path)
+	if (!response.ok) {
 		throw new Error('Get error.' + await response.text())
-	  }
-	  onSuccess(await response.json())
-	})
+	}
+	return await response.json()
 }
+
+
 /**
  * @param {string} path
  * @param {Object} payload
@@ -105,7 +89,6 @@ export async function backendPost(path, payload) {
     if (!response.ok) {
         throw new Error('Post error: ' + await response.text());
     }
-
     return await response.json();
 }
 

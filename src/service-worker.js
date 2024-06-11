@@ -16,6 +16,7 @@ self.addEventListener('install', (event) => {
 	async function addFilesToCache() {
 		const cache = await caches.open(CACHE);
 		await cache.addAll(ASSETS);
+		console.log(ASSETS);
 	}
 
 	event.waitUntil(addFilesToCache());
@@ -38,7 +39,7 @@ self.addEventListener('fetch', (event) => {
 	if (
 		event.request.method !== 'GET'
 		|| url.origin === config.backend
-	) {console.log('bail: ' + event.request.method + url.origin); return};
+	) return;
 
 	async function respond() {
 		const cache = await caches.open(CACHE);
@@ -78,7 +79,8 @@ self.addEventListener('fetch', (event) => {
 			// if there's no cache, then just show offline page
 			// as there is nothing we can do to respond to this request
 			console.log('Serving offline page');
-			return cache.match('offline.html') 
+			console.log(await cache.keys());
+			return await cache.match('/offline.html')
 		}
 	}
 
