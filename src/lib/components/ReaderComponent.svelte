@@ -14,8 +14,8 @@
 
   export let phase: string
   export let trySpeak: Function
-  export let solutionText
-  export let taskVisible
+  export let solutionText: string
+  export let taskVisible: boolean
 
 
   $: if($currentTask && divTask && solutionField) setTask($currentTask)
@@ -48,12 +48,11 @@
    * Set a document as the currently shown task
    * @param {DocumentC} doc Document cnotaining the task
    */
-  export function setTask(doc: DocumentC) {    
+  function setTask(doc: DocumentC) {    
     divTask.scrollTop = 0
     solutionField.scrollTop = 0
 
     divTask.textContent = '' // delete previous task
-    divTask.style.visibility="visible"
     phase = "prompting"
 
     let space = new Token(' ', undefined, -1)

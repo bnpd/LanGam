@@ -47,7 +47,7 @@
         // load task (restore saved state or next due task or given by doc url parameter)
         let urldoc = urlparams.get('doc') || urlparams.get('queuedDoc');
         
-        goto('/'); // remove URL param docId since we are no longer in that document (otherwise would've been param to this function)
+        goto('/', {replaceState: true}); // remove URL param docId since we are no longer in that document (otherwise would've been param to this function)
                 
         if ($failedWords.size > 0) {            
             // we have a saved state from last session to restore
@@ -64,7 +64,7 @@
             }
 
             if (urldoc && urldoc != $currentTask?.docId) {
-                goto('/?queuedDoc=' + urldoc); //= urlparams.set('queuedDoc', urldoc)
+                goto('/?queuedDoc=' + urldoc, {replaceState: true}); //= urlparams.set('queuedDoc', urldoc)
                 toast = TOAST_REDIRECTED_SAVED_TASK;
                 textRejectToast = TEXT_REJECT_SAVED_TASK
             }			
@@ -116,12 +116,12 @@
 			sendPendingReviews()
 			.then(async _done => {        
 				nextTask(getUrlDoc())
-				goto('/')
+				goto('/', {replaceState: true})
 			}, _offline => {
-                toast = "You are offline. Response will be sent later."
+                toast = "Offline. Your data was saved."
                 setTimeout(() => {
                     goto('/catalog') //TODO: filter catalog to only show cached documents      
-                }, 1000);
+                }, 1500);
             })
 		}
     }
@@ -167,11 +167,17 @@
 
 
     async function nextTask(docId: string | null){
-        let doc = await getTask($user, docId)
-        loading = false
+        let doc = await getTask($user, docId).catch(_offline => {
+            toast = "Text has not been downloaded offline. Going to catalog."
+            setTimeout(() => {
+                goto('/catalog') //TODO: filter catalog to only show cached documents      
+            }, 2000);
+            return undefined
+        })
+        if (doc) loading = false;
         phase = "prompting"
         $currentTask = doc
-        solutionText = doc.title.translations[$nativeLang] + '\n\n' + doc.text.translations[$nativeLang]
+        solutionText = doc?.title?.translations[$nativeLang] + '\n\n' + doc?.text?.translations[$nativeLang]
     }
 
 </script>
