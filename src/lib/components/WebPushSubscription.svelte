@@ -15,6 +15,6 @@ onMount(() => {
 
 {#if notificationPermission === 'default'}
   <button id="btnNotifications" on:click={() => requestNotifications($user).then(() => {notificationPermission = Notification.permission})}>
-    Set a reminder
+    Reminder
   </button>
 {/if}

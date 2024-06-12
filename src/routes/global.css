@@ -124,6 +124,35 @@ input[type="text"] {
   transform: scaleX(1.5) scaleY(2);
 }
 
+#navbar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    display: flex;
+}
+
+#navbar button {
+  width: 1px;
+  flex-grow: 1;
+}
+
+#navbar button {
+  width: 1px;
+  border-radius: 5px;
+  flex-grow: 1;
+}
+
+#navbar button:first-child {
+  border-top-left-radius: 20px;
+  border-bottom-left-radius: 20px;
+}
+
+#navbar button:last-child {
+  border-top-right-radius: 20px;
+  border-bottom-right-radius: 20px;
+}
+
 .hidden {
   visibility: hidden;
 }

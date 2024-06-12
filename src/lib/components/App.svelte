@@ -7,6 +7,7 @@
 	import { goto } from '$app/navigation';
 	import Install from './Install.svelte';
 	import Toast from './Toast.svelte';
+	import NavbarComponent from './NavbarComponent.svelte';
 
     const answbtnTxtWhilePrompting = "Show solution"
     const answbtnTxtWhileSolutionShown = "Next question"
@@ -188,7 +189,7 @@
 <!-- Main Application -->
 <h1>Automated Language Learning AI</h1>
 <ReaderComponent phase={phase} trySpeak={trySpeak} solutionText={solutionText} taskVisible={!loading}/>
-<Install/>
+<button id="btnSound" on:click={onSoundClick}>{$isSoundOn ? '🔊' : '🔈'}</button>
 <button id="answbtn" class:loading on:click={onAnswbtnClick}>
     {#if phase === 'prompting'}
         {answbtnTxtWhilePrompting}
@@ -196,9 +197,12 @@
         {answbtnTxtWhileSolutionShown}
     {/if}
 </button>
-<button on:click={()=>goto("/lists")} id="aManageLists">See your vocabulary</button>
-<WebPushSubscription/>
-<button id="btnSound" on:click={onSoundClick}>{$isSoundOn ? '🔊' : '🔈'}</button>
+<NavbarComponent>
+    <button on:click={()=>goto("/catalog")}>Texts</button>
+    <button on:click={()=>goto("/lists")}>My vocab</button>
+    <Install/>
+    <WebPushSubscription/>
+</NavbarComponent>
 <Toast message={toast} textReject={textRejectToast} onReject={() => {
     $failedWords = [];
     location.reload();
