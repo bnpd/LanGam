@@ -59,6 +59,23 @@ export async function getTopTasks(user, query){
 	return backendGet(EndpointGetTopTasks(user, JSON.stringify(query)))
 }
 
+/** Check whether a task is available. SHOULD ONLY BE USED WHEN OFFLINE.
+ * @param {string} user
+ * @param {string} docId
+ */
+export async function isTaskCached(user, docId){
+	try {
+		let res = await fetch(
+			config.backend + EndpointGetTask(user, docId),
+			{method:'Head',cache:'force-cache'}
+		);
+		return true
+	} catch (_) {
+		console.log(_);
+		return false
+	}
+}
+
 
 // lowlevel backend communication
 /**

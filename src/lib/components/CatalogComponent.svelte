@@ -14,8 +14,18 @@
         {title: 'Polish Culture', filter: {topic: 'Culture'}},
     ]
 
+    let offline = false
+
 </script>
 
+<svelte:window on:offline={()=>{offline = true}} on:online={()=>{offline = false}}></svelte:window>
+<h1>
+    Your
+    {#if offline}
+        Offline
+    {/if}
+    Catalog
+</h1>
 {#each filters as filter}
     <h2>{filter.title}</h2>
     <DocPreviewListComponent filter={filter.filter}/>    
