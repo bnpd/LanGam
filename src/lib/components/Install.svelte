@@ -26,4 +26,6 @@
     deferredPrompt = event;
     installButtonVisible = true;
 }} />
-<button id="btnInstall" hidden={!installButtonVisible} on:click={handleInstallClick}>Install as app</button>
+{#if installButtonVisible}
+  <button id="btnInstall" on:click={handleInstallClick}>Install as app</button>  
+{/if}
