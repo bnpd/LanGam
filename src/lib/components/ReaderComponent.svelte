@@ -103,7 +103,7 @@
     if ($failedWords?.has(token?.word)) {
       $failedWords?.delete(token.word)
     } else {
-      trySpeak(token)
+      trySpeak(token?.word)
       $failedWords?.add(token.word)
     }
     $failedWords = $failedWords
