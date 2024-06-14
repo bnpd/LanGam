@@ -9,7 +9,7 @@
 
   let solutionField: HTMLDivElement
   let divTask: HTMLDivElement
-  let taskParagraphs: Array<Array<any>> = []
+  let taskParagraphs: Array<{htmlTag: string, words: Array<any>}> = []
   let solutionParagraphs: Array<string> = []
 
   export let phase: string
@@ -63,14 +63,15 @@
         while (char_index < (start_char as unknown as number)) { // insert whitespace and newlines
           if (translatableText.text[char_index] == '\n' && paragraph.length > 0) {
             // next paragraph
-            taskParagraphs.push(paragraph)
+            const headingLevel = getHeadingLevel(paragraph)
+            taskParagraphs.push({htmlTag: headingLevel ? 'h'+headingLevel : 'p', words: paragraph.slice(headingLevel)})
             paragraph = []
           } else {
             paragraph.push(space)
           }
           char_index++
         }
-        // now we are where we should be, so can insert new span with token
+        // now our char indexes are synced
 
         let token_obj = translatableText.tokens[char_index]
         let token_word = token_obj?.word
@@ -83,7 +84,8 @@
         paragraph.push(token_obj)
         char_index += token_word.length
       }
-      taskParagraphs.push(paragraph)
+      const headingLevel = getHeadingLevel(paragraph)
+      taskParagraphs.push({htmlTag: headingLevel ? 'h'+headingLevel : 'p', words: paragraph.slice(headingLevel)})
     }
     taskParagraphs = taskParagraphs
   }
@@ -108,20 +110,32 @@
     }
     $failedWords = $failedWords
   }
+
+  function getHeadingLevel(taskWords: Array<any>) {
+    let level = 0;
+    for (let i = 0; i < Math.min(4, taskWords.length); i++) {
+      if (taskWords[i]?.word === '#') {
+        level++;
+      } else {
+        break;
+      }
+    }
+    return level;
+  }
 </script>
 
 <div class="boxBig" id="contentbox">
   <div id="divTask" class:hidden={!taskVisible} bind:this={divTask} on:scroll={() => syncScroll(divTask, solutionField)}>
-    {#each taskParagraphs as taskWords}
-    <p>
-      {#each taskWords as token}
-        <TokenComponent 
-          word={token?.word} 
-          isFailed={$failedWords?.has(token?.word)}
-          isClickable={!NON_CLICKABLE_POS_IDS.has(token?.pos)}
-          on:click={() => {onWordClick(token)}}></TokenComponent>
-      {/each}
-    </p>
+    {#each taskParagraphs as taskParagraph}
+      <svelte:element this={taskParagraph.htmlTag}>
+        {#each taskParagraph.words as token}
+          <TokenComponent 
+            word={token?.word} 
+            isFailed={$failedWords?.has(token?.word)}
+            isClickable={!NON_CLICKABLE_POS_IDS.has(token?.pos)}
+            on:click={() => {onWordClick(token)}}></TokenComponent>
+        {/each}          
+      </svelte:element>
     {/each}
   </div>
   <hr>
