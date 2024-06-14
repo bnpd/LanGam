@@ -6,7 +6,7 @@
 
     let filters: Array<{title: string; filter: {[filter: string]: string}}> = [
         {title: 'Short Stories', filter: {content_type: 'Story'}},
-        {title: 'Long Stories', filter: {content_type: 'Long Sotry'}},
+        {title: 'Long Stories', filter: {content_type: 'Long Story'}},
         {title: 'Articles', filter: {content_type: 'Article'}},
         {title: 'Adventures', filter: {topic: 'Adventure'}},
         {title: 'About Friendship', filter: {topic: 'Friendship'}},
