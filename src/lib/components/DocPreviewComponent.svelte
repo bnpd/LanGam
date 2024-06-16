@@ -18,10 +18,10 @@
         {#if available}
             <a href={"/?doc="+docId}>
                 <h4>
-                    {doc.title.text}
+                    {doc.title.text.replaceAll('#', '')}
                 </h4>
                 {#if doc.img}
-                    <img src={doc.img} alt={doc.title.text + "Image"}>
+                    <img src={doc.img} alt={doc.title.text.replaceAll('#', '') + " Image"}>
                 {/if}
             </a>
         {/if}
@@ -29,10 +29,10 @@
 {:else}
     <a href={"/?doc="+docId}>
         <h4>
-            {doc.title.text}
+            {doc.title.text.replaceAll('#', '')}
         </h4>
         {#if doc.img}
-            <img src={doc.img} alt={doc.title.text + "Image"}>
+            <img src={doc.img} alt={doc.title.text.replaceAll('#', '') + " Image"}>
         {/if}
     </a>
 {/if}
