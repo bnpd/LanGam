@@ -1,8 +1,9 @@
 <script lang="ts">
 	import { onMount } from "svelte";
-	import { getTopTasks } from "./backend";
+	import { getTask, getTopTasks } from "./backend";
 	import { user } from "$lib/stores";
 	import DocPreviewListComponent from "./DocPreviewListComponent.svelte";
+	import DocPreviewComponent from "./DocPreviewComponent.svelte";
 
     let filters: Array<{title: string; filter: {[filter: string]: string}}> = [
         {title: 'Short Stories', filter: {content_type: 'Story'}},
@@ -26,6 +27,11 @@
     {/if}
     Catalog
 </h1>
+{#await getTask($user) then doc}
+    <em>
+        Recommended: <DocPreviewComponent docId={doc.docId} doc={doc}/>
+    </em>
+{/await}
 {#each filters as filter}
     <h2>{filter.title}</h2>
     <DocPreviewListComponent filter={filter.filter}/>    

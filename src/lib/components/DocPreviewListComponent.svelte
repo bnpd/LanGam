@@ -7,12 +7,10 @@
     export let filter = {}
 
     let docs: any[][] = []
-
-    onMount(async () => {
-        docs = await getTopTasks($user, filter)
-    })
 </script>
 
-{#each docs as docId_doc}
-    <DocPreviewComponent docId={docId_doc[0]} doc={docId_doc[1]}/>    
-{/each}
+{#await getTopTasks($user, filter) then docs}
+    {#each docs as docId_doc}
+        <DocPreviewComponent docId={docId_doc[0]} doc={docId_doc[1]}/>    
+    {/each}
+{/await}
