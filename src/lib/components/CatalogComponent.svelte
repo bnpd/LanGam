@@ -4,6 +4,7 @@
 	import { user } from "$lib/stores";
 	import DocPreviewListComponent from "./DocPreviewListComponent.svelte";
 	import DocPreviewComponent from "./DocPreviewComponent.svelte";
+	import BadgeComponent from "./BadgeComponent.svelte";
 
     let filters: Array<{title: string; filter: {[filter: string]: string}}> = [
         {title: 'Short Stories', filter: {content_type: 'Story'}},
@@ -28,8 +29,10 @@
     Catalog
 </h1>
 {#await getTask($user) then doc}
-    <em>
-        Recommended: <DocPreviewComponent docId={doc.docId} doc={doc}/>
+    <em class='forceOneLine'>
+        <BadgeComponent text='AI' tooltip='This text optimizes the amount of words that are due for spaced repetition to help you keep your vocabulary fresh.'/>
+        Recommended: 
+        <DocPreviewComponent docId={doc.docId} doc={doc}/> 
     </em>
 {/await}
 {#each filters as filter}

@@ -1,0 +1,60 @@
+<script>
+    export let text;
+    export let tooltip = '';
+    let showTooltip = false;
+  
+    function toggleTooltip() {
+      showTooltip = !showTooltip;
+    }
+  </script>
+  
+  <style>
+    .badge {
+      display: inline-block;
+      padding: 0.5em 1em;
+      background-color: #007bff;
+      color: white;
+      border-radius: 1em;
+      cursor: pointer;
+      position: relative;
+      font-size: x-small;
+      transform: translateY(-0.25em);
+    }
+  
+    .tooltip {
+      visibility: hidden;
+      background-color: black;
+      color: #fff;
+      text-align: center;
+      border-radius: 0.25em;
+      padding: 0.5em;
+      position: absolute;
+      z-index: 1;
+      top: 125%; /* Position the tooltip above the badge */
+      left: 50%;
+      margin-left: -50px;
+      width: 200px;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+  
+    .badge:hover .tooltip, .badge:focus .tooltip, .badge:active .tooltip {
+      visibility: visible;
+      opacity: 1;
+    }
+  </style>
+  
+  <div 
+    class="badge" 
+    on:mouseenter={toggleTooltip} 
+    on:mouseleave={toggleTooltip}
+    on:click={toggleTooltip}
+    tabindex="0"
+  >
+    {text}
+    {#if showTooltip}
+      <div class="tooltip">
+        {tooltip}
+      </div>
+    {/if}
+  </div>
