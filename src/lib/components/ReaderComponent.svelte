@@ -49,7 +49,9 @@
    * Set a document as the currently shown task
    * @param {DocumentC} doc Document cnotaining the task
    */
-  function setTask(doc: DocumentC) {    
+  function setTask(doc: DocumentC) {   
+    console.log(doc);
+     
     docIdOfCurrentTask = $currentTask.docId // keep track of currentTask so that we don't do all the work of setTask twice
 
     divTask.scrollTop = 0

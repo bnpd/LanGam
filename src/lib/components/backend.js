@@ -39,7 +39,7 @@ export async function getVocab(user){
 
 /**
  * @param {string} user
- * @param {string} [docId]
+ * @param {string | null} [docId]
  */
 export async function getTask(user, docId){
 	try { 

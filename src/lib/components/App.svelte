@@ -8,6 +8,7 @@
 	import Install from './Install.svelte';
 	import Toast from './Toast.svelte';
 	import NavbarComponent from './NavbarComponent.svelte';
+	import ChatComponent from './ChatComponent.svelte';
 
     const answbtnTxtWhilePrompting = "Show solution"
     const answbtnTxtWhileSolutionShown = "Next question"
@@ -55,7 +56,10 @@
             await nextTask($currentTask?.docId);
 
             // click words, which will add them to $failedWords and mark them on the page
-            let targetFailedWords = structuredClone($failedWords);
+            // sound off while doing this
+            const savedSoundSetting = $isSoundOn
+            $isSoundOn = false
+            const targetFailedWords = structuredClone($failedWords);
             $failedWords.clear()
             for (const word of targetFailedWords) { // mark words that were marked in last session
                 let el = document.getElementsByClassName('span-'+word)[0] // we only click the first one, it will mark all of them
@@ -63,6 +67,7 @@
                     (el as HTMLSpanElement).click()
                 }
             }
+            $isSoundOn = savedSoundSetting
 
             if (urldoc && urldoc != $currentTask?.docId) {
                 goto('/?queuedDoc=' + urldoc, {replaceState: true}); //= urlparams.set('queuedDoc', urldoc)
@@ -83,6 +88,10 @@
         }
     }
 
+    function trySpeakCurrentTask() {
+        trySpeak(($currentTask.title.text + '\n' + $currentTask.text.text).replace(/\xa0/g, '').replaceAll('#', '')) // remove nbsp just in case its a problem, and remove hashtags
+    }
+
     function trySpeak(str: string) {
         if ($isSoundOn && voice != null) {
             let utterance = new SpeechSynthesisUtterance(str)
@@ -96,7 +105,7 @@
     function onAnswbtnClick () {
 		if (phase === "prompting") {
             phase = "solutionShown"
-			trySpeak(($currentTask.title.text + '\n' + $currentTask.text.text).replace(/\xa0/g, '')) // remove nbsp just in case its a problem
+            trySpeakCurrentTask()
 		} else if (phase === "solutionShown") {
 			speechSynthesis.cancel()
             loading = true
@@ -130,7 +139,7 @@
     function onSoundClick() {
 		$isSoundOn = ! $isSoundOn
 		if ($isSoundOn) {
-			trySpeak(($currentTask?.title?.text + '\n' + $currentTask?.text?.text).replace(/\xa0/g, '')); // remove nbsp just in case its a problem
+            trySpeakCurrentTask()
 		} else {
 			speechSynthesis.cancel()
 		}
@@ -176,7 +185,7 @@
             return undefined
         })
         if (doc) loading = false;
-        phase = "prompting"
+        phase = "prompting"        
         $currentTask = doc
         solutionText = doc?.title?.translations[$nativeLang] + '\n\n' + doc?.text?.translations[$nativeLang]
     }
@@ -189,14 +198,17 @@
 <!-- Main Application -->
 <h1>Automated Language Learning AI</h1>
 <ReaderComponent phase={phase} trySpeak={trySpeak} solutionText={solutionText} taskVisible={!loading}/>
-<button id="btnSound" on:click={onSoundClick}>{$isSoundOn ? '🔊' : '🔈'}</button>
-<button id="answbtn" class:loading on:click={onAnswbtnClick}>
-    {#if phase === 'prompting'}
-        {answbtnTxtWhilePrompting}
-    {:else if phase === 'solutionShown'}
-        {answbtnTxtWhileSolutionShown}
-    {/if}
-</button>
+<div>
+    <button id="btnSound" on:click={onSoundClick}>{$isSoundOn ? '🔊' : '🔈'}</button>
+    <button id="answbtn" class:loading on:click={onAnswbtnClick}>
+        {#if phase === 'prompting'}
+            {answbtnTxtWhilePrompting}
+        {:else if phase === 'solutionShown'}
+            {answbtnTxtWhileSolutionShown}
+        {/if}
+    </button>
+</div>
+<ChatComponent />
 <NavbarComponent>
     <button on:click={()=>goto("/catalog")}>Texts</button>
     <button on:click={()=>goto("/lists")}>My vocab</button>
