@@ -21,6 +21,12 @@ function EndpointGetTopTasks(user, filter) {return `/top_tasks/${user}?q=${filte
  * @param {string} user
  */
 function EndpointGetDueTask(user) {return `/due_task/${user}`;}
+/**
+ * @param {string} user
+ * @param {string} chatPrompt
+ * @param {string | undefined} docId
+ */
+function EndpointChat(user, chatPrompt, docId) {return `/chat/${user}?q=${chatPrompt}` + (docId ? `&docId=${docId}` : '');}
 
 
 // backend endpoints
@@ -74,6 +80,16 @@ export async function isTaskCached(user, docId){
 		console.log(_);
 		return false
 	}
+}
+    
+
+/**
+ * @param {string} user
+ * @param {string} chatPrompt
+ * @param {string | undefined} docId
+ */
+export async function sendChat(user, chatPrompt, docId) {
+	return (await backendGet(EndpointChat(user, chatPrompt, docId))).response
 }
 
 

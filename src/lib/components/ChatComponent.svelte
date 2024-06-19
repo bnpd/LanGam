@@ -1,11 +1,17 @@
 <script lang="ts">
-	import { currentTask, failedWords } from "$lib/stores";
+	import { currentTask, failedWords, user } from "$lib/stores";
+	import { sendChat } from "./backend";
     
     /**
      * @type {string | undefined}
      */
     $: lastFailed = Array.from($failedWords).at(-1);
     $: lastFailedLemma = lastFailed ? findLemma(lastFailed) : undefined
+    $: if ($currentTask) response = undefined; // reset response on changes to currentTask
+    
+
+    let chatPrompt: string | undefined
+    let response: string | undefined
 
     /**
      * Finds the first occurrence of word in the text and returns the corresponding lemma (thus not necessarily the lemma for that ocurrence that the user clicked)
@@ -19,19 +25,33 @@
             }
         }
     }
-    
 </script>
 
+{#if response}
+    <div class="boxBig">{response}</div>
+{/if}
 <div id="chatComponent">
     <div>
-        <button class="promptSuggestion">Explain the most important grammar for this text.</button>
+        <button class="promptSuggestion" on:click={async () => {response = await sendChat($user, "Explain the most important grammar for this text.", $currentTask.docId)}}>
+            Explain the most important grammar for this text.
+        </button>
         {#if lastFailed}
             {#if lastFailedLemma !== lastFailed}
-                <button class="promptSuggestion">Why is it {lastFailed} and not {lastFailedLemma} here?</button>
+                <button class="promptSuggestion" on:click={async () => {response = await sendChat($user, `Why is it ${lastFailed} and not ${lastFailedLemma} here?`, $currentTask.docId)}}>
+                    Why is it {lastFailed} and not {lastFailedLemma} here?
+                </button>
             {/if}
-            <button class="promptSuggestion">Why is {lastFailed} used here?</button>
+            <button class="promptSuggestion" on:click={async () => {response = await sendChat($user, `Why is ${lastFailed} used here?`, $currentTask.docId)}}>
+                Why is {lastFailed} used here?
+            </button>
         {/if}
     </div>
-    <div contenteditable id="iChat" data-placeholder="Ask me ✨"/>
-    <button id="submit"><b><em>AI</em></b></button>
+    <div contenteditable id="iChat" data-placeholder="Ask me ✨" bind:textContent={chatPrompt}/>
+    <button id="submit" on:click={async () => {if (chatPrompt) response = await sendChat($user, chatPrompt, $currentTask.docId)}}><b><em>
+        {#if chatPrompt}
+        ➥
+        {:else}
+        AI            
+        {/if}
+    </em></b></button>
 </div>

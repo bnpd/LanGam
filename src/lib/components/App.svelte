@@ -208,7 +208,7 @@
         {/if}
     </button>
 </div>
-<ChatComponent />
+<ChatComponent/>
 <NavbarComponent>
     <button on:click={()=>goto("/catalog")}>Texts</button>
     <button on:click={()=>goto("/lists")}>My vocab</button>
