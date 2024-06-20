@@ -25,33 +25,32 @@
 
   function syncScroll(source: HTMLDivElement, target: HTMLDivElement) {
     // find all paragraphs contained in the text in source and target
-    var sourceParagraphs = source.querySelectorAll('p');
-    var targetParagraphs = target.querySelectorAll('p');
+    var sourceParagraphs = source.children;    
+    var targetParagraphs = target.children;
 
     // Find the current paragraph index in the source div
-    var currentIndex = findCurrentParagraphIndex(source.scrollTop, sourceParagraphs, source);
+    var currentIndex = findCurrentParagraphIndex(source.scrollTop, sourceParagraphs, source);    
 
     // Scroll the target div to the same paragraph index
     target.scrollTop = targetParagraphs[currentIndex].offsetTop-targetParagraphs[0].offsetTop;
   }
 
-  // Function to find the index of the current paragraph based on scroll position
+  // Find index of the paragraph at the middle position of divTask (unless min/max scrolled, then first/last)
   function findCurrentParagraphIndex(scrollTop: number, paragraphs: NodeListOf<HTMLParagraphElement>, parentEl: HTMLDivElement) {
+    if (scrollTop == 0) return 0
     for (var i = 0; i < paragraphs.length; i++) {
-      if (paragraphs[i].offsetTop-paragraphs[0].offsetTop >= scrollTop-0.5*parentEl.offsetHeight) {
-        return i;
+      if (scrollTop + 0.5*parentEl.offsetHeight < paragraphs[i].offsetTop-paragraphs[0].offsetTop) {
+        return i-1;
       }
     }
-    return 0; // Default to the first paragraph if not found
+    return paragraphs.length-1;
   }
 
   /**
    * Set a document as the currently shown task
    * @param {DocumentC} doc Document cnotaining the task
    */
-  function setTask(doc: DocumentC) {   
-    console.log(doc);
-     
+  function setTask(doc: DocumentC) {        
     docIdOfCurrentTask = $currentTask.docId // keep track of currentTask so that we don't do all the work of setTask twice
 
     divTask.scrollTop = 0
