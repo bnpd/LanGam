@@ -21,6 +21,7 @@
     var phase = "prompting"; // or "solutionShown"
     let toast: string | undefined;
     let textRejectToast: string | undefined;
+    let readerComponent: ReaderComponent;
     
 
     onMount(async () => {
@@ -197,7 +198,7 @@
 
 <!-- Main Application -->
 <h1>Automated Language Learning AI</h1>
-<ReaderComponent phase={phase} trySpeak={trySpeak} solutionText={solutionText} taskVisible={!loading}/>
+<ReaderComponent phase={phase} trySpeak={trySpeak} solutionText={solutionText} taskVisible={!loading} bind:this={readerComponent}/>
 <div>
     <button id="btnSound" on:click={onSoundClick}>{$isSoundOn ? '🔊' : '🔈'}</button>
     <button id="answbtn" class:loading on:click={onAnswbtnClick}>
@@ -208,7 +209,7 @@
         {/if}
     </button>
 </div>
-<ChatComponent/>
+<ChatComponent readerComponent={readerComponent}/>
 <NavbarComponent>
     <button on:click={()=>goto("/catalog")}>Texts</button>
     <button on:click={()=>goto("/lists")}>My vocab</button>

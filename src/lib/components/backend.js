@@ -21,12 +21,15 @@ function EndpointGetTopTasks(user, filter) {return `/top_tasks/${user}?q=${filte
  * @param {string} user
  */
 function EndpointGetDueTask(user) {return `/due_task/${user}`;}
-/**
+/** EITHER docId or contextParagraphs should be specified, if both are present, contextParagraphs will be prioritized.
  * @param {string} user
  * @param {string} chatPrompt
  * @param {string | undefined} docId
+ * @param {string | undefined} contextParagraphs
  */
-function EndpointChat(user, chatPrompt, docId) {return `/chat/${user}?q=${chatPrompt}` + (docId ? `&docId=${docId}` : '');}
+function EndpointChat(user, chatPrompt, docId=undefined, contextParagraphs=undefined) {
+	return `/chat/${user}?q=${chatPrompt}` + (contextParagraphs ? `&ctx=${contextParagraphs}` : docId ? `&docId=${docId}` : '');
+}
 
 
 // backend endpoints
@@ -83,13 +86,14 @@ export async function isTaskCached(user, docId){
 }
     
 
-/**
+/** EITHER docId or contextParagraphs should be specified, if both are present, contextParagraphs will be prioritized.
  * @param {string} user
  * @param {string} chatPrompt
  * @param {string | undefined} docId
+ * @param {string | undefined} contextParagraphs
  */
-export async function sendChat(user, chatPrompt, docId) {
-	return (await backendGet(EndpointChat(user, chatPrompt, docId))).response
+export async function sendChat(user, chatPrompt, docId=undefined, contextParagraphs=undefined) {
+	return (await backendGet(EndpointChat(user, chatPrompt, docId, contextParagraphs))).response
 }
 
 

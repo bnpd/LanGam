@@ -22,24 +22,36 @@
   $: if($currentTask && divTask && solutionField && $currentTask.docId != docIdOfCurrentTask) setTask($currentTask)
   $: if(solutionText) setSolution(solutionText)
 
-
-  function syncScroll(source: HTMLDivElement, target: HTMLDivElement) {
-    // find all paragraphs contained in the text in source and target
-    var sourceParagraphs = source.children;    
-    var targetParagraphs = target.children;
-
-    // Find the current paragraph index in the source div
-    var currentIndex = findCurrentParagraphIndex(source.scrollTop, sourceParagraphs, source);    
-
-    // Scroll the target div to the same paragraph index
-    target.scrollTop = targetParagraphs[currentIndex].offsetTop-targetParagraphs[0].offsetTop;
+  export function getVisibleParagraphs() {
+    const top = currentScrolledParagraphIndex('top')
+    const bottom = currentScrolledParagraphIndex('bottom')
+    console.log(top);
+    console.log(bottom);
+    let visibleParagraphs = taskParagraphs.slice(top, bottom+1).map(p => p.words.map(token => token.word).join('')).join('\n')
+    console.log(visibleParagraphs);
+    return visibleParagraphs
   }
 
-  // Find index of the paragraph at the middle position of divTask (unless min/max scrolled, then first/last)
-  function findCurrentParagraphIndex(scrollTop: number, paragraphs: NodeListOf<HTMLParagraphElement>, parentEl: HTMLDivElement) {
-    if (scrollTop == 0) return 0
+  function onScroll() {
+    // Scroll the target div to the same paragraph index as divTask
+    solutionField.scrollTop = (solutionField.children[currentScrolledParagraphIndex()] as HTMLElement).offsetTop
+                              -(solutionField.children[0] as HTMLElement).offsetTop;
+  }
+
+  // Find index of the paragraph at the top/mid/bottom (depending on ref param) position of divTask 
+  // if ref='mid' && min/max scrolled, then first/last index is returned)
+  function currentScrolledParagraphIndex(ref: string = 'mid') {
+    let paragraphs = divTask.children
+    if (ref == 'mid' && divTask.scrollTop + (paragraphs[0] as HTMLElement).offsetTop == divTask.scrollHeight) {
+      return paragraphs.length -1
+    }
+    if (ref == 'mid' && divTask.scrollTop == 0) return 0
+
     for (var i = 0; i < paragraphs.length; i++) {
-      if (scrollTop + 0.5*parentEl.offsetHeight < paragraphs[i].offsetTop-paragraphs[0].offsetTop) {
+      if (
+        divTask.scrollTop + (ref=='top' ? 0 : ref=='mid' ? 0.5 : 1) * divTask.offsetHeight 
+        < (paragraphs[i] as HTMLElement).offsetTop - (paragraphs[0] as HTMLElement).offsetTop
+      ) {
         return i-1;
       }
     }
@@ -154,7 +166,7 @@
 </script>
 
 <div class="boxBig" id="contentbox">
-  <div id="divTask" class:hidden={!taskVisible} bind:this={divTask} on:scroll={() => syncScroll(divTask, solutionField)}>
+  <div id="divTask" class:hidden={!taskVisible} bind:this={divTask} on:scroll={onScroll}>
     {#each taskParagraphs as taskParagraph}
       <svelte:element this={taskParagraph.htmlTag}>
         {#each taskParagraph.words as token}
