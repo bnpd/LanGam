@@ -71,7 +71,6 @@
     divTask.textContent = '' // delete previous task
     phase = "prompting"
 
-    taskParagraphs = []
     let space = {word: ' ', lemma_: '', pos: -1}
     for (const translatableText of [doc.title, doc.text]) {
       let paragraph = []	
