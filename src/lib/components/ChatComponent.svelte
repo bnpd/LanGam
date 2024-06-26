@@ -14,6 +14,7 @@
 
     let chatPrompt: string | undefined
     let response: string | undefined
+    let iChat: HTMLDivElement
 
     /**
      * Finds the first occurrence of word in the text and returns the corresponding lemma (thus not necessarily the lemma for that ocurrence that the user clicked)
@@ -48,8 +49,8 @@
             </button>
         {/if}
     </div>
-    <div contenteditable id="iChat" data-placeholder="Ask me ✨" bind:textContent={chatPrompt}/>
-    <button id="submit" on:click={async () => {if (chatPrompt) response = await sendChat($user, chatPrompt, $currentTask.docId, undefined)}}><b><em>
+    <div contenteditable id="iChat" data-placeholder="Ask me ✨" bind:textContent={chatPrompt} bind:this={iChat}/>
+    <button id="submit" on:click={async () => {if (chatPrompt) {response = await sendChat($user, chatPrompt, $currentTask.docId, undefined)} else {iChat?.focus()}}}><b><em>
         {#if chatPrompt}
         ➥
         {:else}

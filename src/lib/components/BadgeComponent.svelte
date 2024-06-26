@@ -1,3 +1,5 @@
+<!-- svelte-ignore a11y-no-static-element-interactions -->
+<!-- svelte-ignore a11y-click-events-have-key-events -->
 <script>
     export let text;
     export let tooltip = '';
@@ -49,7 +51,6 @@
     on:mouseenter={toggleTooltip} 
     on:mouseleave={toggleTooltip}
     on:click={toggleTooltip}
-    tabindex="0"
   >
     {text}
     {#if showTooltip}
