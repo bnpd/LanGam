@@ -54,26 +54,28 @@ function reloadLists() {
   <meta name="description" content="Overview of your learned words - learn languages the fun way: talk about texts with AI.">
 </svelte:head>
 
-<div id="divLeft">
-  <button id="btnExportSearchList" on:click={() => exportObject(scheduledTokens, 'Spaced Repetition Words')}>Export</button>
-  <h1>
-    Spaced Repetition
-  </h1>
-  <ul id="ulSearchList">
-    {#each Object.keys(scheduledTokens) as key}
-    <li>{scheduledTokens[key].word + ": " + scheduledTokens[key].due?.day + "." + scheduledTokens[key].due?.month + "." + scheduledTokens[key].due?.year}</li>
-    {/each}  
-  </ul>
-</div>
-<div id="divRight">
-  <button on:click={()=>goto("/")}>◄ Back</button>
-  <h1>
-    Seen
-    <span id="spanNKnown">{Object.keys(seenTokens).length ? "("+Object.keys(seenTokens).length+" lemmas)" : ""}</span>
-  </h1>
-  <ul id="ulKnownList">
-    {#each Object.keys(scheduledTokens) as key}
-    <li>{key + ": " + seenTokens[key]}</li>
-    {/each}  
-  </ul>
+<div>
+  <div id="divLeft">
+    <button id="btnExportSearchList" on:click={() => exportObject(scheduledTokens, 'Spaced Repetition Words')}>Export</button>
+    <h1>
+      Spaced Repetition
+    </h1>
+    <ul id="ulSearchList">
+      {#each Object.keys(scheduledTokens) as key}
+      <li>{scheduledTokens[key].word + ": " + scheduledTokens[key].due?.day + "." + scheduledTokens[key].due?.month + "." + scheduledTokens[key].due?.year}</li>
+      {/each}  
+    </ul>
+  </div>
+  <div id="divRight">
+    <button on:click={()=>goto("/")}>◄ Back</button>
+    <h1>
+      Seen
+      <span id="spanNKnown">{Object.keys(seenTokens).length ? "("+Object.keys(seenTokens).length+" lemmas)" : ""}</span>
+    </h1>
+    <ul id="ulKnownList">
+      {#each Object.keys(scheduledTokens) as key}
+      <li>{key + ": " + seenTokens[key]}</li>
+      {/each}  
+    </ul>
+  </div>
 </div>
