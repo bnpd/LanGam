@@ -1,8 +1,24 @@
 'use strict';
+import { goto } from '$app/navigation';
 import config from '../../config.js';
 import DocumentC from '../DocumentC.js'
+import PocketBase, { LocalAuthStore } from 'pocketbase';
 
-// backend constants
+// PocketBase
+const url = 'https://allai.pockethost.io/'
+const pb = new PocketBase(url)
+
+/**
+ * @param {string} user
+ * @param {string} password
+ */
+export async function login(user, password) {
+	return pb.collection('users').authWithPassword(user, password);
+}
+
+
+// backend endpoint constants
+const ENDPOINT_SIGNUP = '/signup'
 /**
  * @param {string} user
  */
@@ -11,7 +27,7 @@ function EndpointGetVocab(user) {return '/vocab/'+user;}
  * @param {string} user
  * @param {string} docId
  */
-function EndpointGetTask(user, docId) {return `/task/${user}/${docId}`;}
+async function EndpointGetTask(user, docId) {return `/task/${user}/${docId}`;}
 /**
  * @param {string} user
  * @param {string} filter
@@ -22,17 +38,24 @@ function EndpointGetTopTasks(user, filter) {return `/top_tasks/${user}?q=${filte
  */
 function EndpointGetDueTask(user) {return `/due_task/${user}`;}
 /** EITHER docId or contextParagraphs should be specified, if both are present, contextParagraphs will be prioritized.
- * @param {string} user
  * @param {string} chatPrompt
  * @param {string | undefined} docId
  * @param {string | undefined} contextParagraphs
  */
-function EndpointChat(user, chatPrompt, docId=undefined, contextParagraphs=undefined) {
-	return `/chat/${user}?q=${chatPrompt}` + (contextParagraphs ? `&ctx=${contextParagraphs}` : docId ? `&docId=${docId}` : '');
+function EndpointChat(chatPrompt, docId=undefined, contextParagraphs=undefined) {
+	return `/chat?q=${chatPrompt}` + (contextParagraphs ? `&ctx=${contextParagraphs}` : docId ? `&docId=${docId}` : '');
 }
 
 
-// backend endpoints
+// backend functions
+/**
+ * @param {string} email
+ * @param {string} password
+ */
+export async function signup(email, password) {
+	return backendPost(ENDPOINT_SIGNUP, {email: email, password: password}, false)
+}
+
 /**
  * @param {string} user
  */
@@ -52,7 +75,7 @@ export async function getVocab(user){
  */
 export async function getTask(user, docId){
 	try { 
-		const responseJson = await backendGet(docId ? EndpointGetTask(user, docId) : EndpointGetDueTask(user)) 
+		const responseJson = await backendGet(docId ? await EndpointGetTask(user, docId) : EndpointGetDueTask(user)) 
 		return DocumentC.fromJson(responseJson)
 	} catch (error) {
 		console.error(error)
@@ -93,16 +116,21 @@ export async function isTaskCached(user, docId){
  * @param {string | undefined} contextParagraphs
  */
 export async function sendChat(user, chatPrompt, docId=undefined, contextParagraphs=undefined) {
-	return (await backendGet(EndpointChat(user, chatPrompt, docId, contextParagraphs))).response
+	return (await backendGet(EndpointChat(chatPrompt, docId, contextParagraphs))).response
 }
 
 
 // lowlevel backend communication
 /**
  * @param {string} path
+ * @param {boolean} [authRequired] whether this endpoint requires authorization token
  */
-export async function backendGet(path) {
-	const response = await fetch(config.backend + path)
+export async function backendGet(path, authRequired=true) {
+	if (authRequired && !pb.authStore.isValid) {
+		goto('/login')
+		return Promise.reject('Not logged in.')
+	}
+	const response = await fetch(config.backend + path, authRequired ? {headers: {Authorization: `Bearer ${pb.authStore.token}`}} : undefined)
 	if (!response.ok) {
 		throw new Error('Get error.' + await response.text())
 	}
@@ -113,13 +141,21 @@ export async function backendGet(path) {
 /**
  * @param {string} path
  * @param {Object} payload
+ * @param {boolean} [authRequired] whether this endpoint requires authorization token
  */
-export async function backendPost(path, payload) {
+export async function backendPost(path, payload, authRequired=true) {
+	if (authRequired && !pb.authStore.isValid) {
+		goto('/login')
+		return Promise.reject('Not logged in.')
+	}
     const response = await fetch(config.backend + path, {
         method: 'POST',
-        headers: {
+        headers: authRequired ? {
+			Authorization: `Bearer ${pb.authStore.token}`,
             'Content-Type': 'application/json',
-        },
+        } : {
+			'Content-Type': 'application/json',
+		},
         body: JSON.stringify(payload),
     });
 
