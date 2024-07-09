@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { currentTask, failedWords, user } from "$lib/stores";
+	import { currentTask, failedWords, targetLang, user } from "$lib/stores";
 	import ReaderComponent from "./ReaderComponent.svelte";
 	import { sendChat } from "./backend";
     
@@ -35,22 +35,22 @@
 {/if}
 <div id="chatComponent">
     <div>
-        <button class="promptSuggestion" on:click={async () => {response = await sendChat($user, "Explain the most important grammar for this text.", $currentTask.docId, undefined)}}>
+        <button class="promptSuggestion" on:click={async () => {response = await sendChat("Explain the most important grammar for this text.", $targetLang, $currentTask.docId, undefined)}}>
             Explain the most important grammar for this text.
         </button>
         {#if lastFailed}
             {#if lastFailedLemma !== lastFailed}
-                <button class="promptSuggestion" on:click={async () => {response = await sendChat($user, `Why is it ${lastFailed} and not ${lastFailedLemma} here?`, undefined, readerComponent.getVisibleParagraphs())}}>
+                <button class="promptSuggestion" on:click={async () => {response = await sendChat(`Why is it ${lastFailed} and not ${lastFailedLemma} here?`, undefined, undefined, readerComponent.getVisibleParagraphs())}}>
                     Why is it {lastFailed} and not {lastFailedLemma} here?
                 </button>
             {/if}
-            <button class="promptSuggestion" on:click={async () => {response = await sendChat($user, `Why is ${lastFailed} used here?`, undefined, readerComponent.getVisibleParagraphs())}}>
+            <button class="promptSuggestion" on:click={async () => {response = await sendChat(`Why is ${lastFailed} used here?`, undefined, undefined, readerComponent.getVisibleParagraphs())}}>
                 Why is {lastFailed} used here?
             </button>
         {/if}
     </div>
     <div contenteditable id="iChat" data-placeholder="Ask me ✨" bind:textContent={chatPrompt} bind:this={iChat}/>
-    <button id="submit" on:click={async () => {if (chatPrompt) {response = await sendChat($user, chatPrompt, $currentTask.docId, undefined)} else {iChat?.focus()}}}><b><em>
+    <button id="submit" on:click={async () => {if (chatPrompt) {response = await sendChat(chatPrompt, $targetLang, $currentTask.docId, undefined)} else {iChat?.focus()}}}><b><em>
         {#if chatPrompt}
         ➥
         {:else}

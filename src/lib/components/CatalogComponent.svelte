@@ -1,7 +1,6 @@
 <script lang="ts">
-	import { onMount } from "svelte";
-	import { getTask, getTopTasks } from "./backend";
-	import { user } from "$lib/stores";
+	import { getTask } from "./backend";
+	import { targetLang } from "$lib/stores";
 	import DocPreviewListComponent from "./DocPreviewListComponent.svelte";
 	import DocPreviewComponent from "./DocPreviewComponent.svelte";
 	import BadgeComponent from "./BadgeComponent.svelte";
@@ -28,7 +27,7 @@
     {/if}
     Catalog
 </h1>
-{#await getTask($user) then doc}
+{#await getTask($targetLang) then doc}
     <em class='forceOneLine'>
         <BadgeComponent text='AI' tooltip='This text optimizes the amount of words that are due for spaced repetition to help you keep your vocabulary fresh.'/>
         Recommended: 

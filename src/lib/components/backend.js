@@ -2,7 +2,7 @@
 import { goto } from '$app/navigation';
 import config from '../../config.js';
 import DocumentC from '../DocumentC.js'
-import PocketBase, { LocalAuthStore } from 'pocketbase';
+import PocketBase from 'pocketbase';
 
 // PocketBase
 const url = 'https://allai.pockethost.io/'
@@ -19,31 +19,37 @@ export async function login(user, password) {
 
 // backend endpoint constants
 const ENDPOINT_SIGNUP = '/signup'
+const ENDPOINT_NEW_USER_LANG = '/new_user_lang'
 /**
- * @param {string} user
+ * @param {string} targetLang
  */
-function EndpointGetVocab(user) {return '/vocab/'+user;}
+function EndpointGetVocab(targetLang) {return '/vocab/'+targetLang;}
 /**
- * @param {string} user
+ * @param {string} targetLang
  * @param {string} docId
  */
-async function EndpointGetTask(user, docId) {return `/task/${user}/${docId}`;}
+async function EndpointGetTask(targetLang, docId) {return `/task/${targetLang}/${docId}`;}
 /**
- * @param {string} user
+ * @param {string} targetLang
  * @param {string} filter
  */
-function EndpointGetTopTasks(user, filter) {return `/top_tasks/${user}?q=${filter}`;}
+function EndpointGetTopTasks(targetLang, filter) {return `/top_tasks/${targetLang}?q=${filter}`;}
 /**
- * @param {string} user
+ * @param {string} targetLang
  */
-function EndpointGetDueTask(user) {return `/due_task/${user}`;}
-/** EITHER docId or contextParagraphs should be specified, if both are present, contextParagraphs will be prioritized.
+function EndpointGetDueTask(targetLang) {return `/due_task/${targetLang}`;}
+/**
+ * @param {string} targetLang
+ */
+function EndpointReview(targetLang) {return `/review/${targetLang}`;}
+/** EITHER docId+targetLang or contextParagraphs should be specified, if both are present, contextParagraphs will be prioritized.
  * @param {string} chatPrompt
+ * @param {string | undefined} targetLang
  * @param {string | undefined} docId
  * @param {string | undefined} contextParagraphs
  */
-function EndpointChat(chatPrompt, docId=undefined, contextParagraphs=undefined) {
-	return `/chat?q=${chatPrompt}` + (contextParagraphs ? `&ctx=${contextParagraphs}` : docId ? `&docId=${docId}` : '');
+function EndpointChat(chatPrompt, targetLang=undefined, docId=undefined, contextParagraphs=undefined) {
+	return `/chat?q=${chatPrompt}` + (contextParagraphs ? `&ctx=${contextParagraphs}` : docId && targetLang ? `&docId=${docId}&targetLang=${targetLang}` : '');
 }
 
 
@@ -51,17 +57,39 @@ function EndpointChat(chatPrompt, docId=undefined, contextParagraphs=undefined) 
 /**
  * @param {string} email
  * @param {string} password
+ * @param {string} native_lang
  */
-export async function signup(email, password) {
-	return backendPost(ENDPOINT_SIGNUP, {email: email, password: password}, false)
+export async function signup(email, password, native_lang) {
+	return backendPost(ENDPOINT_SIGNUP, {email: email, password: password, native_lang: native_lang}, false)
 }
 
+
 /**
- * @param {string} user
+ * @param {string} targetLang
  */
-export async function getVocab(user){
+export async function newUserLang(targetLang) {
+	return backendPost(ENDPOINT_NEW_USER_LANG, {target_lang: targetLang}, true)
+}
+
+
+/**
+ * @param {string} targetLang
+ * @param {string} docId
+ * @param {string[]} failedTokens
+ */
+export async function sendReview(targetLang, docId, failedTokens) {
+	const json = {docId: docId, failedTokens: failedTokens}
+	return backendPost(EndpointReview(targetLang), json)
+}
+
+  
+
+/**
+ * @param {string} targetLang
+ */
+export async function getVocab(targetLang){
 	try { 
-		const responseJson = await backendGet(EndpointGetVocab(user))
+		const responseJson = await backendGet(EndpointGetVocab(targetLang))
 		return [responseJson['scheduled'], responseJson['all_forms']]
 	} catch (error) {
 		console.error(error)
@@ -70,12 +98,12 @@ export async function getVocab(user){
 }
 
 /**
- * @param {string} user
+ * @param {string} targetLang
  * @param {string | null} [docId]
  */
-export async function getTask(user, docId){
+export async function getTask(targetLang, docId){
 	try { 
-		const responseJson = await backendGet(docId ? await EndpointGetTask(user, docId) : EndpointGetDueTask(user)) 
+		const responseJson = await backendGet(docId ? await EndpointGetTask(targetLang, docId) : EndpointGetDueTask(targetLang)) 
 		return DocumentC.fromJson(responseJson)
 	} catch (error) {
 		console.error(error)
@@ -84,21 +112,21 @@ export async function getTask(user, docId){
 }
 
 /**
- * @param {string} user
+ * @param {string} targetLang
  * @param {any} query
  */
-export async function getTopTasks(user, query){
-	return backendGet(EndpointGetTopTasks(user, JSON.stringify(query)))
+export async function getTopTasks(targetLang, query){
+	return backendGet(EndpointGetTopTasks(targetLang, JSON.stringify(query)))
 }
 
 /** Check whether a task is available. SHOULD ONLY BE USED WHEN OFFLINE.
- * @param {string} user
+ * @param {string} targetLang
  * @param {string} docId
  */
-export async function isTaskCached(user, docId){
+export async function isTaskCached(targetLang, docId){
 	try {
 		let res = await fetch(
-			config.backend + EndpointGetTask(user, docId),
+			config.backend + EndpointGetTask(targetLang, docId),
 			{method:'Head',cache:'force-cache'}
 		);
 		return true
@@ -110,13 +138,13 @@ export async function isTaskCached(user, docId){
     
 
 /** EITHER docId or contextParagraphs should be specified, if both are present, contextParagraphs will be prioritized.
- * @param {string} user
  * @param {string} chatPrompt
+ * @param {string | undefined} targetLang
  * @param {string | undefined} docId
  * @param {string | undefined} contextParagraphs
  */
-export async function sendChat(user, chatPrompt, docId=undefined, contextParagraphs=undefined) {
-	return (await backendGet(EndpointChat(chatPrompt, docId, contextParagraphs))).response
+export async function sendChat(chatPrompt, targetLang=undefined, docId=undefined, contextParagraphs=undefined) {
+	return (await backendGet(EndpointChat(chatPrompt, targetLang, docId, contextParagraphs))).response
 }
 
 

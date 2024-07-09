@@ -1,5 +1,4 @@
 import { writable } from 'svelte/store';
-import { getTask } from './components/backend';
 
 /* Global Stores */
 export const user = createPersistentStore('username', null);

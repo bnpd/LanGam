@@ -2,7 +2,7 @@
     import { onMount } from 'svelte';
     import ReaderComponent from './ReaderComponent.svelte';
     import WebPushSubscription from './WebPushSubscription.svelte';
-    import { backendPost, getTask, getTopTasks } from './backend';
+    import { backendPost, getTask, sendReview } from './backend';
     import { user, nativeLang, targetLang, isSoundOn, ttsSpeed, currentTask, reviews, failedWords, reviewDocIds } from '$lib/stores';
 	import { goto } from '$app/navigation';
 	import Install from './Install.svelte';
@@ -26,9 +26,6 @@
 
     onMount(async () => {
         let urlparams = new URLSearchParams(window.location.search)
-        if (urlparams.get('u')) $user = urlparams.get('u');
-        if (urlparams.get('tl')) $targetLang = urlparams.get('tl')?.toLowerCase();
-        if (urlparams.get('nl')) $nativeLang = urlparams.get('nl')?.toLowerCase();
 
         if (!$user) {
             console.error('Login missing.');
@@ -158,15 +155,13 @@
     async function sendPendingReviews(){
         const times = $reviewDocIds.length
         for (let i = 0; i < times; i++) {
-            const json = {docId: $reviewDocIds[0], failedTokens: Array.from($reviews[0])}
-            console.log(JSON.stringify(json));
             try {
-                await backendPost('/review/'+$user, json)                
+                await sendReview($targetLang, $reviewDocIds[0], Array.from($reviews[0]))            
             } catch (offlineError) {
                 return Promise.reject(offlineError)
             }
             // onSuccessfulPost, dequeue
-            console.log('SHOULDNT GET HWERE WHEN OFFLINE');
+            console.log('SHOULDNT GET HERE WHEN OFFLINE');
             
             $reviews.shift()
             $reviews = $reviews
@@ -178,7 +173,7 @@
 
 
     async function nextTask(docId: string | null){
-        let doc = await getTask($user, docId).catch(_offline => {
+        let doc = await getTask($targetLang, docId).catch(_offline => {
             toast = "Text has not been downloaded offline. Going to catalog."
             setTimeout(() => {
                 goto('/catalog') //TODO: filter catalog to only show cached documents      
@@ -187,7 +182,7 @@
         })
         if (doc) loading = false;
         phase = "prompting"        
-        $currentTask = doc
+        $currentTask = doc              
         solutionText = doc?.title?.translations[$nativeLang] + '\n\n' + doc?.text?.translations[$nativeLang]
     }
 
