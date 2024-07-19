@@ -159,6 +159,10 @@ export async function backendGet(path, authRequired=true) {
 	}
 	const response = await fetch(config.backend + path, authRequired ? {headers: {Authorization: `Bearer ${pb.authStore.token}`}} : undefined)
 	if (!response.ok) {
+		if (response.status == 401) {
+			goto('/login')
+			return Promise.reject('Invalid auth.')
+		}
 		throw new Error('Get error.' + await response.text())
 	}
 	return await response.json()
@@ -187,6 +191,10 @@ export async function backendPost(path, payload, authRequired=true) {
     });
 
     if (!response.ok) {
+		if (response.status == 401) {
+			goto('/login')
+			return Promise.reject('Invalid auth.')
+		}
         throw new Error('Post error: ' + await response.text());
     }
     return await response.json();
