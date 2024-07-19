@@ -1,6 +1,5 @@
 <script lang="ts">
     import DocumentC from "$lib/DocumentC";
-	import { onMount } from "svelte";
 	import { isTaskCached } from "./backend";
 	import { targetLang } from "$lib/stores";
 
@@ -8,8 +7,7 @@
     export let docId: number;
     export let doc: DocumentC;
 
-    let offline = false
-
+    let offline = !navigator.onLine;
 </script>
 
 <svelte:window on:offline={()=>{offline = true}} on:online={()=>{offline = false}}></svelte:window>

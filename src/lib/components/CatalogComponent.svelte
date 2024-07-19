@@ -23,17 +23,19 @@
 <h1>
     Your
     {#if offline}
-        Offline
+        <em>📴line</em>
     {/if}
     Catalog
 </h1>
-{#await getTask($targetLang) then doc}
-    <em class='forceOneLine'>
-        <BadgeComponent text='AI' tooltip='This text optimizes the amount of words that are due for spaced repetition to help you keep your vocabulary fresh.'/>
-        Recommended: 
-        <DocPreviewComponent docId={doc.docId} doc={doc}/> 
-    </em>
-{/await}
+{#if !offline}
+    {#await getTask($targetLang) then doc}
+        <em class='forceOneLine'>
+            <BadgeComponent text='AI' tooltip='This text optimizes the amount of words that are due for spaced repetition to help you keep your vocabulary fresh.'/>
+            Recommended: 
+            <DocPreviewComponent docId={doc.docId} doc={doc}/> 
+        </em>
+    {/await}
+{/if}
 {#each filters as filter}
     <h2>{filter.title}</h2>
     <DocPreviewListComponent filter={filter.filter}/>    
