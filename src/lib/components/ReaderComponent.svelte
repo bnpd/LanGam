@@ -18,6 +18,7 @@
   export let trySpeak: Function
   export let solutionText: string
   export let taskVisible: boolean
+  export let srWords: Set<String>
 
 
   $: if($currentTask && divTask && solutionField && $currentTask.docId != docIdOfCurrentTask) setTask($currentTask)
@@ -186,6 +187,7 @@
           <TokenComponent 
             word={token?.word} 
             isFailed={$failedWords?.has(token?.word)}
+            isSrWord={srWords?.has(token?.lemma_)}
             isClickable={!NON_CLICKABLE_POS_IDS.has(token?.pos)}
             on:click={() => {onWordClick(token)}}></TokenComponent>
         {/each}          

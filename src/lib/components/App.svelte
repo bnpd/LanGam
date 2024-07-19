@@ -2,7 +2,7 @@
     import { onMount } from 'svelte';
     import ReaderComponent from './ReaderComponent.svelte';
     import WebPushSubscription from './WebPushSubscription.svelte';
-    import { backendPost, getTask, sendReview } from './backend';
+    import { backendPost, getTask, getUserTaskStats, sendReview } from './backend';
     import { user, nativeLang, targetLang, isSoundOn, ttsSpeed, currentTask, reviews, failedWords, reviewDocIds, currentlyScrolledParagraphIndex } from '$lib/stores';
 	import { goto } from '$app/navigation';
 	import Install from './Install.svelte';
@@ -22,6 +22,8 @@
     let toast: string | undefined;
     let textRejectToast: string | undefined;
     let readerComponent: ReaderComponent;
+    let srWords: Set<string>;
+    let newForms: Set<string>;
     
 
     onMount(async () => {
@@ -182,12 +184,16 @@
         })
         if (doc) loading = false;
         phase = "prompting"        
-        $currentTask = doc              
+        $currentTask = doc
+        
         solutionText = doc?.title?.translations[$nativeLang] + '\n\n' + doc?.text?.translations[$nativeLang]
 
         if (!restoreScrollPosition) {
             $currentlyScrolledParagraphIndex = 0
         }
+
+        const [srWords_l, newForms_l] = await getUserTaskStats($targetLang, (String)(doc?.docId))
+        srWords = new Set(srWords_l)        
     }
 
 </script>
@@ -197,7 +203,7 @@
 
 <!-- Main Application -->
 <h1>Automated Language Learning AI</h1>
-<ReaderComponent phase={phase} trySpeak={trySpeak} solutionText={solutionText} taskVisible={!loading} bind:this={readerComponent}/>
+<ReaderComponent phase={phase} trySpeak={trySpeak} solutionText={solutionText} taskVisible={!loading} srWords={srWords} bind:this={readerComponent}/>
 <div>
     <button id="btnSound" on:click={onSoundClick}>{$isSoundOn ? '🔊' : '🔈'}</button>
     <button id="answbtn" class:loading on:click={onAnswbtnClick}>

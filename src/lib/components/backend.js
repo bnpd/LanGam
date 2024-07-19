@@ -27,7 +27,7 @@ function EndpointGetVocab(targetLang) {return '/vocab/'+targetLang;}
  * @param {string} targetLang
  * @param {string} docId
  */
-async function EndpointGetTask(targetLang, docId) {return `/task/${targetLang}/${docId}`;}
+function EndpointGetTask(targetLang, docId) {return `/task/${targetLang}/${docId}`;}
 /**
  * @param {string} targetLang
  * @param {string} filter
@@ -37,6 +37,14 @@ function EndpointGetTopTasks(targetLang, filter) {return `/top_tasks/${targetLan
  * @param {string} targetLang
  */
 function EndpointGetDueTask(targetLang) {return `/due_task/${targetLang}`;}
+/**
+ * @param {string} targetLang
+ */
+/**
+ * @param {string} targetLang
+ * @param {string} docId
+ */
+function EndpointGetUserTaskStats(targetLang, docId) {return `/user_task_stats/${targetLang}/${docId}`;}
 /**
  * @param {string} targetLang
  */
@@ -102,8 +110,22 @@ export async function getVocab(targetLang){
  */
 export async function getTask(targetLang, docId){
 	try { 
-		const responseJson = await backendGet(docId ? await EndpointGetTask(targetLang, docId) : EndpointGetDueTask(targetLang)) 
+		const responseJson = await backendGet(docId ? EndpointGetTask(targetLang, docId) : EndpointGetDueTask(targetLang)) 
 		return DocumentC.fromJson(responseJson)
+	} catch (error) {
+		console.error(error)
+		return Promise.reject(error)
+	}
+}
+
+/**
+ * @param {string} targetLang
+ * @param {string} docId
+ */
+export async function getUserTaskStats(targetLang, docId){
+	try { 
+		const responseJson = await backendGet(await EndpointGetUserTaskStats(targetLang, docId))
+		return [responseJson['sr_words'], responseJson['new_forms']]
 	} catch (error) {
 		console.error(error)
 		return Promise.reject(error)
@@ -126,7 +148,7 @@ export async function isTaskCached(targetLang, docId){
 	try {
 		console.log('isTaskCached');
 		let res = await fetch(
-			config.backend + await EndpointGetTask(targetLang, docId),
+			config.backend + EndpointGetTask(targetLang, docId),
 			{method:'Head',cache:'force-cache'}
 		);
 		return true
