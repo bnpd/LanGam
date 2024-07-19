@@ -3,7 +3,7 @@
     import ReaderComponent from './ReaderComponent.svelte';
     import WebPushSubscription from './WebPushSubscription.svelte';
     import { backendPost, getTask, sendReview } from './backend';
-    import { user, nativeLang, targetLang, isSoundOn, ttsSpeed, currentTask, reviews, failedWords, reviewDocIds } from '$lib/stores';
+    import { user, nativeLang, targetLang, isSoundOn, ttsSpeed, currentTask, reviews, failedWords, reviewDocIds, currentlyScrolledParagraphIndex } from '$lib/stores';
 	import { goto } from '$app/navigation';
 	import Install from './Install.svelte';
 	import Toast from './Toast.svelte';
@@ -28,7 +28,7 @@
         let urlparams = new URLSearchParams(window.location.search)
 
         if (!$user) {
-            console.error('Login missing.');
+            goto('/login')
             return;
         }
 
@@ -49,9 +49,9 @@
         
         goto('/', {replaceState: true}); // remove URL param docId since we are no longer in that document (otherwise would've been param to this function)
                 
-        if ($failedWords.size > 0) {            
+        if ($failedWords.size > 0) {
             // we have a saved state from last session to restore
-            await nextTask($currentTask?.docId);
+            await nextTask($currentTask?.docId, true);
 
             // click words, which will add them to $failedWords and mark them on the page
             // sound off while doing this
@@ -172,7 +172,7 @@
     }
 
 
-    async function nextTask(docId: string | null){
+    async function nextTask(docId: string | null, restoreScrollPosition: boolean = false){
         let doc = await getTask($targetLang, docId).catch(_offline => {
             toast = "Text has not been downloaded offline. Going to catalog."
             setTimeout(() => {
@@ -184,6 +184,10 @@
         phase = "prompting"        
         $currentTask = doc              
         solutionText = doc?.title?.translations[$nativeLang] + '\n\n' + doc?.text?.translations[$nativeLang]
+
+        if (!restoreScrollPosition) {
+            $currentlyScrolledParagraphIndex = 0
+        }
     }
 
 </script>

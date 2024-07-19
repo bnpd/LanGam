@@ -2,7 +2,8 @@
 	import type DocumentC from "$lib/DocumentC";
 	import Token from "$lib/Token";
 	import TokenComponent from "./TokenComponent.svelte";
-  import { currentTask, failedWords } from '../stores';
+  import { currentTask, failedWords, currentlyScrolledParagraphIndex } from '../stores';
+	import { afterUpdate } from "svelte";
 
   const NON_CLICKABLE_POS_IDS = new Set([-1, 97, 99, 101]) // added -1 for whitespace
 
@@ -22,6 +23,14 @@
   $: if($currentTask && divTask && solutionField && $currentTask.docId != docIdOfCurrentTask) setTask($currentTask)
   $: if(solutionText) setSolution(solutionText)
 
+  afterUpdate(() => {
+    if (divTask?.scrollTop == 0) {
+      // on first time we added all p elements, restore scroll position
+      scrollToParagraph(divTask, Math.max($currentlyScrolledParagraphIndex - 1, 0))
+      scrollToParagraph(solutionField, $currentlyScrolledParagraphIndex - 1)
+    }
+  })
+
   export function getVisibleParagraphs() {
     const top = currentScrolledParagraphIndex('top')
     const bottom = currentScrolledParagraphIndex('bottom')
@@ -33,24 +42,27 @@
   }
 
   function onScroll() {
-    // Scroll the target div to the same paragraph index as divTask
-    solutionField.scrollTop = (solutionField.children[currentScrolledParagraphIndex()] as HTMLElement).offsetTop
-                              -(solutionField.children[0] as HTMLElement).offsetTop;
+    // Scroll the solutionField to the same paragraph index as divTask
+    const newScrollIndex = currentScrolledParagraphIndex()
+    if (newScrollIndex != $currentlyScrolledParagraphIndex) {
+      $currentlyScrolledParagraphIndex = newScrollIndex
+      scrollToParagraph(solutionField, newScrollIndex)
+    }
   }
 
   // Find index of the paragraph at the top/mid/bottom (depending on ref param) position of divTask 
   // if ref='mid' && min/max scrolled, then first/last index is returned)
   function currentScrolledParagraphIndex(ref: string = 'mid') {
     let paragraphs = divTask.children
-    if (ref == 'mid' && divTask.scrollTop + (paragraphs[0] as HTMLElement).offsetTop == divTask.scrollHeight) {
+    if (ref == 'mid' && divTask?.scrollTop + (paragraphs[0] as HTMLElement)?.offsetTop == divTask?.scrollHeight) {
       return paragraphs.length -1
     }
-    if (ref == 'mid' && divTask.scrollTop == 0) return 0
+    if (ref == 'mid' && divTask?.scrollTop == 0) return 0
 
     for (var i = 0; i < paragraphs.length; i++) {
       if (
-        divTask.scrollTop + (ref=='top' ? 0 : ref=='mid' ? 0.5 : 1) * divTask.offsetHeight 
-        < (paragraphs[i] as HTMLElement).offsetTop - (paragraphs[0] as HTMLElement).offsetTop
+        divTask?.scrollTop + (ref=='top' ? 0 : ref=='mid' ? 0.5 : 1) * divTask?.offsetHeight 
+        < (paragraphs[i] as HTMLElement)?.offsetTop - (paragraphs[0] as HTMLElement)?.offsetTop
       ) {
         return i-1;
       }
@@ -58,9 +70,13 @@
     return paragraphs.length-1;
   }
 
+  function scrollToParagraph(el: HTMLElement, paragraphIndex: number) {    
+    el.scrollTop = (el.children[paragraphIndex] as HTMLElement)?.offsetTop - (el.children[0] as HTMLElement)?.offsetTop;    
+  }
+
   /**
    * Set a document as the currently shown task
-   * @param {DocumentC} doc Document cnotaining the task
+   * @param {DocumentC} doc Document containing the task
    */
   function setTask(doc: DocumentC) {        
     docIdOfCurrentTask = $currentTask.docId // keep track of currentTask so that we don't do all the work of setTask twice
@@ -104,8 +120,6 @@
       taskParagraphs.push({htmlTag: headingLevel ? 'h'+headingLevel : 'p', words: paragraph.slice(headingLevel)})
     }
     taskParagraphs = taskParagraphs
-    console.log(taskParagraphs);
-    
   }
 
   function setSolution(solution: string) {
