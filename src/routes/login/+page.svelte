@@ -3,4 +3,4 @@
     import LoginComponent from '$lib/components/LoginComponent.svelte';
 </script>
 
-<LoginComponent isSignup={true} />
+<LoginComponent isSignup={false} />

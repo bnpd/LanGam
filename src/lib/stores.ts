@@ -12,6 +12,7 @@ export const reviews = createPersistentStore('reviews', []);
 export const reviewDocIds = createPersistentStore('reviewOrder', []);
 export const failedWords = createPersistentStore('failedWords', new Set());
 export const currentTask = createPersistentStore('currentTask', null);
+export const currentlyScrolledParagraphIndex = createPersistentStore('currentScrolledParagraphIndex', 0);
 
 
 /* Store Creation Functions */
