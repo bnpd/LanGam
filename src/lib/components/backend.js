@@ -5,8 +5,7 @@ import DocumentC from '../DocumentC.js'
 import PocketBase from 'pocketbase';
 
 // PocketBase
-const url = 'https://allai.pockethost.io/'
-const pb = new PocketBase(url)
+const pb = new PocketBase(config.pocketbase)
 
 /**
  * @param {string} user
