@@ -73,7 +73,7 @@ function reloadLists() {
       <span id="spanNKnown">{Object.keys(seenTokens).length ? "("+Object.keys(seenTokens).length+" lemmas)" : ""}</span>
     </h1>
     <ul id="ulKnownList">
-      {#each Object.keys(scheduledTokens) as key}
+      {#each Object.keys(seenTokens) as key}
       <li>{key + ": " + seenTokens[key]}</li>
       {/each}  
     </ul>

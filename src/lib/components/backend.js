@@ -124,13 +124,13 @@ export async function getTopTasks(targetLang, query){
  */
 export async function isTaskCached(targetLang, docId){
 	try {
+		console.log('isTaskCached');
 		let res = await fetch(
-			config.backend + EndpointGetTask(targetLang, docId),
+			config.backend + await EndpointGetTask(targetLang, docId),
 			{method:'Head',cache:'force-cache'}
 		);
 		return true
 	} catch (_) {
-		console.log(_);
 		return false
 	}
 }
