@@ -8,13 +8,13 @@ let notificationPermission: NotificationPermission;
 onMount(() => {
   notificationPermission = Notification.permission
   if (notificationPermission === 'granted') {
-          requestNotifications($user)
+          requestNotifications()
     }
 });
 </script>
 
 {#if notificationPermission === 'default'}
-  <button id="btnNotifications" on:click={() => requestNotifications($user).then(() => {notificationPermission = Notification.permission})}>
+  <button id="btnNotifications" on:click={() => requestNotifications().then(() => {notificationPermission = Notification.permission})}>
     Reminder
   </button>
 {/if}

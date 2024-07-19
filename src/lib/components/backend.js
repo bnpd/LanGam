@@ -194,11 +194,8 @@ export async function backendPost(path, payload, authRequired=true) {
 }
 
 // Push Notifications
-/**
- * @param {String} user
- */
-export function requestNotifications(user) {
-	return subscribeUserToPush().then(subscription => sendSubscriptionToBackEnd(subscription, user));
+export function requestNotifications() {
+	return subscribeUserToPush().then(subscription => backendPost('/api/webpush-subscribe', subscription, true));
 }
 function subscribeUserToPush() {
 	return navigator.serviceWorker.ready
@@ -216,23 +213,5 @@ function subscribeUserToPush() {
 			);
 			return pushSubscription;
 		});
-}
-/**
- * @param {PushSubscription} subscription
- * @param {string} username
- */
-function sendSubscriptionToBackEnd(subscription, username) {
-	return fetch(config.backend + '/api/webpush-subscribe/' + username, {
-		method: 'POST',
-		headers: {
-			'Content-Type': 'application/json',
-		},
-		body: JSON.stringify(subscription),
-	}).then(function (response) {
-		if (!response.ok) {
-			throw new Error('Server error.');
-		}
-		return true;
-	});
 }
 
