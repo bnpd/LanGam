@@ -30,7 +30,11 @@
   </script>
 
 <form class="boxBig" on:submit|preventDefault={onSubmit}>
-	<h2>{isSignup ? 'Welcome :)' : 'Welcome back =)'}</h2>
+	<h2>
+        {isSignup ? 'Welcome :)' : 'Welcome back =)'}
+    </h2>
+    <a href={isSignup ? "/login" : "signup"}>{isSignup ? "Already registered? Login here" : "New here? Sign up"}</a>
+    <br><br>
 	<input type="email" name="email" placeholder="Email" autocomplete="email" required />
 	<input type="password" name="password" placeholder="Password" autocomplete="new-password" required minlength="8"/>
     {#if isSignup}
@@ -57,5 +61,5 @@
         </datalist>
     {/if}
     <br>
-    <input type="submit">
+    <input type="submit" value={isSignup ? "Register" : "Login"}>
 </form>
