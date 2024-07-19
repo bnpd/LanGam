@@ -2,7 +2,7 @@
     import DocumentC from "$lib/DocumentC";
 	import { onMount } from "svelte";
 	import { isTaskCached } from "./backend";
-	import { user } from "$lib/stores";
+	import { targetLang } from "$lib/stores";
 
     //export let img: ; // included in DocumentC?
     export let docId: number;
@@ -14,7 +14,7 @@
 
 <svelte:window on:offline={()=>{offline = true}} on:online={()=>{offline = false}}></svelte:window>
 {#if offline}
-    {#await isTaskCached($user, docId.toString()) then available}
+    {#await isTaskCached($targetLang, docId.toString()) then available}
         {#if available}
             <a href={"/?doc="+docId}>
                 <h4>

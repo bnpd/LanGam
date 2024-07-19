@@ -48,8 +48,7 @@ textarea {
   resize: vertical;
 }
 
-input[type="text"] {
-  width: 25%;
+input[type="text"], input[type="email"], input[type="password"] {
   margin-bottom: 10px;
   padding: 8px;
   border: 1px solid #ccc;

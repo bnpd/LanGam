@@ -1,7 +1,7 @@
 <script lang="ts">
 import type Token from "$lib/Token";
 import { getVocab } from "$lib/components/backend.js"
-import { user } from '$lib/stores';
+import { targetLang } from '$lib/stores';
 	import { onMount } from "svelte";
 import '../global.css';
 import './lists.css';
@@ -24,7 +24,7 @@ function reloadLists() {
   seenTokens = {}
 
   // load lists
-  getVocab($user).then(vocab => {
+  getVocab($targetLang).then(vocab => {
       let scheduledMap, allFormsMap
       [scheduledMap, allFormsMap] = [...vocab]
       scheduledTokens = scheduledMap
