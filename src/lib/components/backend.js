@@ -121,6 +121,7 @@ export async function getTask(targetLang, docId){
 /**
  * @param {string} targetLang
  * @param {string} docId
+ * @returns {Promise<[string[], string[]]>}
  */
 export async function getUserTaskStats(targetLang, docId){
 	try { 

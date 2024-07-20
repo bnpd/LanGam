@@ -9,9 +9,10 @@
 	import Toast from './Toast.svelte';
 	import NavbarComponent from './NavbarComponent.svelte';
 	import ChatComponent from './ChatComponent.svelte';
+	import AnimatedPopup from './AnimatedPopup.svelte';
 
-    const answbtnTxtWhilePrompting = "Show solution"
-    const answbtnTxtWhileSolutionShown = "Next question"
+    const answbtnTxtWhilePrompting = "Show translation"
+    const answbtnTxtWhileSolutionShown = "Next"
     const TOAST_REDIRECTED_SAVED_TASK = "Your selected text has been queued cause you have a saved text."
     const TEXT_REJECT_SAVED_TASK = "Discard saved"
 
@@ -23,7 +24,8 @@
     let textRejectToast: string | undefined;
     let readerComponent: ReaderComponent;
     let srWords: Set<string>;
-    let newForms: Set<string>;
+    let nNewForms: number;
+    let congratsMessage: string | undefined;
     
 
     onMount(async () => {
@@ -107,33 +109,44 @@
             phase = "solutionShown"
             trySpeakCurrentTask()
 		} else if (phase === "solutionShown") {
-			speechSynthesis.cancel()
-            loading = true
-
-			solutionText = ''
-			loading = true
-
-            if ($currentTask) {
-                $reviews.push(structuredClone($failedWords))
-                $reviews = $reviews
-                $reviewDocIds.push($currentTask.docId)
-                $reviewDocIds = $reviewDocIds
-                $failedWords.clear()
-                $failedWords = $failedWords
-                $currentTask = undefined
-            }         
-
-			sendPendingReviews()
-			.then(async _done => {        
-				nextTask(getUrlDoc())
-				goto('/', {replaceState: true})
-			}, _offline => {
-                toast = "Offline. Your data was saved."
-                setTimeout(() => {
-                    goto('/catalog') //TODO: filter catalog to only show cached documents      
-                }, 1500);
-            })
+            const correctedWords = (srWords.difference($failedWords)).size // this is kinda cheating cause srWords are lemmas and failedWords are forms, but it's not easily fixable without saving the whole Token object somewhere
+            if (nNewForms || correctedWords) {
+                congratsMessage = 
+                    nNewForms ? `You just encountered ${nNewForms} new words!` : ''
+                    + correctedWords ? `You remembered ${correctedWords} words you had wrong before!` : ''
+            } else {
+                onStatsClose()
+            }
 		}
+    }
+
+    function onStatsClose() {
+        speechSynthesis.cancel()
+        loading = true
+
+        solutionText = ''
+        loading = true
+
+        if ($currentTask) {
+            $reviews.push(structuredClone($failedWords))
+            $reviews = $reviews
+            $reviewDocIds.push($currentTask.docId)
+            $reviewDocIds = $reviewDocIds
+            $failedWords.clear()
+            $failedWords = $failedWords
+            $currentTask = undefined
+        }         
+
+        sendPendingReviews()
+        .then(async _done => {        
+            nextTask(getUrlDoc())
+            goto('/', {replaceState: true})
+        }, _offline => {
+            toast = "Offline. Your data was saved."
+            setTimeout(() => {
+                goto('/catalog') //TODO: filter catalog to only show cached documents      
+            }, 1500);
+        })
     }
 
     function onSoundClick() {
@@ -193,7 +206,8 @@
         }
 
         const [srWords_l, newForms_l] = await getUserTaskStats($targetLang, (String)(doc?.docId))
-        srWords = new Set(srWords_l)        
+        srWords = new Set(srWords_l)
+        nNewForms = newForms_l.length
     }
 
 </script>
@@ -225,3 +239,4 @@
     $failedWords = [];
     location.reload();
 }}/>
+<AnimatedPopup message={congratsMessage} onClose={onStatsClose}/>
