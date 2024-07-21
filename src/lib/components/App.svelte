@@ -110,11 +110,13 @@
             trySpeakCurrentTask()
 		} else if (phase === "solutionShown") {
             const correctedWords = (srWords.difference($failedWords)).size // this is kinda cheating cause srWords are lemmas and failedWords are forms, but it's not easily fixable without saving the whole Token object somewhere
+            console.log(correctedWords);
+            
             if (nNewForms || correctedWords) {
                 congratsMessage = 
-                    nNewForms ? `You just encountered ${nNewForms} new words!` : ''
-                    + correctedWords ? `You remembered ${correctedWords} words you had wrong before!` : ''
-            } else {
+                    (nNewForms ? `You just encountered ${nNewForms} new words!\n` : '')
+                    + (correctedWords ? `You remembered ${correctedWords} word families you had wrong before!\n` : '');
+            } else { //TODO: IMPORTANT: onStatsClose should be called while popup is shown. Maybe popup closing could be a promise and we wait for both the popup promise and the reviews sent promise to complete.
                 onStatsClose()
             }
 		}

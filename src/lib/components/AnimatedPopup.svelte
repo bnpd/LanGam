@@ -7,7 +7,7 @@
 	<div class="popup-container">
 		<div class="popup">
 			<h1>Congratulations!</h1>
-			<p>{message}</p>
+			<p style="white-space: pre-line">{message}</p>
 			<button class="close-button" on:click={()=>{message = undefined; onClose();}}>Close</button>
 		</div>
 	</div>

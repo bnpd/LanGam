@@ -9,6 +9,13 @@
     $: lastFailed = Array.from($failedWords).at(-1);
     $: lastFailedLemma = lastFailed ? findLemma(lastFailed) : undefined
     $: if ($currentTask) response = undefined; // reset response on changes to currentTask
+    let chatFocussed: boolean;
+    $: if (typeof document !== 'undefined') {            
+            let mainContent = document?.getElementById('contentbox')
+            if (mainContent) {
+                mainContent.style.opacity = (response && chatFocussed) ? "0.65" : "1"
+            }
+        }
     
     export let readerComponent: ReaderComponent;
 
@@ -30,21 +37,21 @@
     }
 </script>
 
-{#if response}
-    <div class="boxBig">{response}</div>
-{/if}
-<div id="chatComponent">
+<div id="chatComponent" on:focus|capture={()=>{chatFocussed = true}} on:focusout|capture={()=>{chatFocussed = false}}>
+    {#if response && chatFocussed}
+        <div class="boxBig" style="max-height: 18vh; overflow-y: scroll;" id="responseBox">{response}</div>
+    {/if}
     <div>
-        <button class="promptSuggestion" on:click={async () => {response = await sendChat("Explain the most important grammar for this text.", $targetLang, $currentTask.docId, undefined)}}>
-            Explain the most important grammar for this text.
+        <button class="promptSuggestion" on:click={async (e) => {response = await sendChat(e.currentTarget.innerText, undefined, undefined, readerComponent.getVisibleParagraphs())}}>
+            How is the past tense formed?
         </button>
         {#if lastFailed}
             {#if lastFailedLemma !== lastFailed}
-                <button class="promptSuggestion" on:click={async () => {response = await sendChat(`Why is it ${lastFailed} and not ${lastFailedLemma} here?`, undefined, undefined, readerComponent.getVisibleParagraphs())}}>
+                <button class="promptSuggestion" on:click={async (e) => {response = await sendChat(e.currentTarget.innerText, undefined, undefined, readerComponent.getVisibleParagraphs())}}>
                     Why is it {lastFailed} and not {lastFailedLemma} here?
                 </button>
             {/if}
-            <button class="promptSuggestion" on:click={async () => {response = await sendChat(`Why is ${lastFailed} used here?`, undefined, undefined, readerComponent.getVisibleParagraphs())}}>
+            <button class="promptSuggestion" on:click={async (e) => {response = await sendChat(e.currentTarget.innerText, undefined, undefined, readerComponent.getVisibleParagraphs())}}>
                 Why is {lastFailed} used here?
             </button>
         {/if}

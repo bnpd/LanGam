@@ -42,7 +42,9 @@
     return visibleParagraphs
   }
 
-  function onScroll() {
+  function onScroll(e: Event) {
+    (document?.activeElement as HTMLElement)?.blur();
+    
     // Scroll the solutionField to the same paragraph index as divTask
     const newScrollIndex = currentScrolledParagraphIndex()
     if (newScrollIndex != $currentlyScrolledParagraphIndex) {
