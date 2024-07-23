@@ -7,6 +7,8 @@
 		onClose();
 	 }
 </script>
+<!-- svelte-ignore a11y-no-static-element-interactions -->
+<!-- svelte-ignore a11y-click-events-have-key-events -->
 
 {#if message}
 	<div class="popup-container" on:click|self={closeSelf}>
