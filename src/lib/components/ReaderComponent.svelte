@@ -18,7 +18,7 @@
   export let trySpeak: Function
   export let solutionText: string
   export let taskVisible: boolean
-  export let srWords: Set<String>
+  export let srWords: Set<String> | undefined
 
 
   $: if($currentTask && divTask && solutionField && $currentTask.docId != docIdOfCurrentTask) setTask($currentTask)

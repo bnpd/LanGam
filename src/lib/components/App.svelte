@@ -23,9 +23,11 @@
     let toast: string | undefined;
     let textRejectToast: string | undefined;
     let readerComponent: ReaderComponent;
-    let srWords: Set<string>;
-    let nNewForms: number;
+    let srWords: Set<string> | undefined;
+    let nNewForms: number | undefined;
     let congratsMessage: string | undefined;
+    let statsClosedPromise: Promise<undefined>;
+    let statsClosedPromiseResolve: Function;
     
 
     onMount(async () => {
@@ -104,51 +106,54 @@
         }
     }
 
-    function onAnswbtnClick () {
+    async function onAnswbtnClick () {
 		if (phase === "prompting") {
             phase = "solutionShown"
             trySpeakCurrentTask()
 		} else if (phase === "solutionShown") {
-            const correctedWords = (srWords.difference($failedWords)).size // this is kinda cheating cause srWords are lemmas and failedWords are forms, but it's not easily fixable without saving the whole Token object somewhere
-            console.log(correctedWords);
-            
+            speechSynthesis.cancel()
+
+            if ($currentTask) {
+                $reviews.push(structuredClone($failedWords))
+                $reviews = $reviews
+                $reviewDocIds.push($currentTask.docId)
+                $reviewDocIds = $reviewDocIds
+                $failedWords.clear()
+                $failedWords = $failedWords
+                $currentTask = undefined
+            }         
+
+            let reviewsSentPromise = sendPendingReviews()
+
+
+            const correctedWords = (srWords?.difference($failedWords))?.size // this is kinda cheating cause srWords are lemmas and failedWords are forms, but it's not easily fixable without saving the whole Token object somewhere
             if (nNewForms || correctedWords) {
+                statsClosedPromise = new Promise<undefined>((resolve, reject) => {
+                    statsClosedPromiseResolve = resolve;
+                })
                 congratsMessage = 
                     (nNewForms ? `You just encountered ${nNewForms} new words!\n` : '')
                     + (correctedWords ? `You remembered ${correctedWords} word families you had wrong before!\n` : '');
-            } else { //TODO: IMPORTANT: onStatsClose should be called while popup is shown. Maybe popup closing could be a promise and we wait for both the popup promise and the reviews sent promise to complete.
-                onStatsClose()
+
+                await statsClosedPromise
+            } 
+
+            solutionText = ''
+            loading = true
+
+            try {
+                await reviewsSentPromise
+            } catch (rejection) {
+                toast = "Offline. Your data was saved."
+                setTimeout(() => {
+                    goto('/catalog')
+                }, 1500);
+                return
             }
-		}
-    }
-
-    function onStatsClose() {
-        speechSynthesis.cancel()
-        loading = true
-
-        solutionText = ''
-        loading = true
-
-        if ($currentTask) {
-            $reviews.push(structuredClone($failedWords))
-            $reviews = $reviews
-            $reviewDocIds.push($currentTask.docId)
-            $reviewDocIds = $reviewDocIds
-            $failedWords.clear()
-            $failedWords = $failedWords
-            $currentTask = undefined
-        }         
-
-        sendPendingReviews()
-        .then(async _done => {        
+            
             nextTask(getUrlDoc())
             goto('/', {replaceState: true})
-        }, _offline => {
-            toast = "Offline. Your data was saved."
-            setTimeout(() => {
-                goto('/catalog') //TODO: filter catalog to only show cached documents      
-            }, 1500);
-        })
+		}
     }
 
     function onSoundClick() {
@@ -207,9 +212,14 @@
             $currentlyScrolledParagraphIndex = 0
         }
 
-        const [srWords_l, newForms_l] = await getUserTaskStats($targetLang, (String)(doc?.docId))
-        srWords = new Set(srWords_l)
-        nNewForms = newForms_l.length
+        try {
+            const [srWords_l, newForms_l] = await getUserTaskStats($targetLang, (String)(doc?.docId))
+            srWords = new Set(srWords_l)
+            nNewForms = newForms_l.length            
+        } catch (_offline) {
+            srWords = undefined
+            nNewForms = undefined
+        }
     }
 
 </script>
@@ -241,4 +251,4 @@
     $failedWords = [];
     location.reload();
 }}/>
-<AnimatedPopup message={congratsMessage} onClose={onStatsClose}/>
+<AnimatedPopup message={congratsMessage} onClose={statsClosedPromiseResolve}/>
