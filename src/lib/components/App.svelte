@@ -151,7 +151,7 @@
                 return
             }
             
-            nextTask(getUrlDoc())
+            nextTask(getUrlDoc()) // IMPROVEMENT: we could even pre-fetch the next task while stats popup is shown
             goto('/', {replaceState: true})
 		}
     }

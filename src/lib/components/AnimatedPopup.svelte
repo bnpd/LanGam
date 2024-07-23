@@ -1,14 +1,19 @@
 <script lang="ts">
 	 export let message: String | undefined;
      export let onClose: Function;
+
+	 function closeSelf() {
+		message = undefined; 
+		onClose();
+	 }
 </script>
 
 {#if message}
-	<div class="popup-container">
+	<div class="popup-container" on:click|self={closeSelf}>
 		<div class="popup">
 			<h1>Congratulations!</h1>
 			<p style="white-space: pre-line">{message}</p>
-			<button class="close-button" on:click={()=>{message = undefined; onClose();}}>Close</button>
+			<button class="close-button" on:click={closeSelf}>Close</button>
 		</div>
 	</div>
 {/if}
