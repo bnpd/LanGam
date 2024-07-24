@@ -15,6 +15,13 @@ export async function login(user, password) {
 	return pb.collection('users').authWithPassword(user, password);
 }
 
+/**
+ * @param {string} langId id of the language in pocketbase
+ */
+export async function getLangById(langId) {
+	return pb.collection('langs').getOne(langId);
+}
+
 
 // backend endpoint constants
 const ENDPOINT_SIGNUP = '/signup'

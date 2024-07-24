@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { login, newUserLang, signup } from '$lib/components/backend';
+    import { getLangById, login, newUserLang, signup } from '$lib/components/backend';
     import { goto } from '$app/navigation';
 	import { nativeLang, targetLang, user } from '$lib/stores';
   
@@ -15,10 +15,11 @@
             if (isSignup) {
                 await signup(formDataEntries.get('email')?.toString(), formDataEntries.get('password')?.toString(), formDataEntries.get('native_lang')?.toString())
             }
-            $user = (await login(formDataEntries.get('email')?.toString(), formDataEntries.get('password')?.toString())).record.id
+            let user_obj = (await login(formDataEntries.get('email')?.toString(), formDataEntries.get('password')?.toString())).record            
+            $user = user_obj.id
+            $nativeLang = (await getLangById(user_obj.native_lang)).shortcode.toLowerCase()
             $targetLang = 'pl'
             if (isSignup) {
-                $nativeLang = formDataEntries.get('native_lang')?.toString()
                 await newUserLang('pl')
             }
 
