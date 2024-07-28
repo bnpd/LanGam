@@ -10,10 +10,15 @@
 
     function onDictClick(event: Event) {
         event.preventDefault();
+        const start = Date.now();
         window.open((event.currentTarget as HTMLAnchorElement).href);
         
         setTimeout(() => {
-            window.open(`https://translate.google.com/?sl=${$targetLang}&tl=${$nativeLang}&text=${word}`);
+            if (Date.now() - start < 500) {
+                // If the elapsed time is less than 500ms, assume the app did not open
+                window.open(`https://translate.google.com/?sl=${$targetLang}&tl=${$nativeLang}&text=${word}`);
+            }
+
         }, 250);
     }
 </script>
