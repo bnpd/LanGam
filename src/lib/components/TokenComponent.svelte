@@ -10,16 +10,26 @@
 
     function onDictClick(event: Event) {
         event.preventDefault();
-        const start = Date.now();
-        window.open((event.currentTarget as HTMLAnchorElement).href);
-        
-        setTimeout(() => {
-            if (Date.now() - start < 500) {
-                // If the elapsed time is less than 500ms, assume the app did not open
-                window.open(`https://translate.google.com/?sl=${$targetLang}&tl=${$nativeLang}&text=${word}`);
-            }
+    
+        const translatorUrl = `https://translate.google.com/?sl=${$targetLang}&tl=${$nativeLang}&text=${word}`
 
-        }, 250);
+        const isAndroid = /Android/i.test(navigator.userAgent); // chech whether user agent matches /Android/ regex
+
+        const start = Date.now();
+        if (isAndroid) {
+            window.open((event.currentTarget as HTMLAnchorElement).href);
+            
+            setTimeout(() => {
+                if (Date.now() - start < 500) {
+                    // If the elapsed time is less than 500ms, assume the app did not open
+                    window.open(translatorUrl);
+                }
+
+            }, 250);
+        } else {
+            // If not on Android, directly go to Google Translate
+            window.open(translatorUrl);
+        }
     }
 </script>
 
