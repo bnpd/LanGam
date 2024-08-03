@@ -220,8 +220,9 @@
             $currentlyScrolledParagraphIndex = 0
         }
 
-        try {
-            const [srWords_l, newForms_l] = $user ? await getUserTaskStats($targetLang, (String)(doc?.docId)) : [["📖"], ["🧑‍💻", "📱", "➡️", "💬", "🌍", "👥", "🌐", "📝", "📚", "💡", "✨"]]
+        try {         
+            const [srWords_l, newForms_l] = $user ? await getUserTaskStats($targetLang, (String)(doc?.docId)) : [["ornage"], Object.values(doc?.title?.tokens).map(tok => tok.word).concat(Object.values(doc?.title?.tokens).map(tok => tok.word))]
+            console.log(newForms_l);
             srWords = new Set(srWords_l)
             nNewForms = newForms_l.length
         } catch (_offline) {
@@ -238,7 +239,7 @@
 <!-- Main Application -->
 <h1>Automated Language Learning AI</h1>
 {#if !$user}
-    <strong>In this demo text, you can learn the fabulous <em>Emoji</em> language. If you want to dive right in with Polish, hit sign up at the bottom.</strong>
+    <strong>In this demo text, you learn the fabulous <em>Drnuk</em> language (and how this app works).</strong> <!-- If you want to dive right in with Polish, create an account at the bottom.-->
 {/if}
 <ReaderComponent phase={phase} trySpeak={trySpeak} solutionText={solutionText} taskVisible={!loading} srWords={srWords} bind:this={readerComponent}/>
 <div>
