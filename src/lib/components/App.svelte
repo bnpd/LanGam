@@ -2,7 +2,7 @@
     import { onMount } from 'svelte';
     import ReaderComponent from './ReaderComponent.svelte';
     import WebPushSubscription from './WebPushSubscription.svelte';
-    import { backendPost, getTask, getUserTaskStats, sendReview } from './backend';
+    import { getTask, getUserTaskStats, sendReview } from './backend';
     import { user, nativeLang, targetLang, isSoundOn, ttsSpeed, currentTask, reviews, failedWords, reviewDocIds, currentlyScrolledParagraphIndex } from '$lib/stores';
 	import { goto } from '$app/navigation';
 	import Install from './Install.svelte';
@@ -10,6 +10,7 @@
 	import NavbarComponent from './NavbarComponent.svelte';
 	import ChatComponent from './ChatComponent.svelte';
 	import AnimatedPopup from './AnimatedPopup.svelte';
+	import DocumentC from '$lib/DocumentC';
 
     const answbtnTxtWhilePrompting = "Show translation"
     const answbtnTxtWhileSolutionShown = "Next"
@@ -34,8 +35,9 @@
         let urlparams = new URLSearchParams(window.location.search)
 
         if (!$user) {
-            goto('/login')
-            return;
+            $targetLang = 'emoji'
+            $nativeLang = 'en'
+            $isSoundOn = false
         }
 
 
@@ -86,7 +88,7 @@
 
     function setVoice() {
         const separator = speechSynthesis.getVoices()[0].lang.includes('-') ? '-' : '_'
-        let voices_in_lang = speechSynthesis.getVoices().filter(voice=>{return voice.lang.split(separator)[0].big()===$targetLang.big()})
+        let voices_in_lang = speechSynthesis.getVoices().filter(voice=>{return voice.lang.split(separator)[0].toUpperCase()===$targetLang.toUpperCase()})
         if (voices_in_lang.length!==0) {
             voice = voices_in_lang[0]
         }
@@ -195,15 +197,21 @@
 
 
     async function nextTask(docId: string | null, restoreScrollPosition: boolean = false){
-        let doc = await getTask($targetLang, docId).catch(_offline => {
-            toast = "Text has not been downloaded offline. Going to catalog."
-            setTimeout(() => {
-                goto('/catalog') //TODO: filter catalog to only show cached documents      
-            }, 2000);
-            return undefined
-        })
+        let doc        
+        if (!$user) { //anonymous mode
+            doc = DocumentC.getSampleDoc()
+        } else {
+            doc = await getTask($targetLang, docId).catch(_offline => {
+                toast = "Text has not been downloaded offline. Going to catalog."
+                setTimeout(() => {
+                    goto('/catalog')   
+                }, 2000);
+                return undefined
+            })
+        }
+        
         if (doc) loading = false;
-        phase = "prompting"        
+        phase = "prompting"
         $currentTask = doc
         
         solutionText = doc?.title?.translations[$nativeLang] + '\n\n' + doc?.text?.translations[$nativeLang]
@@ -213,9 +221,9 @@
         }
 
         try {
-            const [srWords_l, newForms_l] = await getUserTaskStats($targetLang, (String)(doc?.docId))
+            const [srWords_l, newForms_l] = $user ? await getUserTaskStats($targetLang, (String)(doc?.docId)) : [["📖"], ["🧑‍💻", "📱", "➡️", "💬", "🌍", "👥", "🌐", "📝", "📚", "💡", "✨"]]
             srWords = new Set(srWords_l)
-            nNewForms = newForms_l.length            
+            nNewForms = newForms_l.length
         } catch (_offline) {
             srWords = undefined
             nNewForms = undefined
@@ -229,6 +237,9 @@
 
 <!-- Main Application -->
 <h1>Automated Language Learning AI</h1>
+{#if !$user}
+    <strong>In this demo text, you can learn the fabulous <em>Emoji</em> language. If you want to dive right in with Polish, hit sign up at the bottom.</strong>
+{/if}
 <ReaderComponent phase={phase} trySpeak={trySpeak} solutionText={solutionText} taskVisible={!loading} srWords={srWords} bind:this={readerComponent}/>
 <div>
     <button id="btnSound" on:click={onSoundClick}>{$isSoundOn ? '🔊' : '🔈'}</button>
@@ -243,9 +254,13 @@
 <ChatComponent readerComponent={readerComponent}/>
 <NavbarComponent>
     <button on:click={()=>goto("/catalog")}>Texts</button>
-    <button on:click={()=>goto("/lists")}>My vocab</button>
     <Install/>
-    <WebPushSubscription/>
+    {#if $user}
+        <button on:click={()=>goto("/lists")}>My vocab</button>
+        <WebPushSubscription/>
+    {:else}
+        <button on:click={()=>goto("/signup")}><b>Sign up 👤</b></button>
+    {/if}
 </NavbarComponent>
 <Toast message={toast} textReject={textRejectToast} onReject={() => {
     $failedWords = [];
