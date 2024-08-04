@@ -115,7 +115,7 @@
 		} else if (phase === "solutionShown") {
             speechSynthesis.cancel()
 
-            if ($currentTask) {
+            if ($currentTask && $user) {
                 $reviews.push(structuredClone($failedWords))
                 $reviews = $reviews
                 $reviewDocIds.push($currentTask.docId)
@@ -153,8 +153,12 @@
                 return
             }
             
-            nextTask(getUrlDoc()) // IMPROVEMENT: we could even pre-fetch the next task while stats popup is shown
-            goto('/', {replaceState: true})
+            if ($user) {
+                nextTask(getUrlDoc()) // IMPROVEMENT: we could even pre-fetch the next task while stats popup is shown
+                goto('/', {replaceState: true})
+            } else {
+                goto('/signup')
+            }
 		}
     }
 
