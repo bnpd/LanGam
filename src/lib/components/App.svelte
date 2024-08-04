@@ -14,6 +14,7 @@
 
     const answbtnTxtWhilePrompting = "Show translation"
     const answbtnTxtWhileSolutionShown = "Next"
+    const answbtnTxtWhileChatting = "Next Text"
     const TOAST_REDIRECTED_SAVED_TASK = "Your selected text has been queued cause you have a saved text."
     const TEXT_REJECT_SAVED_TASK = "Discard saved"
 
@@ -27,8 +28,10 @@
     let srWords: Set<string> | undefined;
     let nNewForms: number | undefined;
     let congratsMessage: string | undefined;
-    let statsClosedPromise: Promise<undefined>;
+    let statsClosedPromise: Promise<boolean>;
     let statsClosedPromiseResolve: Function;
+    let reviewsSentPromise: Promise<undefined>;
+    $: chatFocussed = phase === 'chatting'; // focus chat when entering chatting phase (ChatComponent can still manage it's focus independently after this, e.g. unfocus even though we are in chatting phase)
     
 
     onMount(async () => {
@@ -122,24 +125,35 @@
                 $reviewDocIds = $reviewDocIds
                 $failedWords.clear()
                 $failedWords = $failedWords
-                $currentTask = undefined
-            }         
+            }
 
-            let reviewsSentPromise = sendPendingReviews()
+            reviewsSentPromise = sendPendingReviews()
 
 
             const correctedWords = (srWords?.difference($failedWords))?.size // this is kinda cheating cause srWords are lemmas and failedWords are forms, but it's not easily fixable without saving the whole Token object somewhere
             if (nNewForms || correctedWords) {
-                statsClosedPromise = new Promise<undefined>((resolve, reject) => {
-                    statsClosedPromiseResolve = resolve;
+                statsClosedPromise = new Promise<boolean>((resolve, reject) => {
+                    statsClosedPromiseResolve = resolve
                 })
                 congratsMessage = 
                     (nNewForms ? `You just encountered ${nNewForms} new words!\n` : '')
                     + (correctedWords ? `You remembered ${correctedWords} word families you had wrong before!\n` : '');
 
-                await statsClosedPromise
-            } 
+                let goToChat = await statsClosedPromise
 
+                if (goToChat) {
+                    phase = "chatting"
+                    
+                } else {
+                    phase = "done"
+                }
+            } 
+        } else if (phase === 'chatting') {
+            phase = 'done'
+        }
+
+        if (phase === "done") {
+            $currentTask = undefined
             solutionText = ''
             loading = true
 
@@ -217,6 +231,8 @@
         if (doc) loading = false;
         phase = "prompting"
         $currentTask = doc
+        console.log(doc);
+        
         
         solutionText = doc?.title?.translations[$nativeLang] + '\n\n' + doc?.text?.translations[$nativeLang]
 
@@ -253,10 +269,12 @@
             {answbtnTxtWhilePrompting}
         {:else if phase === 'solutionShown'}
             {answbtnTxtWhileSolutionShown}
+        {:else if phase === 'chatting'}
+            {answbtnTxtWhileChatting}
         {/if}
     </button>
 </div>
-<ChatComponent readerComponent={readerComponent}/>
+<ChatComponent readerComponent={readerComponent} chatFocussed={chatFocussed}/>
 <NavbarComponent>
     <button on:click={()=>goto("/catalog")}>Texts</button>
     <Install/>
@@ -271,4 +289,4 @@
     $failedWords = [];
     location.reload();
 }}/>
-<AnimatedPopup message={congratsMessage} onClose={statsClosedPromiseResolve}/>
+<AnimatedPopup message={congratsMessage} onClose={statsClosedPromiseResolve} chatPrompt={$currentTask?.question?.text}/>

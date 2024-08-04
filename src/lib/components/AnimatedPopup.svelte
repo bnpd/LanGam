@@ -1,21 +1,30 @@
 <script lang="ts">
+	import BadgeComponent from "./BadgeComponent.svelte";
+
 	 export let message: String | undefined;
      export let onClose: Function;
+	 export let chatPrompt: String | undefined = undefined;
 
-	 function closeSelf() {
+	 function closeSelf(goToChat: boolean) {
 		message = undefined; 
-		onClose();
+		onClose(goToChat);
 	 }
 </script>
 <!-- svelte-ignore a11y-no-static-element-interactions -->
 <!-- svelte-ignore a11y-click-events-have-key-events -->
 
 {#if message}
-	<div class="popup-container" on:click|self={closeSelf}>
+	<div class="popup-container" on:click|self={() => closeSelf(false)}>
 		<div class="popup">
 			<h1>Congratulations!</h1>
 			<p style="white-space: pre-line">{message}</p>
-			<button class="close-button" on:click={closeSelf}>Close</button>
+			{#if chatPrompt}
+				<br>
+				<p>Continue chatting about the topic:</p>
+				<p><em><strong><BadgeComponent text='AI' tooltip='Chat with AI to advance your speaking skills'/></strong>&nbsp;{chatPrompt}</em></p>
+				<button class="close-to-chat-button" on:click={() => closeSelf(true)}>Chat</button>
+			{/if}
+			<button class="close-button" on:click={() => closeSelf(false)}>Close</button>
 		</div>
 	</div>
 {/if}
@@ -58,20 +67,5 @@
 		to {
 			transform: translateY(0);
 		}
-	}
-
-	.close-button {
-		background-color: #007bff;
-		color: white;
-		border: none;
-		padding: 0.5rem 1rem;
-		margin-top: 1rem;
-		border-radius: 5px;
-		cursor: pointer;
-		transition: background-color 0.3s;
-	}
-
-	.close-button:hover {
-		background-color: #0056b3;
 	}
 </style>

@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { currentTask, failedWords, targetLang, user } from "$lib/stores";
+	import BadgeComponent from "./BadgeComponent.svelte";
 	import ReaderComponent from "./ReaderComponent.svelte";
 	import { sendChat } from "./backend";
 
@@ -10,8 +11,7 @@
      */
     $: lastFailed = Array.from($failedWords).at(-1);
     $: lastFailedLemma = lastFailed ? findLemma(lastFailed) : undefined
-    $: if ($currentTask) response = undefined; // reset response on changes to currentTask
-    let chatFocussed: boolean;
+    $: if ($currentTask) response = $currentTask?.question?.text; // reset response on changes to currentTask
     $: if (typeof document !== 'undefined') {            
             let mainContent = document?.getElementById('contentbox')
             if (mainContent) {
@@ -20,10 +20,11 @@
         }
     
     export let readerComponent: ReaderComponent;
-
+    export let chatFocussed: boolean = false;
+    let response: string | undefined;
     let chatPrompt: string | undefined
-    let response: string | undefined
     let iChat: HTMLDivElement
+    let loading: boolean = false
 
     /**
      * Finds the first occurrence of word in the text and returns the corresponding lemma (thus not necessarily the lemma for that ocurrence that the user clicked)
@@ -39,14 +40,18 @@
     }
 
     async function onClickChatSuggestion(e: Event) {
+        loading = true
         response = $user ? await sendChat((e.currentTarget as HTMLButtonElement).innerText, undefined, undefined, readerComponent.getVisibleParagraphs())
                          : ANON_RESPONSE
+        loading = false
     }
 
     async function onSubmitChatPrompt(e: Event) {
         if (chatPrompt) {
+            loading = true
             response = $user ? await sendChat(chatPrompt, $targetLang, $currentTask.docId, undefined)
                              : ANON_RESPONSE
+            loading = false
         } else {
             iChat?.focus()
         }
@@ -54,8 +59,10 @@
 </script>
 
 <div id="chatComponent" on:focus|capture={()=>{chatFocussed = true}} on:focusout|capture={()=>{chatFocussed = false}}>
-    {#if response && chatFocussed}
-        <div class="boxBig" style="max-height: 18vh; overflow-y: scroll;" id="responseBox">{response}</div>
+    {#if response && chatFocussed || loading}
+        <div class="boxBig" class:loading style="max-height: 18vh; overflow-y: scroll;" id="responseBox">
+            <em><strong><BadgeComponent text='AI' tooltip="AI's response"/></strong></em>&nbsp;{response}
+        </div>
     {/if}
     <div>
         <button class="promptSuggestion" on:click={onClickChatSuggestion}>
