@@ -233,9 +233,10 @@ input[type="text"], input[type="email"], input[type="password"] {
   border-style: dotted;
   animation: loading-indicator 1.2s linear infinite;
   visibility: visible;
+  margin: auto;
 }
 
-@keyframes loading {
+@keyframes loading-indicator {
   0% {
     transform: rotate(0deg);
   }
