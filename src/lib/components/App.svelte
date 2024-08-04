@@ -35,7 +35,7 @@
         let urlparams = new URLSearchParams(window.location.search)
 
         if (!$user) {
-            $targetLang = 'emoji'
+            $targetLang = 'pl'
             $nativeLang = 'en'
             $isSoundOn = false
         }

@@ -145,7 +145,7 @@ export async function getUserTaskStats(targetLang, docId){
  * @param {any} query
  */
 export async function getTopTasks(targetLang, query){
-	return backendGet(EndpointGetTopTasks(targetLang, JSON.stringify(query)))
+	return backendGet(EndpointGetTopTasks(targetLang, JSON.stringify(query)), false)
 }
 
 /** Check whether a task is available. SHOULD ONLY BE USED WHEN OFFLINE.

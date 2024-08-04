@@ -2,6 +2,8 @@
 	import { currentTask, failedWords, targetLang, user } from "$lib/stores";
 	import ReaderComponent from "./ReaderComponent.svelte";
 	import { sendChat } from "./backend";
+
+    const ANON_RESPONSE = 'AI cannot help with the Drnuk language yet - but sign up to get help with Polish.'
     
     /**
      * @type {string | undefined}
@@ -35,6 +37,20 @@
             }
         }
     }
+
+    async function onClickChatSuggestion(e: Event) {
+        response = $user ? await sendChat((e.currentTarget as HTMLButtonElement).innerText, undefined, undefined, readerComponent.getVisibleParagraphs())
+                         : ANON_RESPONSE
+    }
+
+    async function onSubmitChatPrompt(e: Event) {
+        if (chatPrompt) {
+            response = $user ? await sendChat(chatPrompt, $targetLang, $currentTask.docId, undefined)
+                             : ANON_RESPONSE
+        } else {
+            iChat?.focus()
+        }
+    }
 </script>
 
 <div id="chatComponent" on:focus|capture={()=>{chatFocussed = true}} on:focusout|capture={()=>{chatFocussed = false}}>
@@ -42,22 +58,22 @@
         <div class="boxBig" style="max-height: 18vh; overflow-y: scroll;" id="responseBox">{response}</div>
     {/if}
     <div>
-        <button class="promptSuggestion" on:click={async (e) => {response = await sendChat(e.currentTarget.innerText, undefined, undefined, readerComponent.getVisibleParagraphs())}}>
+        <button class="promptSuggestion" on:click={onClickChatSuggestion}>
             How is the past tense formed?
         </button>
         {#if lastFailed}
             {#if lastFailedLemma !== lastFailed}
-                <button class="promptSuggestion" on:click={async (e) => {response = await sendChat(e.currentTarget.innerText, undefined, undefined, readerComponent.getVisibleParagraphs())}}>
+                <button class="promptSuggestion" on:click={onClickChatSuggestion}>
                     Why is it {lastFailed} and not {lastFailedLemma} here?
                 </button>
             {/if}
-            <button class="promptSuggestion" on:click={async (e) => {response = await sendChat(e.currentTarget.innerText, undefined, undefined, readerComponent.getVisibleParagraphs())}}>
+            <button class="promptSuggestion" on:click={onClickChatSuggestion}>
                 Why is {lastFailed} used here?
             </button>
         {/if}
     </div>
     <div contenteditable id="iChat" data-placeholder="Ask me ✨" bind:textContent={chatPrompt} bind:this={iChat}/>
-    <button id="submit" on:click={async () => {if (chatPrompt) {response = await sendChat(chatPrompt, $targetLang, $currentTask.docId, undefined)} else {iChat?.focus()}}}><b><em>
+    <button id="submit" on:click={onSubmitChatPrompt}><b><em>
         {#if chatPrompt}
         ➥
         {:else}

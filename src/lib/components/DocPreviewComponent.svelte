@@ -1,7 +1,7 @@
 <script lang="ts">
     import DocumentC from "$lib/DocumentC";
 	import { isTaskCached } from "./backend";
-	import { targetLang } from "$lib/stores";
+	import { targetLang, user } from "$lib/stores";
 
     //export let img: ; // included in DocumentC?
     export let docId: number;
@@ -14,7 +14,7 @@
 {#if offline}
     {#await isTaskCached($targetLang, docId.toString()) then available}
         {#if available}
-            <a href={"/?doc="+docId}>
+            <a href={$user ? "/?doc="+docId : "/signup"}>
                 <h4>
                     {doc.title.text.replaceAll('#', '')}
                 </h4>
@@ -25,7 +25,7 @@
         {/if}
     {/await}
 {:else}
-    <a href={"/?doc="+docId}>
+    <a href={$user ? "/?doc="+docId : "/signup"}>
         <h4>
             {doc.title.text.replaceAll('#', '')}
         </h4>
