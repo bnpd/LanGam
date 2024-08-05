@@ -1,9 +1,11 @@
 * {
   --button-height: 40px;
+  --body-background-color: #eeeeee;
+  --body-background-color-half-opaque: #eeeeee80;
 }
 
 body {
-  background-color: #dddddd;
+  background-color: var(--body-background-color);
   font-family: system-ui, Arial, Helvetica, sans-serif;
   text-align: center;
   padding: 0 5px;
@@ -56,11 +58,8 @@ input[type="text"], input[type="email"], input[type="password"] {
 }
 
 .boxBig {
-  border-color: darkblue;
-  padding: 20px;
-  border-width: 3px;
-  border-style: solid;
-  background-color: lightblue;
+  padding: 0 20px 0 20px;
+  background-color: aliceblue;
   border-radius: 10px;
   margin: 5px;
 }
@@ -92,9 +91,13 @@ input[type="text"], input[type="email"], input[type="password"] {
 }
 
 #divTask, #solutionField {
-  height: 50%;
+  height: calc(50% - 0.75em);
   overflow-y: scroll;
   overflow-x: hidden;
+}
+
+#divTask::-webkit-scrollbar, #solutionField::-webkit-scrollbar {
+  display: none;
 }
 
 #solutionField {
@@ -251,7 +254,11 @@ input[type="text"], input[type="email"], input[type="password"] {
 @media only screen and (max-width: 767px) {
 
   h1 {
-    font-size: small;
+    font-size: medium;
+  }
+
+  h3 {
+    margin: 0.5em 0;
   }
 
   #divTask,
@@ -273,5 +280,9 @@ input[type="text"], input[type="email"], input[type="password"] {
   body {
     width: 60vw;
     margin: 20px auto;
+  }
+
+  .boxBig {
+    padding: 10px 40px 0 40px;
   }
 }

@@ -11,6 +11,7 @@
 	import ChatComponent from './ChatComponent.svelte';
 	import AnimatedPopup from './AnimatedPopup.svelte';
 	import DocumentC from '$lib/DocumentC';
+	import TitleWithBackgroundImageComponent from './TitleWithBackgroundImageComponent.svelte';
 
     const answbtnTxtWhilePrompting = "Show translation"
     const answbtnTxtWhileSolutionShown = "Next"
@@ -257,7 +258,7 @@
 
 
 <!-- Main Application -->
-<h1>Automated Language Learning AI</h1>
+<TitleWithBackgroundImageComponent>Automated Language Learning AI</TitleWithBackgroundImageComponent>
 {#if !$user}
     <strong>In this demo text, you learn the fabulous <em>Drnuk</em> language (and how this app works).</strong> <!-- If you want to dive right in with Polish, create an account at the bottom.-->
 {/if}

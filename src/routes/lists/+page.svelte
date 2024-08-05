@@ -6,6 +6,7 @@ import { targetLang } from '$lib/stores';
 import '../global.css';
 import './lists.css';
 	import { goto } from "$app/navigation";
+	import TitleWithBackgroundImageComponent from "$lib/components/TitleWithBackgroundImageComponent.svelte";
 
 let scheduledTokens: {[key: string]: Token} = {}
 let seenTokens: {[key: string]: string} = {}
@@ -54,6 +55,7 @@ function reloadLists() {
   <meta name="description" content="Overview of your learned words - learn languages the fun way: talk about texts with AI.">
 </svelte:head>
 
+<TitleWithBackgroundImageComponent>Your vocab</TitleWithBackgroundImageComponent>
 <div>
   <div id="divLeft">
     <button id="btnExportSearchList" on:click={() => exportObject(scheduledTokens, 'Spaced Repetition Words')}>Export</button>

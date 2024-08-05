@@ -4,6 +4,7 @@
 	import DocPreviewListComponent from "./DocPreviewListComponent.svelte";
 	import DocPreviewComponent from "./DocPreviewComponent.svelte";
 	import BadgeComponent from "./BadgeComponent.svelte";
+	import TitleWithBackgroundImageComponent from "./TitleWithBackgroundImageComponent.svelte";
 
     let filters: Array<{title: string; filter: {[filter: string]: string}}> = [
         {title: 'Short Stories', filter: {content_type: 'Story'}},
@@ -20,13 +21,13 @@
 </script>
 
 <svelte:window on:offline={()=>{offline = true}} on:online={()=>{offline = false}}></svelte:window>
-<h1>
+<TitleWithBackgroundImageComponent>
     Your
     {#if offline}
         <em>📴line</em>
     {/if}
     Catalog
-</h1>
+</TitleWithBackgroundImageComponent>
 {#if $user}
     {#if !offline}
         {#await getTask($targetLang) then doc}

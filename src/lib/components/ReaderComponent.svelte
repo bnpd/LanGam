@@ -43,6 +43,7 @@
   }
 
   function onScroll(e: Event) {
+    // unfocus any other element (e.g. chat response window)
     (document?.activeElement as HTMLElement)?.blur();
     
     // Scroll the solutionField to the same paragraph index as divTask
@@ -51,6 +52,12 @@
       $currentlyScrolledParagraphIndex = newScrollIndex
       scrollToParagraph(solutionField, newScrollIndex)
     }
+
+    // adjust height of the background image (reaches 100hv when fully scrolled down)
+    console.log((divTask?.scrollTop + divTask?.offsetHeight) / divTask?.scrollHeight);
+    
+    
+    document.body?.style?.setProperty('--header-before-height', `${divTask?.scrollTop / divTask?.scrollHeight * 100 + 10}vh`);
   }
 
   // Find index of the paragraph at the top/mid/bottom (depending on ref param) position of divTask 
@@ -82,6 +89,8 @@
    * @param {DocumentC} doc Document containing the task
    */
   function setTask(doc: DocumentC) {        
+    console.log(doc?.title?.text);
+    
     docIdOfCurrentTask = $currentTask.docId // keep track of currentTask so that we don't do all the work of setTask twice
 
     divTask.scrollTop = 0
