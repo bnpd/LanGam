@@ -54,9 +54,6 @@
     }
 
     // adjust height of the background image (reaches 100hv when fully scrolled down)
-    console.log((divTask?.scrollTop + divTask?.offsetHeight) / divTask?.scrollHeight);
-    
-    
     document.body?.style?.setProperty('--header-before-height', `${divTask?.scrollTop / divTask?.scrollHeight * 100 + 10}vh`);
   }
 
@@ -190,7 +187,7 @@
 
 </script>
 
-<div class="boxBig" id="contentbox">
+<div class="card" id="contentbox">
   <div id="divTask" class:hidden={!taskVisible} bind:this={divTask} on:scroll={onScroll}>
     {#each taskParagraphs as taskParagraph}
       <svelte:element this={taskParagraph.htmlTag}>

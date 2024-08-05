@@ -31,24 +31,30 @@
 {#if $user}
     {#if !offline}
         {#await getTask($targetLang) then doc}
+        <div class="card">
             <em class='forceOneLine'>
                 <BadgeComponent text='AI' tooltip='This text optimizes the amount of words that are due for spaced repetition to help you keep your vocabulary fresh.'/>
                 Recommended: 
                 <DocPreviewComponent docId={doc.docId} doc={doc}/> 
             </em>
+        </div>
         {/await}
     {/if}
 {:else}
-    <em class='forceOneLine'>
-        <BadgeComponent text='AI' tooltip='This text optimizes the amount of words that are due for spaced repetition to help you keep your vocabulary fresh.'/>
-        Recommended: 
-        <a href="/"><h4>Waht AlAli cna do for yuo</h4></a>
-    </em>
-    <p>Create an account so we can save your progress when you read any of the following stories:</p>
+    <div class="card">
+        <em class='forceOneLine'>
+            <BadgeComponent text='AI' tooltip='This text optimizes the amount of words that are due for spaced repetition to help you keep your vocabulary fresh.'/>
+            Recommended: 
+            <a href="/"><h4>Waht AlAli cna do for yuo</h4></a>
+        </em>
+        <p>Create an account so we can save your progress when you read any of the following stories:</p>
+    </div>
 {/if}
 <div style:opacity={$user ? '1' : '0.3'}>
     {#each filters as filter}
-        <h2>{filter.title}</h2>
-        <DocPreviewListComponent filter={filter.filter}/>    
+        <div class="card">
+            <h2>{filter.title}</h2>
+            <DocPreviewListComponent filter={filter.filter}/>    
+        </div>
     {/each}
 </div>

@@ -72,7 +72,7 @@
 
 <div id="chatComponent" on:focus|capture={()=>{chatFocussed = true}} on:focusout|capture={()=>{chatFocussed = false}}>
     {#if response && chatFocussed || loading}
-        <div class="boxBig" class:loading style="max-height: 18vh; overflow-y: scroll;" id="responseBox">
+        <div class="card" class:loading style="max-height: 18vh; overflow-y: scroll;" id="responseBox">
             <em><strong><BadgeComponent text='AI' tooltip="AI's response"/></strong></em>&nbsp;{response}
         </div>
     {/if}

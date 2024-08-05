@@ -3,6 +3,7 @@
     import { goto } from '$app/navigation';
 	import { nativeLang, targetLang, user } from '$lib/stores';
 	import { ClientResponseError } from 'pocketbase';
+	import TitleWithBackgroundImageComponent from './TitleWithBackgroundImageComponent.svelte';
   
     export let isSignup: boolean
   
@@ -55,10 +56,8 @@
     }
   </script>
 
-<form class="boxBig" on:submit|preventDefault={onSubmit}>
-	<h2>
-        {isSignup ? 'Welcome :)' : 'Welcome back =)'}
-    </h2>
+<TitleWithBackgroundImageComponent>{isSignup ? 'Welcome :)' : 'Welcome back =)'}</TitleWithBackgroundImageComponent>
+<form class="card" on:submit|preventDefault={onSubmit}>
     <a href={isSignup ? "/login" : "signup"}>{isSignup ? "Already registered? Login here" : "New here? Sign up"}</a>
     <br><br>
 	<input type="email" name="email" placeholder="Email" autocomplete="email" id="email" required />
