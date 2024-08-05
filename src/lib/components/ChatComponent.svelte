@@ -40,18 +40,30 @@
     }
 
     async function onClickChatSuggestion(e: Event) {
+        response = ''
         loading = true
-        response = $user ? await sendChat((e.currentTarget as HTMLButtonElement).innerText, undefined, undefined, readerComponent.getVisibleParagraphs())
+        try {
+            response = $user ? await sendChat((e.currentTarget as HTMLButtonElement).innerText, undefined, undefined, readerComponent.getVisibleParagraphs())
                          : ANON_RESPONSE
-        loading = false
+        } catch (e) {
+            response = 'Cannot connect, please try again'
+        } finally {
+            loading = false
+        }
     }
 
     async function onSubmitChatPrompt(e: Event) {
         if (chatPrompt) {
+            response = ''
             loading = true
-            response = $user ? await sendChat(chatPrompt, $targetLang, $currentTask.docId, undefined)
-                             : ANON_RESPONSE
-            loading = false
+            try {
+                response = $user ? await sendChat(chatPrompt, $targetLang, $currentTask.docId, undefined)
+                                 : ANON_RESPONSE
+            } catch (e) {
+                response = 'Cannot connect, please try again'
+            } finally {
+                loading = false
+            }
         } else {
             iChat?.focus()
         }
