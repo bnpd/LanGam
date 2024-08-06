@@ -57,11 +57,15 @@ input[type="text"], input[type="email"], input[type="password"] {
   border-radius: 5px;
 }
 
-.boxBig {
-  padding: 0 20px 0 20px;
+.card {
+  padding: 20px;
   background-color: aliceblue;
   border-radius: 10px;
   margin: 5px;
+}
+
+.card > *:first-child, .card > *:first-child > *:first-child {
+  margin-top: 0;
 }
 
 .forceOneLine > * {
@@ -91,6 +95,7 @@ input[type="text"], input[type="email"], input[type="password"] {
 }
 
 #divTask, #solutionField {
+  padding: 0 0.2em;
   height: calc(50% - 0.75em);
   overflow-y: scroll;
   overflow-x: hidden;
@@ -282,7 +287,11 @@ input[type="text"], input[type="email"], input[type="password"] {
     margin: 20px auto;
   }
 
-  .boxBig {
-    padding: 10px 40px 0 40px;
+  .card {
+    padding: 40px;
+  }
+
+  #divTask, #solutionField {
+    padding: 0 0.5em;
   }
 }

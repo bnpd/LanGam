@@ -47,7 +47,7 @@
 	<title>Admin View - Automated Language Learning AI</title>
 </svelte:head>
 
-<form class="boxBig" on:submit|preventDefault={onSubmit}>
+<form class="card" on:submit|preventDefault={onSubmit}>
   <h1>Admin View</h1>
   <textarea name="title" placeholder="Paste your text here..." on:input={onTitleInput} bind:value={title} required></textarea>
   <textarea name="text" rows="20" placeholder="" bind:value={body} required></textarea>

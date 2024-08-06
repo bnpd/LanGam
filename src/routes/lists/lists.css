@@ -1,5 +1,5 @@
 #divLeft, #divRight {
-    width: 50%;
+    width: 37%;
     float: left;
     text-align: center;
 }
@@ -7,12 +7,9 @@
 ul {
     padding-left: 0;
     position: absolute;
-    width: 50%;
-    line-height: 35px;
+    width: 37%;
+    line-height: 2em;
     list-style: none;
-    color: rgb(0, 70, 70);
-    font-size: large;
-    overflow-x: auto;
 }
 
 li:hover {

@@ -57,7 +57,7 @@ function reloadLists() {
 
 <TitleWithBackgroundImageComponent>Your vocab</TitleWithBackgroundImageComponent>
 <div>
-  <div id="divLeft">
+  <div class="card" id="divLeft">
     <button id="btnExportSearchList" on:click={() => exportObject(scheduledTokens, 'Spaced Repetition Words')}>Export</button>
     <h1>
       Spaced Repetition
@@ -68,7 +68,7 @@ function reloadLists() {
       {/each}  
     </ul>
   </div>
-  <div id="divRight">
+  <div class="card" id="divRight">
     <button on:click={()=>goto("/")}>◄ Back</button>
     <h1>
       Seen
