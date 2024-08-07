@@ -9,7 +9,7 @@ body {
   font-family: system-ui, Arial, Helvetica, sans-serif;
   text-align: center;
   padding: 0 5px;
-  height: calc(100vh - 4*var(--button-height));
+  height: calc(100vh - 3.6*var(--button-height));
   display: flex; 
   flex-direction: column; 
 }
@@ -25,6 +25,7 @@ h4 {
 
 a {
   text-decoration: none;
+  color: darkblue;
 }
 
 p {
@@ -38,7 +39,7 @@ button, input[type="submit"] {
   height: var(--button-height);
   line-height: 34px;
   margin-top: 10px;
-  border-radius: 10px;
+  border-radius: 1em;
 }
 
 textarea {
@@ -57,15 +58,21 @@ input[type="text"], input[type="email"], input[type="password"] {
   border-radius: 5px;
 }
 
+hr { /* necessary to avoid corruption in flex-columns*/
+  width: 100%;
+}
+
 .card {
-  padding: 20px;
+  padding: 22px;
   background-color: aliceblue;
-  border-radius: 10px;
+  border-radius: 2em;
   margin: 5px;
+  box-shadow: #80808010 3px 5px;
 }
 
 .card > *:first-child, .card > *:first-child > *:first-child {
   margin-top: 0;
+  line-height: 1em;
 }
 
 .forceOneLine > * {
@@ -96,7 +103,8 @@ input[type="text"], input[type="email"], input[type="password"] {
 
 #divTask, #solutionField {
   padding: 0 0.2em;
-  height: calc(50% - 0.75em);
+  line-height: 1.8em;
+  flex-grow: 1;
   overflow-y: scroll;
   overflow-x: hidden;
 }
@@ -111,16 +119,22 @@ input[type="text"], input[type="email"], input[type="password"] {
 
 #answbtn, input[type="submit"] {
   margin: 5px auto;
+  padding: 0 1em;
   outline: none;
   background-color: darkblue;
-  color: white;
+  color: aliceblue;
+  height: 50px;
+  line-height: 45px;
+  font-size: large;
+  font-weight: bold;
   border-color: darkslategray;
 }
-
 #contentbox {
   text-align: justify;
-  height: 5em;
+  height: 5em; /* overridden by flex-grow, but has to be set*/
   flex-grow: 1;
+  display: flex; 
+  flex-direction: column; 
 }
 
 #toast {
@@ -191,7 +205,11 @@ input[type="text"], input[type="email"], input[type="password"] {
   max-height: calc(1.5*var(--button-height));
   box-sizing: border-box;
   padding: 12px calc(var(--button-height) + 2px);
-  overflow: scroll;
+  overflow: auto;
+}
+
+#iChat::-webkit-scrollbar {
+  display: none;
 }
 
 #iChat:empty::before {
@@ -268,13 +286,6 @@ input[type="text"], input[type="email"], input[type="password"] {
 
   #divTask,
   #solutionField {
-    font-size: large;
-    line-height: 1.8em;
-  }
-
-  #answbtn {
-    height: 50px;
-    line-height: 45px;
     font-size: large;
   }
 }

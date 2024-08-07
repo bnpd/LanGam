@@ -58,8 +58,6 @@
 
 <TitleWithBackgroundImageComponent>{isSignup ? 'Welcome :)' : 'Welcome back =)'}</TitleWithBackgroundImageComponent>
 <form class="card" on:submit|preventDefault={onSubmit}>
-    <a href={isSignup ? "/login" : "signup"}>{isSignup ? "Already registered? Login here" : "New here? Sign up"}</a>
-    <br><br>
 	<input type="email" name="email" placeholder="Email" autocomplete="email" id="email" required />
 	<input type="password" name="password" placeholder="Password" autocomplete="new-password" id="password" required minlength="8"/>
     {#if isSignup}
@@ -88,3 +86,11 @@
     <br>
     <input type="submit" value={isSignup ? "Register" : "Login"}>
 </form>
+<br>
+{#if isSignup}
+    <p>Already registered?</p>
+    <a href="/login">Go to login</a>
+{:else}
+    <p>New here?</p>
+    <a href="/signup">Register</a>
+{/if}

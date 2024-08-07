@@ -264,7 +264,6 @@
 {/if}
 <ReaderComponent phase={phase} trySpeak={trySpeak} solutionText={solutionText} taskVisible={!loading} srWords={srWords} bind:this={readerComponent}/>
 <div>
-    <button id="btnSound" on:click={onSoundClick}>{$isSoundOn ? '🔊' : '🔈'}</button>
     <button id="answbtn" class:loading on:click={onAnswbtnClick}>
         {#if phase === 'prompting'}
             {answbtnTxtWhilePrompting}
@@ -278,6 +277,7 @@
 <ChatComponent readerComponent={readerComponent} chatFocussed={chatFocussed}/>
 <NavbarComponent>
     <button on:click={()=>goto("/catalog")}>Texts</button>
+    <button id="btnSound" on:click={onSoundClick}>{$isSoundOn ? '🔊' : '🔈'}</button>
     <Install/>
     {#if $user}
         <button on:click={()=>goto("/lists")}>My vocab</button>
