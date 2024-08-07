@@ -254,10 +254,6 @@
 
 </script>
 
-
-
-
-<!-- Main Application -->
 <TitleWithBackgroundImageComponent>Automated Language Learning AI</TitleWithBackgroundImageComponent>
 {#if !$user}
     <strong>In this demo text, you learn the fabulous <em>Drnuk</em> language (and how this app works).</strong> <!-- If you want to dive right in with Polish, create an account at the bottom.-->

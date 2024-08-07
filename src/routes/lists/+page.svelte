@@ -41,16 +41,16 @@ function reloadLists() {
  * @param {any} content knownList / searchList
  * @param {string} filename How the exported file should be called
  */
- function exportObject(content: any, filename: string) {
-        // create download link, click it and remove it
-        const element = document.createElement('a')
-        element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(JSON.stringify(content)))
-        element.setAttribute('download', filename)
-        element.style.display = 'none'
-        document.body.appendChild(element)
-        element.click()
-        document.body.removeChild(element)
-}
+// function exportObject(content: any, filename: string) {
+//         // create download link, click it and remove it
+//         const element = document.createElement('a')
+//         element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(JSON.stringify(content)))
+//         element.setAttribute('download', filename)
+//         element.style.display = 'none'
+//         document.body.appendChild(element)
+//         element.click()
+//         document.body.removeChild(element)
+// }
 </script>
 
 <svelte:head>
@@ -61,9 +61,10 @@ function reloadLists() {
 <TitleWithBackgroundImageComponent>Your vocab</TitleWithBackgroundImageComponent>
 <div>
   <div id="divLeft">
-    <button id="btnExportSRList" on:click={() => exportObject(scheduledTokens, 'Spaced Repetition Words')}>Export</button>
+    <!--<button id="btnExportSRList" on:click={() => exportObject(scheduledTokens, 'Spaced Repetition Words')}>Export</button>-->
     <h1>
       Spaced Repetition
+      <span>{Object.keys(scheduledTokens).length ? "("+Object.keys(scheduledTokens).length+" words)" : ""}</span>
     </h1>
     <div id="ulSearchList">
       {#each Object.keys(scheduledTokens) as key}
@@ -75,15 +76,15 @@ function reloadLists() {
     </div>
   </div>
   <div id="divRight">
-    <button id="btnExportSeenList" on:click={() => exportObject(seenTokens, 'Seen Words')}>Export</button>
+    <!--<button id="btnExportSeenList" on:click={() => exportObject(seenTokens, 'Seen Words')}>Export</button>-->
     <h1>
       Seen
-      <span id="spanNKnown">{Object.keys(seenTokens).length ? "("+Object.keys(seenTokens).length+" families)" : ""}</span>
+      <span>{Object.keys(seenTokens).length ? "("+Object.keys(seenTokens).length+" families)" : ""}</span>
     </h1>
     <div id="ulKnownList">
       {#each Object.keys(seenTokens) as key}
-        <VocabListItem title={`Family: ${key}`}>
-          {`Forms: ${seenTokens[key].join(', ')}`}
+        <VocabListItem>
+          {seenTokens[key].join(', ')}
         </VocabListItem>
       {/each}  
     </div>
