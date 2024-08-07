@@ -21,20 +21,44 @@
   ],
   "screenshots": [
     {
-      "src": "/images/screenshot1.png",
-      "sizes": "864x1606",
+      "src": "/images/Screenshots/Long Story Screenshot.png",
+      "sizes": "1082x2402",
       "type": "image/png",
-      "label": "Main Page on an Smartphone",
-      "form_factor": "wide",
-      "platform": "web"
-    },
-    {
-      "src": "/images/screenshot1.png",
-      "sizes": "864x1606",
-      "type": "image/png",
-      "label": "Main Page on an Smartphone",
+      "label": "Story on an Smartphone",
       "form_factor": "narrow",
       "platform": "android"
+    },
+    {
+      "src": "/images/Screenshots/Catalog Screenshot.png",
+      "sizes": "1082x2402",
+      "type": "image/png",
+      "label": "Catalog on an Smartphone",
+      "form_factor": "narrow",
+      "platform": "android"
+    },
+    {
+      "src": "/images/Screenshots/Chat Screenshot.png",
+      "sizes": "515x1144",
+      "type": "image/png",
+      "label": "Chat function on an Smartphone",
+      "form_factor": "narrow",
+      "platform": "android"
+    },
+    {
+      "src": "/images/Screenshots/Culture Screenshot.png",
+      "sizes": "515x1144",
+      "type": "image/png",
+      "label": "Learn about local culture",
+      "form_factor": "narrow",
+      "platform": "android"
+    },
+    {
+      "src": "/images/Screenshots/Desktop.png",
+      "sizes": "1920x1080",
+      "type": "image/png",
+      "label": "Story on an PC",
+      "form_factor": "wide",
+      "platform": "web"
     }
   ],
   "shortcuts": [
