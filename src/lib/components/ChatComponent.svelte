@@ -75,6 +75,59 @@
     }
 </script>
 
+<style>
+    #iChat {
+      width: 100%;
+      min-height: var(--button-height);
+      border-radius: 20px;
+      background-color: aliceblue;
+      max-height: calc(1.5*var(--button-height));
+      box-sizing: border-box;
+      padding: 12px calc(var(--button-height) + 2px);
+      overflow: auto;
+    }
+    
+    #iChat::-webkit-scrollbar {
+      display: none;
+    }
+    
+    #iChat:empty::before {
+      content: attr(data-placeholder);
+      color: #999;
+      pointer-events: none;
+    }
+    
+    #iChat:focus {
+      outline-color: blue;
+    }
+    
+    #submitChat {
+      position: absolute;
+      right: 1px;
+      bottom: 1px;
+      border-radius: 20px;
+      width: var(--button-height);
+      height: var(--button-height);
+    }
+    
+    #closeChat {
+      position: absolute;
+      left: 1px;
+      bottom: 1px;
+      border-radius: 20px;
+      width: var(--button-height);
+      height: var(--button-height);      
+    }
+    
+    #chatComponent {
+      width: 100%;
+      position: absolute;
+      bottom: 0;
+      margin-bottom: calc(var(--button-height) + 5px);
+      left: 0;
+    }
+</style>
+
 <div id="chatComponent" on:focus|capture={()=>{chatFocussed = true}} on:focusout|capture={()=>{chatFocussed = false}}>
     {#if chatHistory.length && chatFocussed || loading}
         {#each chatHistory as msg, i}
@@ -112,7 +165,10 @@
         {/if}
     </div>
     <div contenteditable id="iChat" data-placeholder="Ask me ✨" bind:textContent={chatPrompt} bind:this={iChat}/>
-    <button id="submit" on:click={onSubmitChatPrompt} disabled={loading}><b><em>
+    {#if chatFocussed && chatHistory.length}
+        <button id="closeChat" on:click={() => {document?.activeElement?.blur()}}>x</button>       
+    {/if}    
+    <button id="submitChat" on:click={onSubmitChatPrompt} disabled={loading}><b><em>
         {#if chatPrompt}
         ➥
         {:else}

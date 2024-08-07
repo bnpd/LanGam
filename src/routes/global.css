@@ -197,48 +197,6 @@ hr { /* necessary to avoid corruption in flex-columns*/
   border-bottom-right-radius: 20px;
 }
 
-#iChat {
-  width: 100%;
-  min-height: var(--button-height);
-  border-radius: 20px;
-  background-color: aliceblue;
-  max-height: calc(1.5*var(--button-height));
-  box-sizing: border-box;
-  padding: 12px calc(var(--button-height) + 2px);
-  overflow: auto;
-}
-
-#iChat::-webkit-scrollbar {
-  display: none;
-}
-
-#iChat:empty::before {
-  content: attr(data-placeholder);
-  color: #999;
-  pointer-events: none;
-}
-
-#iChat:focus {
-  outline-color: blue;
-}
-
-#submit {
-  position: absolute;
-  right: 1px;
-  bottom: 1px;
-  border-radius: 20px;
-  width: var(--button-height);
-  height: var(--button-height);
-}
-
-#chatComponent {
-  width: 100%;
-  position: absolute;
-  bottom: 0;
-  margin-bottom: calc(var(--button-height) + 5px);
-  left: 0;
-}
-
 .hidden {
   visibility: hidden;
 }
