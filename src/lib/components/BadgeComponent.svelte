@@ -5,9 +5,12 @@
     export let tooltip = '';
     let showTooltip = false;
   
-    function toggleTooltip() {
-      showTooltip = !showTooltip;
-    }
+  function toggleTooltip() {
+    const tmp = showTooltip
+    setTimeout(() => { // timeout avoids mouseenter & click events cancelling each other out on touch screens
+      showTooltip = !tmp;        
+    }, 10);
+  }
   </script>
   
   <style>
