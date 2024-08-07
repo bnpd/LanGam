@@ -7,9 +7,12 @@ import '../global.css';
 import './lists.css';
 	import { goto } from "$app/navigation";
 	import TitleWithBackgroundImageComponent from "$lib/components/TitleWithBackgroundImageComponent.svelte";
+	import VocabListItem from "$lib/components/VocabListItem.svelte";
+	import NavbarComponent from "$lib/components/NavbarComponent.svelte";
+	import BadgeComponent from "$lib/components/BadgeComponent.svelte";
 
 let scheduledTokens: {[key: string]: Token} = {}
-let seenTokens: {[key: string]: string} = {}
+let seenTokens: {[key: string]: string[]} = {}
 onMount(() => {
   reloadLists()
 })
@@ -57,27 +60,35 @@ function reloadLists() {
 
 <TitleWithBackgroundImageComponent>Your vocab</TitleWithBackgroundImageComponent>
 <div>
-  <div class="card" id="divLeft">
-    <button id="btnExportSearchList" on:click={() => exportObject(scheduledTokens, 'Spaced Repetition Words')}>Export</button>
+  <div id="divLeft">
+    <button id="btnExportSRList" on:click={() => exportObject(scheduledTokens, 'Spaced Repetition Words')}>Export</button>
     <h1>
       Spaced Repetition
     </h1>
-    <ul id="ulSearchList">
+    <div id="ulSearchList">
       {#each Object.keys(scheduledTokens) as key}
-      <li>{scheduledTokens[key].word + ": " + scheduledTokens[key].due?.day + "." + scheduledTokens[key].due?.month + "." + scheduledTokens[key].due?.year}</li>
+        <VocabListItem title={scheduledTokens[key].word} >
+          <BadgeComponent text='AI' tooltip="Estimate when you are likely to forget it, according to Spaced Repetition science. We'll try to show it before that day."/>
+          Due: {Math.min(9999, scheduledTokens[key]?.interval)}&nbsp;d
+        </VocabListItem>
       {/each}  
-    </ul>
+    </div>
   </div>
-  <div class="card" id="divRight">
-    <button on:click={()=>goto("/")}>◄ Back</button>
+  <div id="divRight">
+    <button id="btnExportSeenList" on:click={() => exportObject(seenTokens, 'Seen Words')}>Export</button>
     <h1>
       Seen
-      <span id="spanNKnown">{Object.keys(seenTokens).length ? "("+Object.keys(seenTokens).length+" lemmas)" : ""}</span>
+      <span id="spanNKnown">{Object.keys(seenTokens).length ? "("+Object.keys(seenTokens).length+" families)" : ""}</span>
     </h1>
-    <ul id="ulKnownList">
+    <div id="ulKnownList">
       {#each Object.keys(seenTokens) as key}
-      <li>{key + ": " + seenTokens[key]}</li>
+        <VocabListItem title={`Family: ${key}`}>
+          {`Forms: ${seenTokens[key].join(', ')}`}
+        </VocabListItem>
       {/each}  
-    </ul>
+    </div>
   </div>
 </div>
+<NavbarComponent>
+  <button on:click={()=>goto("/")}>◄ Back</button>
+</NavbarComponent>

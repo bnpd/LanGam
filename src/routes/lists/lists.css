@@ -1,7 +1,11 @@
 #divLeft, #divRight {
-    width: 37%;
+    width: 50%;
     float: left;
     text-align: center;
+}
+
+h4 {
+    margin-bottom: 0.8em;
 }
 
 ul {
