@@ -15,7 +15,7 @@
     $: if (typeof document !== 'undefined') {            
             let mainContent = document?.getElementById('contentbox')
             if (mainContent) {
-                mainContent.style.opacity = (chatHistory.length && chatFocussed) ? "0.65" : "1"
+                mainContent.style.opacity = (chatHistory.length && chatFocussed) ? "0.2" : "1"
             }
         }
     
@@ -76,6 +76,17 @@
 </script>
 
 <style>
+    .promptSuggestion {
+      font-size: xx-small;
+      width: 30vw;
+      line-height: 10px;
+      height: auto;
+      opacity: 0.5;
+      border-color: blue;
+      margin: 1vw;
+      box-shadow: #80808018 0 2px 5px 2px; /* Downwards shadow and on left and right side*/
+    }
+    
     #iChat {
       width: 100%;
       min-height: var(--button-height);
@@ -85,6 +96,11 @@
       box-sizing: border-box;
       padding: 12px calc(var(--button-height) + 2px);
       overflow: auto;
+      box-shadow: #80808018 0 2px 5px 2px; /* Downwards shadow and on left and right side*/
+    }
+    
+    #iChat + button {
+      box-shadow: none;
     }
     
     #iChat::-webkit-scrollbar {

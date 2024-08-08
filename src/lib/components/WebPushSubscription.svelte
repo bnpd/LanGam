@@ -1,7 +1,6 @@
 <script lang="ts">
 import { onMount } from 'svelte';
 import { requestNotifications } from './backend';
-import { user } from '$lib/stores';
 
 let notificationPermission: NotificationPermission;
 

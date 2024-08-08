@@ -40,6 +40,7 @@ button, input[type="submit"] {
   line-height: 34px;
   margin-top: 10px;
   border-radius: 1em;
+  box-shadow: #80808010 0 3px 5px 1px; /* Downwards shadow and on left and right side*/
 }
 
 textarea {
@@ -67,7 +68,7 @@ hr { /* necessary to avoid corruption in flex-columns*/
   background-color: aliceblue;
   border-radius: 2em;
   margin: 5px;
-  box-shadow: #80808010 3px 5px;
+  box-shadow: #80808010 0 3px 5px 1px; /* Downwards shadow and on left and right side*/
 }
 
 .card > *:first-child, .card > *:first-child > *:first-child {
@@ -89,16 +90,6 @@ hr { /* necessary to avoid corruption in flex-columns*/
 
 .srWord {
   color: goldenrod;
-}
-
-.promptSuggestion {
-  font-size: xx-small;
-  width: 30vw;
-  line-height: 10px;
-  height: auto;
-  opacity: 0.5;
-  border-color: blue;
-  margin: 1vw;
 }
 
 #divTask, #solutionField {
@@ -127,7 +118,6 @@ hr { /* necessary to avoid corruption in flex-columns*/
   line-height: 45px;
   font-size: large;
   font-weight: bold;
-  border-color: darkslategray;
 }
 #contentbox {
   text-align: justify;
