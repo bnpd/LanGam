@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { currentTask, failedWords, targetLang, user } from "$lib/stores";
+	import { afterUpdate } from "svelte";
 	import BadgeComponent from "./BadgeComponent.svelte";
 	import ReaderComponent from "./ReaderComponent.svelte";
 	import { sendChat } from "./backend";
@@ -25,6 +26,7 @@
     let iChat: HTMLDivElement
     let loading: boolean = false
     let chatHistory: {type: string, text: string}[] = [];
+    let shouldFocusChat: boolean;
 
     /**
      * Finds the first occurrence of word in the text and returns the corresponding lemma (thus not necessarily the lemma for that ocurrence that the user clicked)
@@ -53,6 +55,7 @@
         } finally {
             loading = false
         }
+        shouldFocusChat = true;
     }
 
     async function onSubmitChatPrompt(e: Event) {
@@ -69,10 +72,18 @@
             } finally {
                 loading = false
             }
+            shouldFocusChat = true
         } else {
             iChat?.focus()
         }
     }
+
+    afterUpdate(() => {
+        if (shouldFocusChat) {
+            iChat?.focus()
+            shouldFocusChat = false;
+        }
+    });
 </script>
 
 <style>
@@ -112,26 +123,29 @@
     }
 </style>
 
-<div id="chatComponent" on:focus|capture={()=>{chatFocussed = true}} on:focusout|capture={()=>{chatFocussed = false}}>
-    {#if chatHistory.length && chatFocussed || loading}
+<div id="chatComponent" on:focus|capture={()=>{chatFocussed = true; console.log('chatFocus');}} on:focusout|capture={()=>{chatFocussed = false; console.log(document?.activeElement);}}>
+    {#if chatFocussed || loading}
         {#each chatHistory as msg, i}
                 {#if msg.type === 'ai'}
-                    <div class="card" class:loading style="max-height: 18vh; overflow-y: scroll;" id="responseBox">
+                    <div class="card" style="max-height: 18vh; overflow-y: scroll;" id="responseBox">
                         <em><strong><BadgeComponent text='AI' tooltip="AI's response"/></strong></em>&nbsp;
                         {msg.text}
                     </div>
                 {:else if msg.type === 'user'}
-                    <div class="card" class:loading style="max-height: 18vh; overflow-y: scroll;" id="responseBox">
+                    <div class="card" style="max-height: 18vh; overflow-y: scroll;" id="responseBox">
                         <em><strong><BadgeComponent text='You' tooltip="Your response"/></strong></em>&nbsp;
                         {msg.text}
                     </div>
                 {:else if msg.type === 'system' && i == chatHistory.length-1}
-                    <div class="card" class:loading style="max-height: 18vh; overflow-y: scroll;" id="responseBox">
+                    <div class="card" style="max-height: 18vh; overflow-y: scroll;" id="responseBox">
                         <em><strong><BadgeComponent text='Error' tooltip="Error"/></strong></em>&nbsp;
                         {msg.text}
                     </div>
                 {/if}
         {/each}
+    {/if}
+    {#if loading}
+        <div class="card" class:loading/>
     {/if}
     <div>
         <button class="promptSuggestion" on:click={onClickChatSuggestion} disabled={loading}>
