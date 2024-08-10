@@ -22,6 +22,10 @@ export async function getLangById(langId) {
 	return pb.collection('langs').getOne(langId);
 }
 
+export function getUserData() {
+	return pb.authStore?.model
+}
+
 
 // backend endpoint constants
 const ENDPOINT_SIGNUP = '/signup'
