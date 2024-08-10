@@ -9,9 +9,10 @@
 	import Toast from './Toast.svelte';
 	import NavbarComponent from './NavbarComponent.svelte';
 	import ChatComponent from './ChatComponent.svelte';
-	import AnimatedPopup from './AnimatedPopup.svelte';
+	import SuccessPopup from './SuccessPopup.svelte';
 	import DocumentC from '$lib/DocumentC';
 	import TitleWithBackgroundImageComponent from './TitleWithBackgroundImageComponent.svelte';
+	import FeedbackComponent from './FeedbackComponent.svelte';
 
     const answbtnTxtWhilePrompting = "Show translation"
     const answbtnTxtWhileSolutionShown = "Next"
@@ -139,6 +140,7 @@
                 congratsMessage = 
                     (nNewForms ? `You just encountered ${nNewForms} new words!\n` : '')
                     + (correctedWords ? `You remembered ${correctedWords} word families you had wrong before!\n` : '');
+console.log(congratsMessage);
 
                 let goToChat = await statsClosedPromise
 
@@ -275,6 +277,7 @@
     <button on:click={()=>goto("/catalog")}>Texts</button>
     <button id="btnSound" on:click={onSoundClick}>{$isSoundOn ? '🔊' : '🔈'}</button>
     <Install/>
+    <FeedbackComponent />
     {#if $user}
         <button on:click={()=>goto("/lists")}>My vocab</button>
         <WebPushSubscription/>
@@ -286,4 +289,4 @@
     $failedWords = [];
     location.reload();
 }}/>
-<AnimatedPopup message={congratsMessage} onClose={statsClosedPromiseResolve} chatPrompt={$currentTask?.question?.text}/>
+<SuccessPopup message={congratsMessage} onClose={statsClosedPromiseResolve} chatPrompt={$currentTask?.question?.text}/>

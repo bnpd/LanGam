@@ -63,6 +63,36 @@ hr { /* necessary to avoid corruption in flex-columns*/
   width: 100%;
 }
 
+div[contenteditable] {
+  width: 100%;
+  min-height: var(--button-height);
+  border-radius: 20px;
+  background-color: aliceblue;
+  max-height: calc(1.5*var(--button-height));
+  box-sizing: border-box;
+  padding: 12px calc(var(--button-height) + 2px);
+  overflow: auto;
+  box-shadow: #80808018 0 2px 5px 2px; /* Downwards shadow and on left and right side*/
+}
+
+div[contenteditable] + button, div[contenteditable] + button + button {
+  box-shadow: none;
+}
+
+div[contenteditable]::-webkit-scrollbar {
+  display: none;
+}
+
+div[contenteditable]:empty::before {
+  content: attr(data-placeholder);
+  color: #999;
+  pointer-events: none;
+}
+
+div[contenteditable]:focus {
+  outline-color: blue;
+}
+
 .card {
   padding: 22px;
   background-color: aliceblue;

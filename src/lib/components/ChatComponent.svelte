@@ -87,52 +87,20 @@
       box-shadow: #80808018 0 2px 5px 2px; /* Downwards shadow and on left and right side*/
     }
     
-    #iChat {
-      width: 100%;
-      min-height: var(--button-height);
-      border-radius: 20px;
-      background-color: aliceblue;
-      max-height: calc(1.5*var(--button-height));
-      box-sizing: border-box;
-      padding: 12px calc(var(--button-height) + 2px);
-      overflow: auto;
-      box-shadow: #80808018 0 2px 5px 2px; /* Downwards shadow and on left and right side*/
-    }
-    
-    #iChat + button {
-      box-shadow: none;
-    }
-    
-    #iChat::-webkit-scrollbar {
-      display: none;
-    }
-    
-    #iChat:empty::before {
-      content: attr(data-placeholder);
-      color: #999;
-      pointer-events: none;
-    }
-    
-    #iChat:focus {
-      outline-color: blue;
-    }
-    
-    #submitChat {
+    #submitChat, #closeChat {
       position: absolute;
-      right: 1px;
       bottom: 1px;
       border-radius: 20px;
       width: var(--button-height);
       height: var(--button-height);
     }
-    
+        
+    #submitChat {
+      right: 1px;
+    }
+        
     #closeChat {
-      position: absolute;
       left: 1px;
-      bottom: 1px;
-      border-radius: 20px;
-      width: var(--button-height);
-      height: var(--button-height);      
     }
     
     #chatComponent {
@@ -180,7 +148,7 @@
             </button>
         {/if}
     </div>
-    <div contenteditable id="iChat" data-placeholder="Ask me ✨" bind:textContent={chatPrompt} bind:this={iChat}/>
+    <div contenteditable id="iChat" data-placeholder="Ask me ✨" bind:innerText={chatPrompt} bind:this={iChat}/>
     {#if chatFocussed && chatHistory.length}
         <button id="closeChat" on:click={() => {document?.activeElement?.blur()}}>x</button>       
     {/if}    

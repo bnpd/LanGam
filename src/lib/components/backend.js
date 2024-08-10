@@ -234,6 +234,15 @@ export async function backendPost(path, payload, authRequired=true) {
     return await response.json();
 }
 
+// Feedback
+/**
+ * @param {string} text
+ * @param {string | undefined} email
+ */
+export async function sendFeedback(text, email) {	
+	return pb.collection('feedback').create({text: text, email: email});
+}
+
 // Push Notifications
 export function requestNotifications() {
 	return subscribeUserToPush().then(subscription => backendPost('/api/webpush-subscribe', subscription, true));
