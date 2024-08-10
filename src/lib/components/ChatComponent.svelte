@@ -12,7 +12,7 @@
      */
     $: lastFailed = Array.from($failedWords).at(-1);
     $: lastFailedLemma = lastFailed ? findLemma(lastFailed) : undefined
-    $: if ($currentTask && $currentTask?.question?.text?.length) chatHistory = [{type: 'ai', text: $currentTask.question.text}]; // reset question on changes to currentTask
+    $: if ($currentTask && $currentTask?.question?.text?.length) chatHistory = [{role: 'assistant', content: $currentTask.question.text}]; // reset question on changes to currentTask
     $: if (typeof document !== 'undefined') {            
             let mainContent = document?.getElementById('contentbox')
             if (mainContent) {
@@ -25,7 +25,7 @@
     let chatPrompt: string | undefined
     let iChat: HTMLDivElement
     let loading: boolean = false
-    let chatHistory: {type: string, text: string}[] = [];
+    let chatHistory: {role: string, content: string}[] = [];
     let shouldFocusChat: boolean;
 
     /**
@@ -44,14 +44,19 @@
     async function onClickChatSuggestion(e: Event) {
         loading = true
         chatPrompt = (e.currentTarget as HTMLButtonElement).innerText
+        const newMessage = {role: 'user', content: chatPrompt}
         try {
-            let response = {type: 'ai', text: ($user ? await sendChat(chatPrompt, undefined, undefined, readerComponent.getVisibleParagraphs())
+            const response = {role: 'assistant', content: ($user ? await sendChat(chatHistory.filter(el => el.role!='internal').concat([newMessage]), undefined, undefined, readerComponent.getVisibleParagraphs())
                          : ANON_RESPONSE)};
-            chatHistory.push({type: 'user', text: chatPrompt})
+            chatHistory.push(newMessage) // we only push user prompt now cause we don't want it here if connection error
             chatHistory.push(response)
             chatPrompt = ''
-        } catch (e) {
-            chatHistory.push({type: 'system', text: 'Cannot connect, please try again'})
+        } catch (e: any) {
+            if (e.message === "Chat history too long.") {
+                chatHistory.push({role: 'internal', content: "This chat has reached it's maximum length. Try chatting about another text."})                
+            } else {
+                chatHistory.push({role: 'internal', content: 'Cannot connect, please try again'})
+            }
         } finally {
             loading = false
         }
@@ -61,14 +66,19 @@
     async function onSubmitChatPrompt(e: Event) {
         if (chatPrompt) {
             loading = true
+            const newMessage = {role: 'user', content: chatPrompt}
             try {
-                let response = {type: 'ai', text: ($user ? await sendChat(chatPrompt, $targetLang, $currentTask.docId, undefined)
+                let response = {role: 'assistant', content: ($user ? await sendChat(chatHistory.filter(el => el.role!='internal').concat([newMessage]), $targetLang, $currentTask.docId, undefined)
                                  : ANON_RESPONSE)};
-                chatHistory.push({type: 'user', text: chatPrompt})
+                chatHistory.push(newMessage) // we only push user prompt now cause we don't want it here if connection error
                 chatHistory.push(response)
                 chatPrompt = ''
             } catch (e) {
-                chatHistory.push({type: 'system', text: 'Cannot connect, please try again'})
+                if (e.message === "Chat history too long.") {
+                    chatHistory.push({role: 'internal', content: "This chat has reached it's maximum length. Try chatting about another text."})                
+                } else {
+                    chatHistory.push({role: 'internal', content: 'Cannot connect, please try again'})
+                }
             } finally {
                 loading = false
             }
@@ -126,20 +136,20 @@
 <div id="chatComponent" on:focus|capture={()=>{chatFocussed = true; console.log('chatFocus');}} on:focusout|capture={()=>{chatFocussed = false; console.log(document?.activeElement);}}>
     {#if chatFocussed || loading}
         {#each chatHistory as msg, i}
-                {#if msg.type === 'ai'}
+                {#if msg.role === 'assistant'}
                     <div class="card" style="max-height: 18vh; overflow-y: scroll;" id="responseBox">
                         <em><strong><BadgeComponent text='AI' tooltip="AI's response"/></strong></em>&nbsp;
-                        {msg.text}
+                        {msg.content}
                     </div>
-                {:else if msg.type === 'user'}
+                {:else if msg.role === 'user'}
                     <div class="card" style="max-height: 18vh; overflow-y: scroll;" id="responseBox">
                         <em><strong><BadgeComponent text='You' tooltip="Your response"/></strong></em>&nbsp;
-                        {msg.text}
+                        {msg.content}
                     </div>
-                {:else if msg.type === 'system' && i == chatHistory.length-1}
+                {:else if msg.role === 'internal' && i == chatHistory.length-1}
                     <div class="card" style="max-height: 18vh; overflow-y: scroll;" id="responseBox">
                         <em><strong><BadgeComponent text='Error' tooltip="Error"/></strong></em>&nbsp;
-                        {msg.text}
+                        {msg.content}
                     </div>
                 {/if}
         {/each}

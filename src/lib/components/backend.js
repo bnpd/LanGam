@@ -6,6 +6,8 @@ import PocketBase from 'pocketbase';
 
 // PocketBase
 const pb = new PocketBase(config.pocketbase)
+const MAX_CHAT_HISTORY_LENGTH = 20
+const MAX_CHAT_HISTORY_CHARS = 20000
 
 /**
  * @param {string} user
@@ -61,13 +63,13 @@ function EndpointGetUserTaskStats(targetLang, docId) {return `/user_task_stats/$
  */
 function EndpointReview(targetLang) {return `/review/${targetLang}`;}
 /** EITHER docId+targetLang or contextParagraphs should be specified, if both are present, contextParagraphs will be prioritized.
- * @param {string} chatPrompt
+ * @param {string} chatHistoryString
  * @param {string | undefined} targetLang
  * @param {string | undefined} docId
  * @param {string | undefined} contextParagraphs
  */
-function EndpointChat(chatPrompt, targetLang=undefined, docId=undefined, contextParagraphs=undefined) {
-	return `/chat?q=${chatPrompt}` + (contextParagraphs ? `&ctx=${contextParagraphs}` : docId && targetLang ? `&docId=${docId}&targetLang=${targetLang}` : '');
+function EndpointChat(chatHistoryString, targetLang=undefined, docId=undefined, contextParagraphs=undefined) {
+	return `/chat?hist=${chatHistoryString}` + (contextParagraphs ? `&ctx=${contextParagraphs}` : docId && targetLang ? `&docId=${docId}&targetLang=${targetLang}` : '');
 }
 
 
@@ -170,14 +172,19 @@ export async function isTaskCached(targetLang, docId){
 }
     
 
-/** EITHER docId or contextParagraphs should be specified, if both are present, contextParagraphs will be prioritized.
- * @param {string} chatPrompt
+/**
+ * EITHER docId or contextParagraphs should be specified, if both are present, contextParagraphs will be prioritized.
+ * @param {{ role: string; content: string; }[]} chatHistory
  * @param {string | undefined} targetLang
  * @param {string | undefined} docId
  * @param {string | undefined} contextParagraphs
  */
-export async function sendChat(chatPrompt, targetLang=undefined, docId=undefined, contextParagraphs=undefined) {
-	return (await backendGet(EndpointChat(chatPrompt, targetLang, docId, contextParagraphs))).response
+export async function sendChat(chatHistory, targetLang=undefined, docId=undefined, contextParagraphs=undefined) {
+	const chatHistoryText = JSON.stringify(chatHistory.slice(-MAX_CHAT_HISTORY_LENGTH))
+	if (chatHistoryText.length > MAX_CHAT_HISTORY_CHARS) {
+		throw new Error("Chat history too long.");		
+	}
+	return (await backendGet(EndpointChat(chatHistoryText, targetLang, docId, contextParagraphs))).response //TODO: properly http-encode so that we don't get problems with # in responses
 }
 
 
