@@ -99,12 +99,14 @@
 <style>
     .promptSuggestion {
       font-size: xx-small;
-      width: 30vw;
+      width: fit-content;
+      max-width: 30vw;
       line-height: 10px;
       height: auto;
       opacity: 0.5;
       border-color: blue;
-      margin: 1vw;
+      margin: 0 1vw;
+      margin-bottom: 8px;
       box-shadow: #80808018 0 2px 5px 2px; /* Downwards shadow and on left and right side*/
     }
     
