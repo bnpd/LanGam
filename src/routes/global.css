@@ -8,10 +8,12 @@ body {
   background-color: var(--body-background-color);
   font-family: system-ui, Arial, Helvetica, sans-serif;
   text-align: center;
-  padding: 0 5px;
+  padding: min(1vh, 20px) 2vw;
   height: calc(100vh - 3.6*var(--button-height));
   display: flex; 
   flex-direction: column; 
+  max-width: 40em;
+  margin: auto;
 }
 
 h1 {
@@ -271,11 +273,6 @@ div[contenteditable]:focus {
 
 /* Changes for PC*/
 @media only screen and (min-width: 768px) {
-  body {
-    width: 60vw;
-    margin: 20px auto;
-  }
-
   .card {
     padding: 40px;
   }
