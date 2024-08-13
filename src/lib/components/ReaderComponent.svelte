@@ -54,7 +54,7 @@
     }
 
     // adjust height of the background image (reaches 100hv when fully scrolled down)
-    document.body?.style?.setProperty('--header-before-height', `${divTask?.scrollTop / divTask?.scrollHeight * 100 + 10}vh`);
+    document.body?.style?.setProperty('--header-before-height', `${divTask?.scrollTop / divTask?.scrollHeight * 100 + 10}dvh`);
   }
 
   // Find index of the paragraph at the top/mid/bottom (depending on ref param) position of divTask 

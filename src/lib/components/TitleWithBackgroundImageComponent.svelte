@@ -17,7 +17,7 @@
       top: 0;
       left: 0;
       width: 100%;
-      height: var(--header-before-height, 10vh); /* Matches the height of the header */
+      height: var(--header-before-height, 10dvh); /* Matches the height of the header */
       z-index: -1; /* Ensure it is behind the title */
       /* Gradient overlay for fade effect as top layer, image as bottom layer */
       background: 

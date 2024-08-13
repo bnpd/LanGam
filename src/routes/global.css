@@ -8,8 +8,8 @@ body {
   background-color: var(--body-background-color);
   font-family: system-ui, Arial, Helvetica, sans-serif;
   text-align: center;
-  padding: min(1vh, 20px) 2vw;
-  height: calc(100vh - 3.6*var(--button-height));
+  padding: min(1dvh, 20px) 2vw;
+  height: calc(100dvh - 3.6*var(--button-height));
   display: flex; 
   flex-direction: column; 
   max-width: 40em;

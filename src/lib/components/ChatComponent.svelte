@@ -139,17 +139,17 @@
     {#if chatFocussed || loading}
         {#each chatHistory as msg, i}
                 {#if msg.role === 'assistant'}
-                    <div class="card" style="max-height: 18vh; overflow-y: scroll;" id="responseBox">
+                    <div class="card" style="max-height: 18dvh; overflow-y: scroll;" id="responseBox">
                         <em><strong><BadgeComponent text='AI' tooltip="AI's response"/></strong></em>&nbsp;
                         {msg.content}
                     </div>
                 {:else if msg.role === 'user'}
-                    <div class="card" style="max-height: 18vh; overflow-y: scroll;" id="responseBox">
+                    <div class="card" style="max-height: 18dvh; overflow-y: scroll;" id="responseBox">
                         <em><strong><BadgeComponent text='You' tooltip="Your response"/></strong></em>&nbsp;
                         {msg.content}
                     </div>
                 {:else if msg.role === 'internal' && i == chatHistory.length-1}
-                    <div class="card" style="max-height: 18vh; overflow-y: scroll;" id="responseBox">
+                    <div class="card" style="max-height: 18dvh; overflow-y: scroll;" id="responseBox">
                         <em><strong><BadgeComponent text='Error' tooltip="Error"/></strong></em>&nbsp;
                         {msg.content}
                     </div>
