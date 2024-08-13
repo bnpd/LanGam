@@ -140,7 +140,6 @@
                 congratsMessage = 
                     (nNewForms ? `You just encountered ${nNewForms} new words!\n` : '')
                     + (correctedWords ? `You remembered ${correctedWords} word families you had wrong before!\n` : '');
-console.log(congratsMessage);
 
                 let goToChat = await statsClosedPromise
 

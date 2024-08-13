@@ -1,28 +1,33 @@
 <script lang="ts">
-    import { getLangById, login, newUserLang, signup } from '$lib/components/backend';
+    import { login, newUserLang, signup } from '$lib/components/backend';
     import { goto } from '$app/navigation';
-	import { nativeLang, targetLang, user } from '$lib/stores';
+	import { currentTask, failedWords, nativeLang, reviews, targetLang, user } from '$lib/stores';
 	import { ClientResponseError } from 'pocketbase';
 	import TitleWithBackgroundImageComponent from './TitleWithBackgroundImageComponent.svelte';
   
     export let isSignup: boolean
+    let loading: boolean
   
     async function onSubmit(event: SubmitEvent) {
         const formDataEntries = new FormData(event.target as HTMLFormElement);
-        if (isSignup && ! new Set(getDatalistOptions()).has(formDataEntries.get('native_lang')?.toString()!)) {
-            showValidationError('native_lang', "Please choose one of the available app languages.", 1500);            
-        }
+        // if (isSignup && ! new Set(getDatalistOptions()).has(formDataEntries.get('native_lang')?.toString()!)) {
+        //     showValidationError('native_lang', "Please choose one of the available app languages.", 1500);            
+        // }
         if (isSignup && formDataEntries.get('password') !== formDataEntries.get('passwordConfirm')) {
             showValidationError('password', "Passwords do not match", 1500);
             return;
         }
         try {
             if (isSignup) {
-                await signup(formDataEntries.get('email')?.toString()!, formDataEntries.get('password')?.toString()!, formDataEntries.get('native_lang')?.toString()!)
+                await signup(formDataEntries.get('email')?.toString()!, formDataEntries.get('password')?.toString()!, 'en'/*formDataEntries.get('native_lang')?.toString()!*/)
             }
             let user_obj = (await login(formDataEntries.get('email')?.toString()!, formDataEntries.get('password')?.toString()!)).record
-            $user = user_obj.id
-            $nativeLang = (await getLangById(user_obj.native_lang)).shortcode.toLowerCase()
+            if (user_obj.id != $user) {
+                $failedWords = new Set()
+                $reviews = []
+                $user = user_obj.id
+            }
+            $nativeLang = 'en'/*(await getLangById(user_obj.native_lang)).shortcode.toLowerCase()*/
             $targetLang = 'pl'
             if (isSignup) {
                 await newUserLang('pl')
@@ -62,7 +67,7 @@
 	<input type="password" name="password" placeholder="Password" autocomplete="new-password" id="password" required minlength="8"/>
     {#if isSignup}
         <input type="password" name="passwordConfirm" placeholder="Confirm Password" autocomplete="new-password" required minlength="8"/>
-        <input type="text" list="languages" name="native_lang" placeholder="Preferred Language" autocomplete="language" id="native_lang" required/>
+        <!-- <input type="text" list="languages" name="native_lang" placeholder="Preferred Language" autocomplete="language" id="native_lang" required/> -->
         <datalist id="languages">
             <option value="en">English</option>
             <!--
