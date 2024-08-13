@@ -26,5 +26,5 @@
     installButtonVisible = true;
 }} />
 {#if installButtonVisible}
-  <button id="btnInstall" on:click={handleInstallClick}>Install as app</button>  
+  <button id="btnInstall" on:click={handleInstallClick}>Install</button>  
 {/if}
