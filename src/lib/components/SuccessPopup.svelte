@@ -5,7 +5,6 @@
 	export let message: String | undefined;
 	export let onClose: Function;
 	export let chatPrompt: String | undefined = undefined;
-	$: if(message) console.log(message);
 	
 
 	function closeSelf(goToChat: boolean) {

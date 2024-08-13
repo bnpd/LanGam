@@ -32,9 +32,9 @@ class DocumentC {
     static getSampleDoc() {
         return new DocumentC(
             -1, 
-            {lang: 'emoji', text: "### Waht AlAli cna do for yuo", translations: {'en': "### What AllAi can do for you"}, 
+            {lang: 'drnuk', text: "### Waht AlAli cna do for yuo", translations: {'en': "### What AllAi can do for you"}, 
                 tokens: {0: {word: '#', pos: 99, lemma_: '#'}, 1: {word: '#', pos: 99, lemma_: '#'}, 2: {word: '#', pos: 92, lemma_: '#'}, 4: {word: 'Waht', pos: 96, lemma_: 'Waht'}, 9: {word: 'AlAli', pos: 96, lemma_: 'AlAli'}, 15: {word: 'cna', pos: 96, lemma_: 'cna'}, 19: {word: 'do', pos: 100, lemma_: 'do'}, 22: {word: 'for', pos: 85, lemma_: 'for'}, 26: {word: 'yuo', pos: 92, lemma_: 'yuo'}}}, 
-            {lang: 'emoji', text: 
+            {lang: 'drnuk', text: 
 `Hree yuo can epaxnd yuor udnrestanding fo a lagnauge by rdeanig smiple tub fun txets ni it.
 
 Teh txet yuo see si slecteed to ctoanin wrods yuo privoesuly srutggeld wtih and new wrods. We use a prncipile cllaed spcaed repetitoin to optmizie yuor larening by swonhig echa wrod rhgit bfoere yuo are msot likley to fogret it.

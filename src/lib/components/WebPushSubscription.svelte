@@ -5,7 +5,7 @@ import { requestNotifications } from './backend';
 let notificationPermission: NotificationPermission;
 let done = false;
 export let loading: boolean;
-$: if (!loading && notificationPermission === 'granted' && !done) {console.log('NOTIFICATIONS');requestNotifications()}
+$: if (!loading && notificationPermission === 'granted' && !done) requestNotifications()
 
 onMount(async () => {
   notificationPermission = Notification.permission

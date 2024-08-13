@@ -204,8 +204,6 @@
             } catch (offlineError) {
                 return Promise.reject(offlineError)
             }
-            // onSuccessfulPost, dequeue
-            console.log('SHOULDNT GET HERE WHEN OFFLINE');
             
             $reviews.shift()
             $reviews = $reviews
@@ -233,7 +231,6 @@
         if (doc) loading = false;
         phase = "prompting"
         $currentTask = doc
-        console.log(doc);
         
         
         solutionText = doc?.title?.translations[$nativeLang] + '\n\n' + doc?.text?.translations[$nativeLang]
@@ -244,7 +241,6 @@
 
         try {         
             const [srWords_l, newForms_l] = $user ? await getUserTaskStats($targetLang, (String)(doc?.docId)) : [["ornage"], Object.values(doc?.title?.tokens).map(tok => tok.word).concat(Object.values(doc?.title?.tokens).map(tok => tok.word))]
-            console.log(newForms_l);
             srWords = new Set(srWords_l)
             nNewForms = newForms_l.length
         } catch (_offline) {

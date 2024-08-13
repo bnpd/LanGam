@@ -21,7 +21,7 @@
   export let srWords: Set<String> | undefined
 
 
-  $: if($currentTask && divTask && solutionField && $currentTask.docId != docIdOfCurrentTask) setTask($currentTask)
+  $: if($currentTask && $currentTask.docId != docIdOfCurrentTask) setTask($currentTask)
   $: if(solutionText) setSolution(solutionText)
 
   afterUpdate(() => {
@@ -35,10 +35,7 @@
   export function getVisibleParagraphs() {
     const top = currentScrolledParagraphIndex('top')
     const bottom = currentScrolledParagraphIndex('bottom')
-    console.log(top);
-    console.log(bottom);
     let visibleParagraphs = taskParagraphs.slice(top, bottom+1).map(p => p.words.map(token => token.word).join('')).join('\n')
-    console.log(visibleParagraphs);
     return visibleParagraphs
   }
 
@@ -86,7 +83,10 @@
    * @param {DocumentC} doc Document containing the task
    */
   function setTask(doc: DocumentC) {        
-    console.log(doc?.title?.text);
+    if (!divTask || !solutionField) {
+      return
+    }
+    taskParagraphs = []
     
     docIdOfCurrentTask = $currentTask.docId // keep track of currentTask so that we don't do all the work of setTask twice
 
@@ -116,10 +116,6 @@
 
         let token_obj = translatableText.tokens[char_index]
         let token_word = token_obj?.word
-        if (!token_word) {
-          console.log(char_index);
-          console.log(translatableText.tokens);
-        }
 
         if (!token_word.trim()) continue // only proceed if it wasn't only some kind of whitespace
         paragraph.push(token_obj)

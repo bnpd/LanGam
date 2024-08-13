@@ -13,8 +13,6 @@
     async function onPopupClosed() {
         isOpen = !isOpen
         if (feedbackText) {
-            console.log(feedbackText);
-            
             await sendFeedback(feedbackText, email)
             toast = 'Feedback sent! Thanks!'
             feedbackText = ''

@@ -16,7 +16,6 @@ self.addEventListener('install', (event) => {
 	async function addFilesToCache() {
 		const cache = await caches.open(CACHE);
 		await cache.addAll(ASSETS);
-		console.log(ASSETS);
 	}
 
 	event.waitUntil(addFilesToCache());
@@ -78,8 +77,6 @@ self.addEventListener('fetch', (event) => {
 
 			// if there's no cache, then just show offline page
 			// as there is nothing we can do to respond to this request
-			console.log('Serving offline page');
-			console.log(await cache.keys());
 			return await cache.match('/offline.html')
 		}
 	}
@@ -92,7 +89,6 @@ self.addEventListener('fetch', (event) => {
 
 self.addEventListener('push', evt => {
     if (evt.data) {
-        console.log('This push event has data: ', evt.data.json())
         self.registration.showNotification(
             evt.data.json().title, {
                 body: evt.data.json().body,

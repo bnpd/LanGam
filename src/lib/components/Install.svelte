@@ -14,8 +14,6 @@
         deferredPrompt = null;
         // Hide the install button after the prompt
         installButtonVisible = false;
-        // Log the user's response
-        console.log(`User response to the install prompt: ${outcome}`);
       }
     }
 

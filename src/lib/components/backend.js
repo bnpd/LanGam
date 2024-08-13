@@ -160,7 +160,6 @@ export async function getTopTasks(targetLang, query){
  */
 export async function isTaskCached(targetLang, docId){
 	try {
-		console.log('isTaskCached');
 		let res = await fetch(
 			config.backend + EndpointGetTask(targetLang, docId),
 			{method:'Head',cache:'force-cache'}
@@ -264,10 +263,6 @@ function subscribeUserToPush() {
 			return registration.pushManager.subscribe(subscribeOptions);
 		})
 		.then(pushSubscription => {
-			console.log(
-				'Received PushSubscription: ',
-				JSON.stringify(pushSubscription)
-			);
 			return pushSubscription;
 		});
 }

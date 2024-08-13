@@ -30,15 +30,12 @@
 
   function onTitleInput() {    
     var paragraphs = title.split('\n');
-    console.log(paragraphs);
     title = paragraphs[0];
     if (paragraphs.length > 1) {
         body = paragraphs.slice(1, paragraphs.length -1).join("\n").trim();
     }
     if (paragraphs.length > 2) {
-        question = paragraphs[paragraphs.length - 1];
-        console.log(question);
-        
+        question = paragraphs[paragraphs.length - 1];        
     }
   }
 </script>

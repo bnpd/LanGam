@@ -135,7 +135,7 @@
     }
 </style>
 
-<div id="chatComponent" on:focus|capture={()=>{chatFocussed = true; console.log('chatFocus');}} on:focusout|capture={()=>{chatFocussed = false; console.log(document?.activeElement);}}>
+<div id="chatComponent" on:focus|capture={()=>{chatFocussed = true}} on:focusout|capture={()=>{chatFocussed = false}}>
     {#if chatFocussed || loading}
         {#each chatHistory as msg, i}
                 {#if msg.role === 'assistant'}

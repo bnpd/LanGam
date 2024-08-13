@@ -43,8 +43,7 @@
             } else if (isSignup && (e as Error).message.includes('validation_is_email')) {// signup email format invalid
                 showValidationError('email', 'Please check the format of this email address.')
             } else {   
-                showValidationError('submit', 'Connection error, please try again.')             
-                console.error(e)
+                showValidationError('submit', 'Connection error, please try again.')
             }
         } finally {
             loading = false
