@@ -12,7 +12,6 @@
   let divTask: HTMLDivElement
   let taskParagraphs: Array<{htmlTag: string, words: Array<any>}> = []
   let solutionParagraphs: Array<{htmlTag: string, string: string}> = []
-  let docIdOfCurrentTask: number
 
   export let phase: string
   export let trySpeak: Function
@@ -21,8 +20,10 @@
   export let srWords: Set<String> | undefined
 
 
-  $: if($currentTask && $currentTask.docId != docIdOfCurrentTask) setTask($currentTask)
+  $: if($currentTask) setTask($currentTask)
   $: if(solutionText) setSolution(solutionText)
+
+  $: console.table(taskParagraphs)
 
   afterUpdate(() => {
     if (divTask?.scrollTop == 0) {
@@ -86,9 +87,7 @@
     if (!divTask || !solutionField) {
       return
     }
-    taskParagraphs = []
-    
-    docIdOfCurrentTask = $currentTask.docId // keep track of currentTask so that we don't do all the work of setTask twice
+    let _taskParagraphs = []
 
     divTask.scrollTop = 0
     solutionField.scrollTop = 0
@@ -105,7 +104,7 @@
           if (translatableText.text[char_index] == '\n' && paragraph.length > 0) {
             // next paragraph
             const headingLevel = getHeadingLevelForTask(paragraph)
-            taskParagraphs.push({htmlTag: headingLevel ? 'h'+headingLevel : 'p', words: paragraph.slice(headingLevel)})
+            _taskParagraphs.push({htmlTag: headingLevel ? 'h'+headingLevel : 'p', words: paragraph.slice(headingLevel)})
             paragraph = []
           } else if (paragraph.length > 0) { // length>0 cause we do not want to push leading spaces to paragraphs
             paragraph.push(space)
@@ -122,9 +121,9 @@
         char_index += token_word.length
       }
       const headingLevel = getHeadingLevelForTask(paragraph)
-      taskParagraphs.push({htmlTag: headingLevel ? 'h'+headingLevel : 'p', words: paragraph.slice(headingLevel)})
+      _taskParagraphs.push({htmlTag: headingLevel ? 'h'+headingLevel : 'p', words: paragraph.slice(headingLevel)})
     }
-    taskParagraphs = taskParagraphs
+    taskParagraphs = _taskParagraphs
   }
 
   function setSolution(solution: string) {
@@ -185,7 +184,7 @@
 
 <div class="card" id="contentbox">
   <div id="divTask" class:hidden={!taskVisible} bind:this={divTask} on:scroll={onScroll}>
-    {#each taskParagraphs as taskParagraph}
+    {#each taskParagraphs as taskParagraph (taskParagraph.words)} <!-- The "key" specified in parentheses is important cause svelte will otherwise use the array index and try to only insert new indexes or do nothing if the array length doesn't change -->
       <svelte:element this={taskParagraph.htmlTag}>
         {#each taskParagraph.words as token}
           <TokenComponent 
