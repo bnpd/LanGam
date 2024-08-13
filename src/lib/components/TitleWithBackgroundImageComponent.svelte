@@ -22,7 +22,7 @@
       /* Gradient overlay for fade effect as top layer, image as bottom layer */
       background: 
         linear-gradient(to bottom, rgba(255, 255, 255, 0) 0%, var(--body-background-color-half-opaque) 66%, var(--body-background-color) 100%),
-        url('/images/Polish.png') no-repeat center center;
+        url('/images/Polish.avif') no-repeat center center;
       background-size: cover, cover; /* Apply cover to both layers */
       background-position: middle; /* Set the desired position */
     }
