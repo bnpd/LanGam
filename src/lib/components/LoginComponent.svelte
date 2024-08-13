@@ -1,7 +1,7 @@
 <script lang="ts">
     import { login, newUserLang, signup } from '$lib/components/backend';
     import { goto } from '$app/navigation';
-	import { currentTask, failedWords, nativeLang, reviews, targetLang, user } from '$lib/stores';
+	import { failedWords, nativeLang, reviews, targetLang, user } from '$lib/stores';
 	import { ClientResponseError } from 'pocketbase';
 	import TitleWithBackgroundImageComponent from './TitleWithBackgroundImageComponent.svelte';
   

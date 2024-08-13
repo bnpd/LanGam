@@ -10,6 +10,7 @@ import './lists.css';
 	import VocabListItem from "$lib/components/VocabListItem.svelte";
 	import NavbarComponent from "$lib/components/NavbarComponent.svelte";
 	import BadgeComponent from "$lib/components/BadgeComponent.svelte";
+	import config from '../../config';
 
 let scheduledTokens: {[key: string]: Token} = {}
 let seenTokens: {[key: string]: string[]} = {}
@@ -56,6 +57,7 @@ function reloadLists() {
 <svelte:head>
 	<title>Your Vocabulary - Automated Language Learning AI</title>
   <meta name="description" content="Overview of your learned words - learn languages the fun way: talk about texts with AI.">
+  <link rel="preconnect" href={config.backend}>
 </svelte:head>
 
 <TitleWithBackgroundImageComponent>Your vocab</TitleWithBackgroundImageComponent>
