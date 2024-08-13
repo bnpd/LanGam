@@ -18,6 +18,7 @@
             return;
         }
         try {
+            loading = true
             if (isSignup) {
                 await signup(formDataEntries.get('email')?.toString()!, formDataEntries.get('password')?.toString()!, 'en'/*formDataEntries.get('native_lang')?.toString()!*/)
             }
@@ -39,9 +40,14 @@
                 showValidationError('password', 'Email or password are wrong.')
             } else if (isSignup && (e as Error).message.includes('validation_invalid_email')) {// signup email was rejected
                 showValidationError('email', 'The email is invalid or already in use.')
-            } else {                
+            } else if (isSignup && (e as Error).message.includes('validation_is_email')) {// signup email format invalid
+                showValidationError('email', 'Please check the format of this email address.')
+            } else {   
+                showValidationError('submit', 'Connection error, please try again.')             
                 console.error(e)
             }
+        } finally {
+            loading = false
         }
     }
 
@@ -89,7 +95,10 @@
         </datalist>
     {/if}
     <br>
-    <input type="submit" value={isSignup ? "Register" : "Login"}>
+    <input id="submit" type="submit" value={isSignup ? "Register" : "Login"} disabled={loading}>
+    {#if loading}
+        <div class:loading/>
+    {/if}
 </form>
 <br>
 {#if isSignup}
