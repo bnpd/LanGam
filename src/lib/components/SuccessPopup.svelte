@@ -15,7 +15,7 @@
 <!-- svelte-ignore a11y-no-static-element-interactions -->
 <!-- svelte-ignore a11y-click-events-have-key-events -->
 
-{#if message}
+{#if message != undefined}
 	<Popup on:closed={() => closeSelf(false)}>
 		<h1>Congratulations!</h1>
 		<p style="white-space: pre-line">{message}</p>

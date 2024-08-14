@@ -23,8 +23,6 @@
   $: if($currentTask) setTask($currentTask)
   $: if(solutionText) setSolution(solutionText)
 
-  $: console.table(taskParagraphs)
-
   afterUpdate(() => {
     if (divTask?.scrollTop == 0) {
       // on first time we added all p elements, restore scroll position

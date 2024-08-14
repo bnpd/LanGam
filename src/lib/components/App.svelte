@@ -36,6 +36,8 @@
     $: chatFocussed = phase === 'chatting'; // focus chat when entering chatting phase (ChatComponent can still manage it's focus independently after this, e.g. unfocus even though we are in chatting phase)
     
 
+  $: console.table($currentTask)
+
     onMount(async () => {
         let urlparams = new URLSearchParams(window.location.search)
 
@@ -120,6 +122,8 @@
 		} else if (phase === "solutionShown") {
             speechSynthesis.cancel()
 
+            const correctedWords = (srWords?.difference($failedWords))?.size // this is kinda cheating cause srWords are lemmas and failedWords are forms, but it's not easily fixable without saving the whole Token object somewhere
+
             if ($currentTask && $user) {
                 $reviews.push(structuredClone($failedWords))
                 $reviews = $reviews
@@ -131,25 +135,23 @@
 
             reviewsSentPromise = sendPendingReviews()
 
-
-            const correctedWords = (srWords?.difference($failedWords))?.size // this is kinda cheating cause srWords are lemmas and failedWords are forms, but it's not easily fixable without saving the whole Token object somewhere
-            if (nNewForms || correctedWords) {
-                statsClosedPromise = new Promise<boolean>((resolve, reject) => {
-                    statsClosedPromiseResolve = resolve
-                })
-                congratsMessage = 
+            statsClosedPromise = new Promise<boolean>((resolve, reject) => {
+                statsClosedPromiseResolve = resolve
+            })
+            congratsMessage = 
+                (
                     (nNewForms ? `You just encountered ${nNewForms} new words!\n` : '')
-                    + (correctedWords ? `You remembered ${correctedWords} word families you had wrong before!\n` : '');
+                  + (correctedWords ? `You remembered ${correctedWords} word families you had wrong before!\n` : '')
+                ) || 'Keep up that pace! 🏃';
 
-                let goToChat = await statsClosedPromise
+            let goToChat = await statsClosedPromise
 
-                if (goToChat) {
-                    phase = "chatting"
-                    
-                } else {
-                    phase = "done"
-                }
-            } 
+            if (goToChat) {
+                phase = "chatting"
+                
+            } else {
+                phase = "done"
+            }
         } else if (phase === 'chatting') {
             phase = 'done'
         }
@@ -284,4 +286,4 @@
     $failedWords = [];
     location.reload();
 }}/>
-<SuccessPopup message={congratsMessage} onClose={statsClosedPromiseResolve} chatPrompt={$currentTask?.question?.text}/>
+<SuccessPopup message={congratsMessage} onClose={goToChat=>{congratsMessage = undefined; statsClosedPromiseResolve(goToChat)}} chatPrompt={$currentTask?.question?.text}/>
