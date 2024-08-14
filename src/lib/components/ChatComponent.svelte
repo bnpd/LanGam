@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { currentTask, failedWords, targetLang, user } from "$lib/stores";
-	import { afterUpdate } from "svelte";
+	import { afterUpdate, tick } from "svelte";
 	import BadgeComponent from "./BadgeComponent.svelte";
-	import ReaderComponent from "./ReaderComponent.svelte";
+	import type ReaderComponent from "./ReaderComponent.svelte";
 	import { sendChat } from "./backend";
 
     const ANON_RESPONSE = 'AI cannot help with the Drnuk language yet - but sign up to get help with Polish.'
@@ -26,7 +26,7 @@
     let iChat: HTMLDivElement
     let loading: boolean = false
     let chatHistory: {role: string, content: string}[] = [];
-    let shouldFocusChat: boolean;
+    let messageHistoryContainer: HTMLDivElement
 
     /**
      * Finds the first occurrence of word in the text and returns the corresponding lemma (thus not necessarily the lemma for that ocurrence that the user clicked)
@@ -45,55 +45,57 @@
         loading = true
         chatPrompt = (e.currentTarget as HTMLButtonElement).innerText
         const newMessage = {role: 'user', content: chatPrompt}
+        let new_history = chatHistory
         try {
             const response = {role: 'assistant', content: ($user ? await sendChat(chatHistory.filter(el => el.role!='internal').concat([newMessage]), undefined, undefined, readerComponent.getVisibleParagraphs())
                          : ANON_RESPONSE)};
-            chatHistory.push(newMessage) // we only push user prompt now cause we don't want it here if connection error
-            chatHistory.push(response)
+            new_history.push(newMessage) // we only push user prompt now cause we don't want it here if connection error
+            new_history.push(response)
             chatPrompt = ''
         } catch (err: any) {
             if (err.message === "Chat history too long.") {
-                chatHistory.push({role: 'internal', content: "This chat has reached it's maximum length. Try chatting about another text."})                
+                new_history.push({role: 'internal', content: "This chat has reached it's maximum length. Try chatting about another text."})                
             } else {
-                chatHistory.push({role: 'internal', content: 'Cannot connect, please try again'})
+                new_history.push({role: 'internal', content: 'Cannot connect, please try again'})
             }
         } finally {
             loading = false
         }
-        shouldFocusChat = true;
+        chatHistory = new_history
+        await tick();
+        iChat?.focus()
+        messageHistoryContainer.scroll({top: messageHistoryContainer.scrollHeight, behavior: 'smooth'})
     }
 
     async function onSubmitChatPrompt(e: Event) {
         if (chatPrompt) {
             loading = true
             const newMessage = {role: 'user', content: chatPrompt}
+            let new_history = chatHistory
             try {
                 let response = {role: 'assistant', content: ($user ? await sendChat(chatHistory.filter(el => el.role!='internal').concat([newMessage]), $targetLang, $currentTask.docId, undefined)
                                  : ANON_RESPONSE)};
-                chatHistory.push(newMessage) // we only push user prompt now cause we don't want it here if connection error
-                chatHistory.push(response)
+                new_history.push(newMessage) // we only push user prompt now cause we don't want it here if connection error
+                new_history.push(response)
                 chatPrompt = ''
             } catch (err: any) {
                 if (err.message === "Chat history too long.") {
-                    chatHistory.push({role: 'internal', content: "This chat has reached it's maximum length. Try chatting about another text."})                
+                    new_history.push({role: 'internal', content: "This chat has reached it's maximum length. Try chatting about another text."})                
                 } else {
-                    chatHistory.push({role: 'internal', content: 'Cannot connect, please try again'})
+                    new_history.push({role: 'internal', content: 'Cannot connect, please try again'})
                 }
             } finally {
                 loading = false
             }
-            shouldFocusChat = true
+            chatHistory = new_history
+            await tick();
+            iChat?.focus()
+            messageHistoryContainer.scroll({top: messageHistoryContainer.scrollHeight, behavior: 'smooth'})
         } else {
             iChat?.focus()
         }
     }
 
-    afterUpdate(() => {
-        if (shouldFocusChat) {
-            iChat?.focus()
-            shouldFocusChat = false;
-        }
-    });
 </script>
 
 <style>
@@ -108,6 +110,12 @@
       margin: 0 1vw;
       margin-bottom: 8px;
       box-shadow: #80808018 0 2px 5px 2px; /* Downwards shadow and on left and right side*/
+    }
+
+    .chatMessage {
+        white-space: pre-wrap;
+        /* max-height: 18dvh; 
+        overflow-y: scroll; */
     }
     
     #submitChat, #closeChat {
@@ -133,32 +141,37 @@
       margin-bottom: calc(var(--button-height) + 5px);
       left: 0;
     }
+
+    #messageHistoryContainer {
+        max-height: 80dvh;
+        overflow-y: scroll; 
+    }
 </style>
 
 <div id="chatComponent" on:focus|capture={()=>{chatFocussed = true}} on:focusout|capture={()=>{chatFocussed = false}}>
-    {#if chatFocussed || loading}
+    <div id="messageHistoryContainer" bind:this={messageHistoryContainer} style:visibility={chatFocussed || loading ? 'visible' : 'hidden'}>
         {#each chatHistory as msg, i}
                 {#if msg.role === 'assistant'}
-                    <div class="card" style="max-height: 18dvh; overflow-y: scroll;" id="responseBox">
+                    <div class="card" id="responseBox">
                         <em><strong><BadgeComponent text='AI' tooltip="AI's response"/></strong></em>&nbsp;
-                        {msg.content}
+                        <span class="chatMessage">{msg.content}</span>
                     </div>
                 {:else if msg.role === 'user'}
-                    <div class="card" style="max-height: 18dvh; overflow-y: scroll;" id="responseBox">
+                    <div class="card" id="responseBox">
                         <em><strong><BadgeComponent text='You' tooltip="Your response"/></strong></em>&nbsp;
-                        {msg.content}
+                        <span class="chatMessage">{msg.content}</span>
                     </div>
                 {:else if msg.role === 'internal' && i == chatHistory.length-1}
-                    <div class="card" style="max-height: 18dvh; overflow-y: scroll;" id="responseBox">
+                    <div class="card" id="responseBox">
                         <em><strong><BadgeComponent text='Error' tooltip="Error"/></strong></em>&nbsp;
-                        {msg.content}
+                        <span class="chatMessage">{msg.content}</span>
                     </div>
                 {/if}
         {/each}
-    {/if}
-    {#if loading}
-        <div class="card" class:loading/>
-    {/if}
+        {#if loading}
+            <div class="card" class:loading/>
+        {/if}
+    </div>
     <div>
         <button class="promptSuggestion" on:click={onClickChatSuggestion} disabled={loading}>
             How is the past tense formed?
