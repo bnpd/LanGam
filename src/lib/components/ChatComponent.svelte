@@ -51,8 +51,8 @@
             chatHistory.push(newMessage) // we only push user prompt now cause we don't want it here if connection error
             chatHistory.push(response)
             chatPrompt = ''
-        } catch (e: any) {
-            if (e.message === "Chat history too long.") {
+        } catch (err: any) {
+            if (err.message === "Chat history too long.") {
                 chatHistory.push({role: 'internal', content: "This chat has reached it's maximum length. Try chatting about another text."})                
             } else {
                 chatHistory.push({role: 'internal', content: 'Cannot connect, please try again'})
@@ -73,8 +73,8 @@
                 chatHistory.push(newMessage) // we only push user prompt now cause we don't want it here if connection error
                 chatHistory.push(response)
                 chatPrompt = ''
-            } catch (e) {
-                if (e.message === "Chat history too long.") {
+            } catch (err: any) {
+                if (err.message === "Chat history too long.") {
                     chatHistory.push({role: 'internal', content: "This chat has reached it's maximum length. Try chatting about another text."})                
                 } else {
                     chatHistory.push({role: 'internal', content: 'Cannot connect, please try again'})
