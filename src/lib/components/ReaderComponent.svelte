@@ -3,7 +3,7 @@
 	import Token from "$lib/Token";
 	import TokenComponent from "./TokenComponent.svelte";
   import { currentTask, failedWords, currentlyScrolledParagraphIndex } from '../stores';
-	import { afterUpdate } from "svelte";
+	import { afterUpdate, tick } from "svelte";
 
   const NON_CLICKABLE_POS_IDS = new Set([-1, 97, 99, 101]) // added -1 for whitespace
 
@@ -81,7 +81,7 @@
    * Set a document as the currently shown task
    * @param {DocumentC} doc Document containing the task
    */
-  function setTask(doc: DocumentC) {        
+  async function setTask(doc: DocumentC) {        
     if (!divTask || !solutionField) {
       return
     }
@@ -90,7 +90,9 @@
     divTask.scrollTop = 0
     solutionField.scrollTop = 0
 
-    divTask.textContent = '' // delete previous task
+    taskParagraphs = []
+    await tick();
+    
     phase = "prompting"
 
     let space = {word: ' ', lemma_: '', pos: -1}
@@ -124,8 +126,9 @@
     taskParagraphs = _taskParagraphs
   }
 
-  function setSolution(solution: string) {
+  async function setSolution(solution: string) {
     solutionParagraphs = []
+    await tick();
     solution = solution.replace('\r', '').replace('\n\n', '\n')
     let row = 1
     solution.split('\n').map(paragraph => {
@@ -190,10 +193,13 @@
             isFailed={$failedWords?.has(token?.word)}
             isSrWord={srWords?.has(token?.lemma_)}
             isClickable={!NON_CLICKABLE_POS_IDS.has(token?.pos)}
-            on:click={() => {onWordClick(token)}}></TokenComponent>
+            on:click={() => {onWordClick(token)}} />
         {/each}          
       </svelte:element>
     {/each}
+    <div>
+      <slot name="afterTask" />
+    </div>
   </div>
   <hr>
   <div id="solutionField" bind:this={solutionField} class:hidden={phase !== "solutionShown"}>
@@ -202,5 +208,8 @@
       {para.string}
     </svelte:element>
     {/each}  
+    <div>
+      <slot name="afterSolution" />
+    </div>
   </div>
 </div>
