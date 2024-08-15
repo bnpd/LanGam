@@ -101,6 +101,12 @@
 <style>
     .promptSuggestions {
         display: flex;
+        justify-content: center;
+    }
+    .promptSuggestions:has(.promptSuggestion + .promptSuggestion) {
+        justify-content: space-evenly;
+    }
+    .promptSuggestions:has(.promptSuggestion + .promptSuggestion + .promptSuggestion ) {
         justify-content: space-between;
     }
     .promptSuggestion {
