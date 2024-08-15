@@ -121,6 +121,7 @@
     .chatHistoryHidden {
         visibility: hidden;
         position: relative; /* necessary for z-index to take effect */
+        z-index: -5;
     }
     
     #submitChat, #closeChat {
@@ -141,19 +142,19 @@
     
     #chatComponent {
       width: 100%;
-      position: absolute;
-      bottom: 0;
-      margin-bottom: calc(var(--button-height) + 5px);
-      left: 0;
+      position: relative;
     }
 
     #messageHistoryContainer {
         max-height: 80dvh;
-        overflow-y: scroll; 
+        overflow-y: auto; 
+        position: absolute;
+        bottom: 100%;
+        margin-bottom: 5px;
     }
 </style>
 
-<div id="chatComponent" on:focus|capture={()=>{chatFocussed = true}} on:focusout|capture={()=>{chatFocussed = false}} style={'z-index:' + (!chatFocussed && !loading ? -5 : 5)}>
+<div id="chatComponent" on:focus|capture={()=>{chatFocussed = true}} on:focusout|capture={()=>{chatFocussed = false}}>
     <div id="messageHistoryContainer" bind:this={messageHistoryContainer} class:chatHistoryHidden={!chatFocussed && !loading}>
         {#each chatHistory as msg, i}
                 {#if msg.role === 'assistant'}

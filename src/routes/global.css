@@ -8,12 +8,14 @@ body {
   background-color: var(--body-background-color);
   font-family: system-ui, Arial, Helvetica, sans-serif;
   text-align: center;
-  padding: min(1dvh, 20px) 2vw;
-  height: calc(100dvh - 3.6*var(--button-height));
+  padding: min(1dvh, 20px) 3vw;
+  height: calc(100dvh - var(--button-height));
   display: flex; 
   flex-direction: column; 
   max-width: 40em;
   margin: auto;
+  margin-bottom: calc();
+  box-sizing: border-box;
 }
 
 h1 {
@@ -99,7 +101,7 @@ div[contenteditable]:focus {
   padding: 22px;
   background-color: aliceblue;
   border-radius: 2em;
-  margin: 5px;
+  margin: 5px 0;
   box-shadow: #80808010 0 3px 5px 1px; /* Downwards shadow and on left and right side*/
 }
 

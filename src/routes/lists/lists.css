@@ -1,7 +1,8 @@
 #divLeft, #divRight {
-    width: 50%;
+    width: 48%;
     float: left;
     text-align: center;
+    margin: 0 1%;
 }
 
 h1 {
@@ -10,40 +11,4 @@ h1 {
 
 h4 {
     margin-bottom: 0.8em;
-}
-
-ul {
-    padding-left: 0;
-    position: absolute;
-    width: 37%;
-    line-height: 2em;
-    list-style: none;
-}
-
-li:hover {
-    background-color: lightblue;
-}
-
-#ulSearchList > li:hover::after {
-    content: 'remove ➡';
-    right: 10px;
-}
-
-#ulKnownList > li:not(.noUnlearn):hover::before {
-    content: '⬅ add';
-    left: 10px;
-}
-
-#ulSearchList > li:hover::after, #ulKnownList > li:hover::before {
-    font-size: 25px;
-    color: darkturquoise;
-    position: absolute;
-}
-
-
-/* Changes for PC*/
-@media only screen and (min-width: 768px) {
-    ul {
-        width: 30%;
-    }
 }
