@@ -99,17 +99,19 @@
 </script>
 
 <style>
+    .promptSuggestions {
+        display: flex;
+        justify-content: space-between;
+    }
     .promptSuggestion {
-      font-size: xx-small;
-      width: fit-content;
-      max-width: 30vw;
-      line-height: 10px;
-      height: auto;
-      opacity: 0.5;
-      border-color: blue;
-      margin: 0 1vw;
-      margin-bottom: 8px;
-      box-shadow: #80808018 0 2px 5px 2px; /* Downwards shadow and on left and right side*/
+        font-size: xx-small;
+        width: 31%;
+        line-height: 10px;
+        height: auto;
+        opacity: 0.5;
+        border-color: blue;
+        margin-bottom: 8px;
+        box-shadow: #80808018 0 2px 5px 2px; /* Downwards shadow and on left and right side*/
     }
 
     .chatMessage {
@@ -125,24 +127,24 @@
     }
     
     #submitChat, #closeChat {
-      position: absolute;
-      bottom: 1px;
-      border-radius: 20px;
-      width: var(--button-height);
-      height: var(--button-height);
+        position: absolute;
+        bottom: 1px;
+        border-radius: 20px;
+        width: var(--button-height);
+        height: var(--button-height);
     }
         
     #submitChat {
-      right: 1px;
+        right: 1px;
     }
         
     #closeChat {
-      left: 1px;
+        left: 1px;
     }
     
     #chatComponent {
-      width: 100%;
-      position: relative;
+        width: 100%;
+        position: relative;
     }
 
     #messageHistoryContainer {
@@ -178,7 +180,7 @@
             <div class="card" class:loading/>
         {/if}
     </div>
-    <div>
+    <div class="promptSuggestions">
         <button class="promptSuggestion" on:click={onClickChatSuggestion} disabled={loading}>
             How is the past tense formed?
         </button>
