@@ -16,7 +16,7 @@
     $: if (typeof document !== 'undefined') {            
             let mainContent = document?.getElementById('contentbox')
             if (mainContent) {
-                mainContent.style.opacity = (chatHistory.length && chatFocussed) ? "0.2" : "1"
+                mainContent.style.opacity = (chatHistory.length && (chatFocussed || loading)) ? "0.2" : "1"
             }
         }
     
@@ -117,6 +117,11 @@
         /* max-height: 18dvh; 
         overflow-y: scroll; */
     }
+
+    .chatHistoryHidden {
+        visibility: hidden;
+        position: relative; /* necessary for z-index to take effect */
+    }
     
     #submitChat, #closeChat {
       position: absolute;
@@ -148,8 +153,8 @@
     }
 </style>
 
-<div id="chatComponent" on:focus|capture={()=>{chatFocussed = true}} on:focusout|capture={()=>{chatFocussed = false}}>
-    <div id="messageHistoryContainer" bind:this={messageHistoryContainer} style:visibility={chatFocussed || loading ? 'visible' : 'hidden'}>
+<div id="chatComponent" on:focus|capture={()=>{chatFocussed = true}} on:focusout|capture={()=>{chatFocussed = false}} style={'z-index:' + (!chatFocussed && !loading ? -5 : 5)}>
+    <div id="messageHistoryContainer" bind:this={messageHistoryContainer} class:chatHistoryHidden={!chatFocussed && !loading}>
         {#each chatHistory as msg, i}
                 {#if msg.role === 'assistant'}
                     <div class="card" id="responseBox">
