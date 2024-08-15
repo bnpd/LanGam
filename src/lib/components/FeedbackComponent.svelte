@@ -5,7 +5,6 @@
 
     let isOpen = false
     let feedbackText = ''
-    let loading = false
     let contactConsent: boolean = getUserData()?.email?.length
     let email: string = getUserData()?.email
     let toast: string

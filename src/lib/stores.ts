@@ -4,6 +4,7 @@ import { writable } from 'svelte/store';
 export const user = createPersistentStore('username', null);
 export const targetLang = createPersistentStore('target_lang', null);
 export const nativeLang = createPersistentStore('native_lang', null);
+export const loadingTask = writable()
 
 /* Study Component Stores */
 export const isSoundOn = createPersistentStore('isSoundOn', true);

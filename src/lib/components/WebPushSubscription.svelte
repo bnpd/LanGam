@@ -1,11 +1,11 @@
 <script lang="ts">
 import { onMount } from 'svelte';
 import { requestNotifications } from './backend';
+import { loadingTask } from '$lib/stores';
 
 let notificationPermission: NotificationPermission;
 let done = false;
-export let loading: boolean;
-$: if (!loading && notificationPermission === 'granted' && !done) requestNotifications()
+$: if (!$loadingTask && notificationPermission === 'granted' && !done) requestNotifications()
 
 onMount(async () => {
   notificationPermission = Notification.permission

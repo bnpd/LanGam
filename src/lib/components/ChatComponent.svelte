@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { currentTask, failedWords, targetLang, user } from "$lib/stores";
-	import { afterUpdate, tick } from "svelte";
+	import { tick } from "svelte";
 	import BadgeComponent from "./BadgeComponent.svelte";
 	import type ReaderComponent from "./ReaderComponent.svelte";
 	import { sendChat } from "./backend";
@@ -33,7 +33,7 @@
      * @param word The word of which the lemma is wanted
      */
     function findLemma(word: string) {
-        if (!word) return undefined
+        if (!word || !$currentTask?.text) return undefined
         for (const token of Object.values($currentTask.text.tokens)) {
             if ((token as any).word == word) {
                 return (token as any).lemma_
