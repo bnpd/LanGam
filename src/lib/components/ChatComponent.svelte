@@ -13,7 +13,7 @@
     $: lastFailed = Array.from($failedWords).at(-1);
     $: lastFailedLemma = lastFailed ? findLemma(lastFailed) : undefined
     $: if ($currentTask && $currentTask?.question?.text?.length) chatHistory = [{role: 'assistant', content: $currentTask.question.text}]; // reset question on changes to currentTask
-    $: if (typeof document !== 'undefined') {            
+    $: if (typeof document !== 'undefined' && !inline) {            
             let mainContent = document?.getElementById('contentbox')
             if (mainContent) {
                 mainContent.style.opacity = (chatHistory.length && (chatFocussed || loading)) ? "0.2" : "1"
@@ -22,6 +22,7 @@
     
     export let readerComponent: ReaderComponent;
     export let chatFocussed: boolean = false;
+    export let inline: boolean;
     let chatPrompt: string | undefined
     let iChat: HTMLDivElement
     let loading: boolean = false
@@ -131,13 +132,24 @@
         position: relative; /* necessary for z-index to take effect */
         z-index: -5;
     }
+
+    .card {
+        width: fit-content;
+        max-width: calc(80% - var(--padding-card));
+        margin-top: var(--padding-card);
+        margin-bottom: var(--padding-card);
+    }
+
+    #chatInputContainer {
+        position: relative;
+    }
     
     #submitChat, #closeChat {
         position: absolute;
         bottom: 1px;
+        height: calc(100% - 2px);
         border-radius: 20px;
         width: var(--button-height);
-        height: var(--button-height);
     }
         
     #submitChat {
@@ -149,34 +161,53 @@
     }
     
     #chatComponent {
-        width: 100%;
         position: relative;
+        width: 100%;
+        padding-bottom: 10px;
     }
 
-    #messageHistoryContainer {
+    /* Inline vs floating stuff */
+
+    #messageHistoryContainer.floatAboveParent {
         max-height: 80dvh;
-        overflow-y: auto; 
+        overflow-y: auto;
+    }
+
+    .floatAboveParent {
         position: absolute;
         bottom: 100%;
-        margin-bottom: 5px;
+    }
+
+    .inline .card { /* TODO: only for inline (probably use in html instead )*/
+        background-color: var(--body-background-color);
+    }
+
+    .card.user {
+        margin-inline-start: auto;
+        margin-inline-end: 0;
+    }
+
+    .card.internal {
+        margin-inline-start: auto;
+        margin-inline-end: auto;
     }
 </style>
 
 <div id="chatComponent" on:focus|capture={()=>{chatFocussed = true}} on:focusout|capture={()=>{chatFocussed = false}}>
-    <div id="messageHistoryContainer" bind:this={messageHistoryContainer} class:chatHistoryHidden={!chatFocussed && !loading}>
+    <div id="messageHistoryContainer" bind:this={messageHistoryContainer} class:chatHistoryHidden={!chatFocussed && !loading && !inline} class:floatAboveParent={!inline} class:inline={inline}>
         {#each chatHistory as msg, i}
                 {#if msg.role === 'assistant'}
-                    <div class="card" id="responseBox">
+                    <div class="card assistant" id="responseBox">
                         <em><strong><BadgeComponent text='AI' tooltip="AI's response"/></strong></em>&nbsp;
                         <span class="chatMessage">{msg.content}</span>
                     </div>
                 {:else if msg.role === 'user'}
-                    <div class="card" id="responseBox">
+                    <div class="card user" id="responseBox">
                         <em><strong><BadgeComponent text='You' tooltip="Your response"/></strong></em>&nbsp;
                         <span class="chatMessage">{msg.content}</span>
                     </div>
                 {:else if msg.role === 'internal' && i == chatHistory.length-1}
-                    <div class="card" id="responseBox">
+                    <div class="card internal" id="responseBox">
                         <em><strong><BadgeComponent text='Error' tooltip="Error"/></strong></em>&nbsp;
                         <span class="chatMessage">{msg.content}</span>
                     </div>
@@ -186,6 +217,7 @@
             <div class="card" class:loading/>
         {/if}
     </div>
+    {#if !inline}   
     <div class="promptSuggestions">
         <button class="promptSuggestion" on:click={onClickChatSuggestion} disabled={loading}>
             How is the past tense formed?
@@ -201,15 +233,18 @@
             </button>
         {/if}
     </div>
-    <div contenteditable id="iChat" data-placeholder="Ask me ✨" bind:innerText={chatPrompt} bind:this={iChat}/>
-    {#if chatFocussed && chatHistory.length}
-        <button id="closeChat" on:click={() => {document?.activeElement?.blur()}}>x</button>       
-    {/if}    
-    <button id="submitChat" on:click={onSubmitChatPrompt} disabled={loading}><b><em>
-        {#if chatPrompt}
-        ➥
-        {:else}
-        AI            
-        {/if}
-    </em></b></button>
+    {/if}
+    <div id="chatInputContainer">
+        <div contenteditable id="iChat" data-placeholder="Ask me ✨" bind:innerText={chatPrompt} bind:this={iChat}/>
+        {#if chatFocussed && chatHistory.length }
+            <button id="closeChat" on:click={() => {document?.activeElement?.blur()}}>x</button>       
+        {/if}    
+        <button id="submitChat" on:click={onSubmitChatPrompt} disabled={loading}><b><em>
+            {#if chatPrompt}
+            ➥
+            {:else}
+            AI            
+            {/if}
+        </em></b></button>
+    </div>
 </div>

@@ -7,7 +7,6 @@
 body {
   background-color: var(--body-background-color);
   font-family: system-ui, Arial, Helvetica, sans-serif;
-  text-align: center;
   padding: min(1dvh, 20px) 3vw;
   height: calc(100dvh - var(--button-height));
   display: flex; 
@@ -68,12 +67,13 @@ hr { /* necessary to avoid corruption in flex-columns*/
 
 div[contenteditable] {
   width: 100%;
+  overflow-wrap: anywhere;
   min-height: var(--button-height);
   border-radius: 20px;
   background-color: aliceblue;
   max-height: calc(2.5*var(--button-height));
   box-sizing: border-box;
-  padding: 12px calc(var(--button-height) + 2px);
+  padding: 10px calc(var(--button-height) + 8px);
   overflow: auto;
   box-shadow: #80808018 0 2px 5px 2px; /* Downwards shadow and on left and right side*/
   line-height: 1.3em;
@@ -98,7 +98,8 @@ div[contenteditable]:focus {
 }
 
 .card {
-  padding: 22px;
+  --padding-card: 22px;
+  padding: var(--padding-card);
   background-color: aliceblue;
   border-radius: 2em;
   margin: 5px 0;
@@ -276,7 +277,7 @@ div[contenteditable]:focus {
 /* Changes for PC*/
 @media only screen and (min-width: 768px) {
   .card {
-    padding: 40px;
+    --padding-card: 30px;
   }
 
   #divTask, #solutionField {

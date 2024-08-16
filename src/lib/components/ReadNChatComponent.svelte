@@ -208,19 +208,20 @@
 {#if !$user}
     <strong>In this demo text, you learn the fabulous <em>Drnuk</em> language (and how this app works).</strong> <!-- If you want to dive right in with Polish, create an account at the bottom.-->
 {/if}
-<ReaderComponent phase={phase} trySpeak={tts?.trySpeak} solutionText={solutionText} taskVisible={!$loadingTask} srWords={srWords} bind:this={readerComponent}/>
-<div>
-    <button id="answbtn" class:loading={$loadingTask} on:click={onAnswbtnClick}>
-        {#if phase === 'prompting'}
-            {answbtnTxtWhilePrompting}
-        {:else if phase === 'solutionShown'}
-            {answbtnTxtWhileSolutionShown}
-        {:else if phase === 'chatting'}
-            {answbtnTxtWhileChatting}
-        {/if}
-    </button>
-</div>
-<ChatComponent readerComponent={readerComponent} chatFocussed={chatFocussed}/>
+<ReaderComponent phase={phase} trySpeak={tts?.trySpeak} solutionText={solutionText} taskVisible={!$loadingTask} srWords={srWords} bind:this={readerComponent}>
+    <span slot="afterTask"><ChatComponent readerComponent={readerComponent} chatFocussed={chatFocussed} inline={true}/></span>
+    <span slot="afterSolution">Hola</span>
+</ReaderComponent>
+<button id="answbtn" class:loading={$loadingTask} on:click={onAnswbtnClick}>
+    {#if phase === 'prompting'}
+        {answbtnTxtWhilePrompting}
+    {:else if phase === 'solutionShown'}
+        {answbtnTxtWhileSolutionShown}
+    {:else if phase === 'chatting'}
+        {answbtnTxtWhileChatting}
+    {/if}
+</button>
+<ChatComponent readerComponent={readerComponent} chatFocussed={chatFocussed} inline={false}/>
 <Toast message={toast} textReject={textRejectToast} onReject={() => {
     $failedWords = [];
     location.reload();
