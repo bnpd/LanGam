@@ -12,7 +12,7 @@
     let tts: TtsComponent
 </script>
 
-<TitleWithBackgroundImageComponent />
+<TitleWithBackgroundImageComponent>Automated Language Learning AI</TitleWithBackgroundImageComponent>
 <ReadNChatComponent tts={tts}></ReadNChatComponent>
 <NavbarComponent>
     <button on:click={()=>goto("/catalog")}>Texts</button>
