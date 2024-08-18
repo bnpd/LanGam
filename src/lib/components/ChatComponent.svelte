@@ -25,7 +25,7 @@
     export let inline: boolean;
     export let chatBoxTitle: string | undefined = undefined;
     export let chatHistory: Writable<{role: string, content: string}[]> = new writable([]);
-    let chatPrompt: string | undefined
+    let chatPrompt: string = ''
     let iChat: HTMLDivElement
     let loading: boolean = false
     let messageHistoryContainer: HTMLDivElement
@@ -66,11 +66,11 @@
         $chatHistory = new_history
         await tick();
         iChat?.focus()
-        messageHistoryContainer.scroll({top: messageHistoryContainer.scrollHeight, behavior: 'smooth'})
+        scrollToLatestChatMessage()
     }
 
     async function onSubmitChatPrompt(e: Event) {
-        if (chatPrompt) {
+        if (chatPrompt.length) {
             loading = true
             const newMessage = {role: 'user', content: chatPrompt}
             let new_history = $chatHistory
@@ -92,10 +92,15 @@
             $chatHistory = new_history
             await tick();
             iChat?.focus()
-            messageHistoryContainer.scroll({top: messageHistoryContainer.scrollHeight, behavior: 'smooth'})
+            scrollToLatestChatMessage()
         } else {
             iChat?.focus()
         }
+    }
+
+    function scrollToLatestChatMessage() {
+        const elToScroll = (inline ? readerComponent.getdivTask() : messageHistoryContainer)
+        elToScroll.scroll({top: elToScroll.scrollHeight, behavior: 'smooth'})
     }
 
 </script>

@@ -10,6 +10,7 @@
 
   let solutionField: HTMLDivElement
   let divTask: HTMLDivElement
+  export function getdivTask() {return divTask}
   let taskParagraphs: Array<{htmlTag: string, words: Array<any>}> = []
   let solutionParagraphs: Array<{htmlTag: string, string: string}> = []
 
