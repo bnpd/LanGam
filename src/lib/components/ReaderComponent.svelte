@@ -38,10 +38,7 @@
     return visibleParagraphs
   }
 
-  function onScroll(e: Event) {
-    // unfocus any other element (e.g. chat response window)
-    (document?.activeElement as HTMLElement)?.blur();
-    
+  function onScroll(e: Event) {    
     // Scroll the solutionField to the same paragraph index as divTask
     const newScrollIndex = currentScrolledParagraphIndex()
     if (newScrollIndex != $currentlyScrolledParagraphIndex) {
