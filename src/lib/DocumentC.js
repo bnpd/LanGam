@@ -22,6 +22,21 @@ class DocumentC {
     }
 
     /**
+     * @param {string} text
+     * @param {string} lang
+     * @param {{(lang: string): string}} translations
+     * @param {{(index: number): {word: string, pos: number, lemma_: string}}} tokens
+     */
+    static partialDocument(text, lang, translations, tokens) {
+        return new DocumentC(undefined, undefined, {
+            lang: lang,
+            text: text,
+            translations: translations,
+            tokens: tokens
+        }, undefined, undefined, undefined, undefined, undefined)
+    }
+
+    /**
      * @param {{ docId: number; title: any; text: any; content_type: string; topic: string; difficulty: number; question: any; img: string; }} json
      */
     static fromJson(json) {

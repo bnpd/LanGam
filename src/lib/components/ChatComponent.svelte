@@ -1,12 +1,16 @@
 <script lang="ts">
-	import { currentTask, failedWords, inlineChatHistoryTranslation, targetLang, user } from "$lib/stores";
+	import { currentTask, failedWords, nativeLang, targetLang, user } from "$lib/stores";
 	import { tick } from "svelte";
 	import BadgeComponent from "./BadgeComponent.svelte";
 	import type ReaderComponent from "./ReaderComponent.svelte";
-	import { getUserData, sendChat } from "./backend";
+	import { sendChat } from "./backend";
 	import { writable, type Writable } from "svelte/store";
+	import TaskComponent from "./TaskComponent.svelte";
+	import DocumentC from "$lib/DocumentC";
 
     const ANON_RESPONSE = 'AI cannot help with the Drnuk language yet - but sign up to get help with Polish.'
+    const MAX_LENGTH_RESPONSE = "This chat has reached it's maximum length. Try chatting about another text."
+    const OTHER_ERROR_RESPONSE = 'Cannot connect, please try again'
     
     /**
      * @type {string | undefined}
@@ -24,11 +28,16 @@
     export let chatFocussed: boolean = false;
     export let inline: boolean;
     export let chatBoxTitle: string | undefined = undefined;
-    export let chatHistory: Writable<{role: string, content: string}[]> = new writable([]);
+    export let chatHistory: Writable<{role: string, content: DocumentC}[]> = new writable([]);
+    export let translationLang: string = 'original'
+    export let srWords: Set<string> | undefined = undefined
+    export let trySpeak: Function | undefined = undefined
     let chatPrompt: string = ''
     let iChat: HTMLDivElement
     let loading: boolean = false
     let messageHistoryContainer: HTMLDivElement
+
+    $: console.table($chatHistory)
 
     /**
      * Finds the first occurrence of word in the text and returns the corresponding lemma (thus not necessarily the lemma for that ocurrence that the user clicked)
@@ -58,37 +67,29 @@
 
     async function submitChat(partialContext: boolean) {
         loading = true
-        const newMessage = {role: 'user', content: chatPrompt}
+        const newMessageTranslationJson = {}
+        newMessageTranslationJson[$nativeLang] = chatPrompt // for now we use what user wrote both for message and message's translation
+        const newMessage = {role: 'user', content: DocumentC.partialDocument(chatPrompt, $targetLang, newMessageTranslationJson, undefined)}
         let new_history = $chatHistory
         try {
-            let responseStr
             let response
             if ($user) {
                 response = partialContext 
-                                 ? await sendChat(new_history.filter(el => el.role!='internal').concat([newMessage]), undefined, undefined, readerComponent.getVisibleParagraphs())
-                                 : await sendChat(new_history.filter(el => el.role!='internal').concat([newMessage]), $targetLang, $currentTask.docId, undefined);
-                console.log(response);                
-                responseStr = response.text.text
+                                 ? await sendChat(messageHistoryForChatGpt($chatHistory.concat([newMessage])), undefined, undefined, readerComponent.getVisibleParagraphs())
+                                 : await sendChat(messageHistoryForChatGpt($chatHistory.concat([newMessage])), $targetLang, $currentTask.docId, undefined);
+                console.log(response);
             } else {
-                responseStr = ANON_RESPONSE
+                response = DocumentC.partialDocument(ANON_RESPONSE, $nativeLang, undefined, undefined)
             }
-            const responseMsg = {role: 'assistant', content: responseStr};
+            const responseMsg = {role: 'assistant', content: response};
             new_history.push(newMessage) // we only push user prompt now cause we don't want it here if connection error
             new_history.push(responseMsg)
             chatPrompt = ''
-
-            if (inline) {
-                let new_translations = $inlineChatHistoryTranslation
-                new_translations.push(newMessage) // temporarily pushing what user typed also to translationHistory
-                new_translations.push({role: 'assistant', content: response?.text?.translations?.en})
-                $inlineChatHistoryTranslation = new_translations
-            }
-
         } catch (err: any) {
             if (err.message === "Chat history too long.") {
-                new_history.push({role: 'internal', content: "This chat has reached it's maximum length. Try chatting about another text."})                
+                new_history.push({role: 'internal', content: DocumentC.partialDocument(MAX_LENGTH_RESPONSE, $nativeLang, undefined, undefined)})                
             } else {
-                new_history.push({role: 'internal', content: 'Cannot connect, please try again'})
+                new_history.push({role: 'internal', content: DocumentC.partialDocument(OTHER_ERROR_RESPONSE, $nativeLang, undefined, undefined)})
             }
         } finally {
             loading = false
@@ -97,6 +98,10 @@
         await tick();
         iChat?.focus()
         scrollToLatestChatMessage()
+    }
+
+    function messageHistoryForChatGpt(history: {role: string, content: DocumentC}[]) {
+        return history.filter(el => el.role!='internal').map(el => ({role: el.role, content: el.content.text.text}))
     }
 
     function scrollToLatestChatMessage() {
@@ -204,15 +209,19 @@
 <div id="chatComponent" on:focus|capture={()=>{chatFocussed = true}} on:focusout|capture={()=>{chatFocussed = false}}>
     <div id="messageHistoryContainer" bind:this={messageHistoryContainer} class:chatHistoryHidden={!chatFocussed && !loading && !inline} class:floatAboveParent={!inline} class:inline={inline}>
         {#each $chatHistory as msg, i}
-                {#if msg.role === 'assistant'}
-                    <div class="card assistant" id="responseBox">
-                        <em><strong><BadgeComponent text='AI' tooltip="AI's response"/></strong></em>&nbsp;
-                        <span class="chatMessage">{msg.content}</span>
-                    </div>
-                {:else if msg.role === 'user'}
-                    <div class="card user" id="responseBox">
-                        <em><strong><BadgeComponent text='You' tooltip="Your response"/></strong></em>&nbsp;
-                        <span class="chatMessage">{msg.content}</span>
+                {#if msg.role === 'assistant' || msg.role === 'user'}
+                    {@const isUser = msg.role === 'user'}
+                    <div class={"card "+msg.role} id="responseBox">
+                        <em><strong><BadgeComponent text={isUser ? 'You' : 'AI'} tooltip={isUser ? "Your" : "AI's" + " response"}/></strong></em>&nbsp;
+                        {#if translationLang === 'original'}
+                            {#if msg.content.text?.tokens}
+                                <TaskComponent task={msg.content} srWords={srWords} trySpeak={trySpeak}/>
+                            {:else}
+                                <span class="chatMessage">{msg.content.text.text}</span>
+                            {/if}
+                        {:else if msg.content.text?.translations?.[translationLang]}
+                            <span class="chatMessage">{msg.content.text.translations[translationLang]}</span>
+                        {/if}
                     </div>
                 {:else if msg.role === 'internal' && i == $chatHistory.length-1}
                     <div class="card internal" id="responseBox">

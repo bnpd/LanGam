@@ -1,4 +1,5 @@
 import { writable, type Writable } from 'svelte/store';
+import type DocumentC from './DocumentC';
 
 /* Global Stores */
 export const user = createPersistentStore('username', null);
@@ -16,8 +17,7 @@ export const currentTask = createPersistentStore('currentTask', null);
 export const currentlyScrolledParagraphIndex = createPersistentStore('currentScrolledParagraphIndex', 0);
 
 /* Chat Component Stores */
-export const inlineChatHistory: Writable<{role: string, content: string}[]> = createPersistentStore('inlineChatHistory', []);
-export const inlineChatHistoryTranslation: Writable<{role: string, content: string}[]> = createPersistentStore('inlineChatHistoryTranslation', []);
+export const inlineChatHistory: Writable<{role: string, content: DocumentC}[]> = createPersistentStore('inlineChatHistory', []);
 
 /* Store Creation Functions */
 

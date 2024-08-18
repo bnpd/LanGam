@@ -222,6 +222,11 @@ div[contenteditable]:focus {
   border-bottom-right-radius: 20px;
 }
 
+
+#messageHistoryContainer p {
+  display: inline;
+}
+
 .hidden {
   visibility: hidden;
 }

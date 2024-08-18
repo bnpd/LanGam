@@ -2,7 +2,7 @@
     import { onMount } from 'svelte';
     import ReaderComponent from './ReaderComponent.svelte';
     import { getTask, getUserTaskStats, sendReview } from './backend';
-    import { user, nativeLang, targetLang, isSoundOn, currentTask, reviews, failedWords, reviewDocIds, currentlyScrolledParagraphIndex, loadingTask, inlineChatHistory, inlineChatHistoryTranslation } from '$lib/stores';
+    import { user, nativeLang, targetLang, isSoundOn, currentTask, reviews, failedWords, reviewDocIds, currentlyScrolledParagraphIndex, loadingTask, inlineChatHistory } from '$lib/stores';
 	import { goto } from '$app/navigation';
 	import Toast from './Toast.svelte';
 	import ChatComponent from './ChatComponent.svelte';
@@ -30,9 +30,6 @@
     let statsClosedPromiseResolve: Function;
     let reviewsSentPromise: Promise<undefined>;
     $: chatFocussed = phase === 'chatting'; // focus chat when entering chatting phase (ChatComponent can still manage it's focus independently after this, e.g. unfocus even though we are in chatting phase)
-
-
-    $: console.table($currentTask);
 
     onMount(async () => {
         let urlparams = new URLSearchParams(window.location.search)
@@ -207,8 +204,7 @@
     }
 
     function initChatHistory() {
-        $inlineChatHistory = $currentTask?.question?.text ? [{role: 'assistant', content: $currentTask?.question?.text}] : [];
-        $inlineChatHistoryTranslation = $currentTask?.question?.translations?.en ? [{role: 'assistant', content: $currentTask?.question?.translations?.en}] : [];
+        $inlineChatHistory = $currentTask?.question?.text ? [{role: 'assistant', content: DocumentC.partialDocument($currentTask?.question?.text, $currentTask?.lang, $currentTask?.question?.translations, $currentTask?.question?.tokens)}] : [];
     }
 
 </script>
@@ -217,8 +213,8 @@
     <strong>In this demo text, you learn the fabulous <em>Drnuk</em> language (and how this app works).</strong> <!-- If you want to dive right in with Polish, create an account at the bottom.-->
 {/if}
 <ReaderComponent phase={phase} trySpeak={tts?.trySpeak} solutionText={solutionText} taskVisible={!$loadingTask} srWords={srWords} bind:this={readerComponent}>
-    <span slot="afterTask" hidden={!$currentTask}><ChatComponent readerComponent={readerComponent} chatFocussed={chatFocussed} inline={true} chatBoxTitle="Twoja odpowiedź 🤙" chatHistory={inlineChatHistory}/></span>
-    <span slot="afterSolution"><ChatComponent readerComponent={readerComponent} chatFocussed={chatFocussed} inline={true} chatBoxTitle={undefined} chatHistory={inlineChatHistoryTranslation}/></span>
+    <span slot="afterTask" hidden={!$currentTask}><ChatComponent readerComponent={readerComponent} chatFocussed={chatFocussed} inline={true} chatBoxTitle="Twoja odpowiedź 🤙" chatHistory={inlineChatHistory} srWords={srWords} trySpeak={tts?.trySpeak}/></span>
+    <span slot="afterSolution"><ChatComponent readerComponent={readerComponent} chatFocussed={chatFocussed} inline={true} chatBoxTitle={undefined} chatHistory={inlineChatHistory} translationLang='en'/></span>
 </ReaderComponent>
 <button id="answbtn" class:loading={$loadingTask} on:click={onAnswbtnClick}>
     {#if phase === 'prompting'}
@@ -231,9 +227,8 @@
 </button>
 <ChatComponent readerComponent={readerComponent} chatFocussed={chatFocussed} inline={false} chatBoxTitle="Ask me ✨"/>
 <Toast message={toast} textReject={textRejectToast} onReject={() => {
-    $failedWords = [];
+    $failedWords = new Set();
     $inlineChatHistory = [];
-    $inlineChatHistoryTranslation = [];
     location.reload();
 }}/>
 <SuccessPopup message={congratsMessage} onClose={goToChat=>{congratsMessage = undefined; statsClosedPromiseResolve(goToChat)}} chatPrompt={$currentTask?.question?.text}/>

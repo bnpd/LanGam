@@ -8,7 +8,7 @@
 
     export let task: DocumentC
     export let srWords: Set<String> | undefined
-    export let trySpeak: Function
+    export let trySpeak: Function | undefined
     let taskParagraphs: Array<{htmlTag: string, words: Array<any>}> = []
     export function getTaskParagraphs() {return taskParagraphs}
     $: if(task) taskParagraphs = makeTask(task)
@@ -17,31 +17,32 @@
         let resParas = []
         let space = {word: ' ', lemma_: '', pos: -1}
         for (const translatableText of [doc.title, doc.text]) {
-        let paragraph = []	
-        let char_index = 0	
-        for (const start_char in translatableText.tokens) {                       
-            while (char_index < (start_char as unknown as number)) { // insert whitespace and newlines
-            if (translatableText.text[char_index] == '\n' && paragraph.length > 0) {
-                // next paragraph
-                const headingLevel = getHeadingLevelForTask(paragraph)
-                resParas.push({htmlTag: headingLevel ? 'h'+headingLevel : 'p', words: paragraph.slice(headingLevel)})
-                paragraph = []
-            } else if (paragraph.length > 0) { // length>0 cause we do not want to push leading spaces to paragraphs
-                paragraph.push(space)
-            }
-            char_index++
-            }
-            // now our char indexes are synced
+            if (!translatableText) continue
+            let paragraph = []	
+            let char_index = 0	
+            for (const start_char in translatableText.tokens) {                       
+                while (char_index < (start_char as unknown as number)) { // insert whitespace and newlines
+                if (translatableText.text[char_index] == '\n' && paragraph.length > 0) {
+                    // next paragraph
+                    const headingLevel = getHeadingLevelForTask(paragraph)
+                    resParas.push({htmlTag: headingLevel ? 'h'+headingLevel : 'p', words: paragraph.slice(headingLevel)})
+                    paragraph = []
+                } else if (paragraph.length > 0) { // length>0 cause we do not want to push leading spaces to paragraphs
+                    paragraph.push(space)
+                }
+                char_index++
+                }
+                // now our char indexes are synced
 
-            let token_obj = translatableText.tokens[char_index]
-            let token_word = token_obj?.word
+                let token_obj = translatableText.tokens[char_index]
+                let token_word = token_obj?.word
 
-            if (!token_word.trim()) continue // only proceed if it wasn't only some kind of whitespace
-            paragraph.push(token_obj)
-            char_index += token_word.length
-        }
-        const headingLevel = getHeadingLevelForTask(paragraph)
-        resParas.push({htmlTag: headingLevel ? 'h'+headingLevel : 'p', words: paragraph.slice(headingLevel)})
+                if (!token_word.trim()) continue // only proceed if it wasn't only some kind of whitespace
+                paragraph.push(token_obj)
+                char_index += token_word.length
+            }
+            const headingLevel = getHeadingLevelForTask(paragraph)
+            resParas.push({htmlTag: headingLevel ? 'h'+headingLevel : 'p', words: paragraph.slice(headingLevel)})
         }
         return resParas
     }
@@ -50,7 +51,7 @@
     if ($failedWords?.has(token?.word)) {
         $failedWords?.delete(token.word)
     } else {
-        trySpeak(token?.word)
+        if (trySpeak != undefined) trySpeak(token?.word)
         $failedWords?.add(token.word)
     }
     $failedWords = $failedWords
@@ -73,6 +74,7 @@
     }
 
 </script>
+
 
 {#each taskParagraphs as taskParagraph (taskParagraph.words)} <!-- The "key" specified in parentheses is important cause svelte will otherwise use the array index and try to only insert new indexes or do nothing if the array length doesn't change -->
 <svelte:element this={taskParagraph.htmlTag}>

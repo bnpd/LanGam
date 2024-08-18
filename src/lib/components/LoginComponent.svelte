@@ -1,7 +1,7 @@
 <script lang="ts">
     import { login, newUserLang, signup } from '$lib/components/backend';
     import { goto } from '$app/navigation';
-	import { failedWords, nativeLang, reviews, targetLang, user } from '$lib/stores';
+	import { failedWords, inlineChatHistory, nativeLang, reviews, targetLang, user } from '$lib/stores';
 	import { ClientResponseError } from 'pocketbase';
 	import TitleWithBackgroundImageComponent from './TitleWithBackgroundImageComponent.svelte';
   
@@ -26,6 +26,7 @@
             if (user_obj.id != $user) {
                 $failedWords = new Set()
                 $reviews = []
+                $inlineChatHistory = []
                 $user = user_obj.id
             }
             $nativeLang = 'en'/*(await getLangById(user_obj.native_lang)).shortcode.toLowerCase()*/
