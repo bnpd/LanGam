@@ -177,13 +177,14 @@ export async function isTaskCached(targetLang, docId){
  * @param {string | undefined} targetLang
  * @param {string | undefined} docId
  * @param {string | undefined} contextParagraphs
+ * @returns {Promise<DocumentC>} This document will have only the key text.text defined unless docId and targetLang were given as inputs //TODO: add a parameter inline to this function and the backend endpoint instead of this assumption
  */
 export async function sendChat(chatHistory, targetLang=undefined, docId=undefined, contextParagraphs=undefined) {
 	const chatHistoryText = JSON.stringify(chatHistory.slice(-MAX_CHAT_HISTORY_LENGTH))
 	if (chatHistoryText.length > MAX_CHAT_HISTORY_CHARS) {
 		throw new Error("Chat history too long.");		
 	}
-	return (await backendGet(EndpointChat(chatHistoryText, targetLang, docId, contextParagraphs))).response //TODO: properly http-encode so that we don't get problems with # in responses
+	return DocumentC.fromJson(await backendGet(EndpointChat(chatHistoryText, targetLang, docId, contextParagraphs))) //TODO: properly http-encode so that we don't get problems with # in responses
 }
 
 

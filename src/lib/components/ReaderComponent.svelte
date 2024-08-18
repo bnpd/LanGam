@@ -9,8 +9,9 @@
 
 
   let solutionField: HTMLDivElement
+  export function getSolutionField() {return solutionField}
   let divTask: HTMLDivElement
-  export function getdivTask() {return divTask}
+  export function getDivTask() {return divTask}
   let taskParagraphs: Array<{htmlTag: string, words: Array<any>}> = []
   let solutionParagraphs: Array<{htmlTag: string, string: string}> = []
 

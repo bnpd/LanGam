@@ -232,6 +232,8 @@
 <ChatComponent readerComponent={readerComponent} chatFocussed={chatFocussed} inline={false} chatBoxTitle="Ask me ✨"/>
 <Toast message={toast} textReject={textRejectToast} onReject={() => {
     $failedWords = [];
+    $inlineChatHistory = [];
+    $inlineChatHistoryTranslation = [];
     location.reload();
 }}/>
 <SuccessPopup message={congratsMessage} onClose={goToChat=>{congratsMessage = undefined; statsClosedPromiseResolve(goToChat)}} chatPrompt={$currentTask?.question?.text}/>

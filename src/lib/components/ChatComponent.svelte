@@ -1,9 +1,9 @@
 <script lang="ts">
-	import { currentTask, failedWords, targetLang, user } from "$lib/stores";
+	import { currentTask, failedWords, inlineChatHistoryTranslation, targetLang, user } from "$lib/stores";
 	import { tick } from "svelte";
 	import BadgeComponent from "./BadgeComponent.svelte";
 	import type ReaderComponent from "./ReaderComponent.svelte";
-	import { sendChat } from "./backend";
+	import { getUserData, sendChat } from "./backend";
 	import { writable, type Writable } from "svelte/store";
 
     const ANON_RESPONSE = 'AI cannot help with the Drnuk language yet - but sign up to get help with Polish.'
@@ -43,17 +43,47 @@
         }
     }
 
-    async function onClickChatSuggestion(e: Event) {
-        loading = true
+    function onClickChatSuggestion(e: Event) {
         chatPrompt = (e.currentTarget as HTMLButtonElement).innerText
+        submitChat(true)
+    }
+
+    function onSubmitChatField(e: Event) {
+        if (chatPrompt.length) {
+            submitChat(false)
+        } else {
+            iChat?.focus()
+        }
+    }
+
+    async function submitChat(partialContext: boolean) {
+        loading = true
         const newMessage = {role: 'user', content: chatPrompt}
         let new_history = $chatHistory
         try {
-            const response = {role: 'assistant', content: ($user ? await sendChat(new_history.filter(el => el.role!='internal').concat([newMessage]), undefined, undefined, readerComponent.getVisibleParagraphs())
-                         : ANON_RESPONSE)};
+            let responseStr
+            let response
+            if ($user) {
+                response = partialContext 
+                                 ? await sendChat(new_history.filter(el => el.role!='internal').concat([newMessage]), undefined, undefined, readerComponent.getVisibleParagraphs())
+                                 : await sendChat(new_history.filter(el => el.role!='internal').concat([newMessage]), $targetLang, $currentTask.docId, undefined);
+                console.log(response);                
+                responseStr = response.text.text
+            } else {
+                responseStr = ANON_RESPONSE
+            }
+            const responseMsg = {role: 'assistant', content: responseStr};
             new_history.push(newMessage) // we only push user prompt now cause we don't want it here if connection error
-            new_history.push(response)
+            new_history.push(responseMsg)
             chatPrompt = ''
+
+            if (inline) {
+                let new_translations = $inlineChatHistoryTranslation
+                new_translations.push(newMessage) // temporarily pushing what user typed also to translationHistory
+                new_translations.push({role: 'assistant', content: response?.text?.translations?.en})
+                $inlineChatHistoryTranslation = new_translations
+            }
+
         } catch (err: any) {
             if (err.message === "Chat history too long.") {
                 new_history.push({role: 'internal', content: "This chat has reached it's maximum length. Try chatting about another text."})                
@@ -69,38 +99,10 @@
         scrollToLatestChatMessage()
     }
 
-    async function onSubmitChatPrompt(e: Event) {
-        if (chatPrompt.length) {
-            loading = true
-            const newMessage = {role: 'user', content: chatPrompt}
-            let new_history = $chatHistory
-            try {
-                let response = {role: 'assistant', content: ($user ? await sendChat(new_history.filter(el => el.role!='internal').concat([newMessage]), $targetLang, $currentTask.docId, undefined)
-                                 : ANON_RESPONSE)};
-                new_history.push(newMessage) // we only push user prompt now cause we don't want it here if connection error
-                new_history.push(response)
-                chatPrompt = ''
-            } catch (err: any) {
-                if (err.message === "Chat history too long.") {
-                    new_history.push({role: 'internal', content: "This chat has reached it's maximum length. Try chatting about another text."})                
-                } else {
-                    new_history.push({role: 'internal', content: 'Cannot connect, please try again'})
-                }
-            } finally {
-                loading = false
-            }
-            $chatHistory = new_history
-            await tick();
-            iChat?.focus()
-            scrollToLatestChatMessage()
-        } else {
-            iChat?.focus()
-        }
-    }
-
     function scrollToLatestChatMessage() {
-        const elToScroll = (inline ? readerComponent.getdivTask() : messageHistoryContainer)
-        elToScroll.scroll({top: elToScroll.scrollHeight, behavior: 'smooth'})
+        const elementsToScroll = (inline ? [readerComponent.getDivTask(), readerComponent.getSolutionField()] : [messageHistoryContainer])
+        elementsToScroll.forEach(el => el.scroll({top: el.scrollHeight, behavior: 'smooth'}))
+        // FIXME: solutionField automatically gets scrolled when divTask does, which means it will snap back afterwards. For now it's fine
     }
 
 </script>
@@ -246,7 +248,7 @@
             {#if chatFocussed && $chatHistory.length }
                 <button id="closeChat" on:click={() => {document?.activeElement?.blur()}}>x</button>       
             {/if}    
-            <button id="submitChat" on:click={onSubmitChatPrompt} disabled={loading}><b><em>
+            <button id="submitChat" on:click={onSubmitChatField} disabled={loading}><b><em>
                 {#if chatPrompt}
                 ➥
                 {:else}
