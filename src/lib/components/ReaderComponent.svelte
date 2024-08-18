@@ -1,19 +1,15 @@
 <script lang="ts">
-	import type DocumentC from "$lib/DocumentC";
-	import Token from "$lib/Token";
-	import TokenComponent from "./TokenComponent.svelte";
   import { currentTask, failedWords, currentlyScrolledParagraphIndex } from '../stores';
 	import { afterUpdate, tick } from "svelte";
-
-  const NON_CLICKABLE_POS_IDS = new Set([-1, 97, 99, 101]) // added -1 for whitespace
+	import TaskComponent from "./TaskComponent.svelte";
 
 
   let solutionField: HTMLDivElement
   export function getSolutionField() {return solutionField}
   let divTask: HTMLDivElement
   export function getDivTask() {return divTask}
-  let taskParagraphs: Array<{htmlTag: string, words: Array<any>}> = []
   let solutionParagraphs: Array<{htmlTag: string, string: string}> = []
+  let taskComponent: TaskComponent
 
   export let phase: string
   export let trySpeak: Function
@@ -21,10 +17,8 @@
   export let taskVisible: boolean
   export let srWords: Set<String> | undefined
 
-
-  $: if($currentTask) setTask($currentTask)
+  $: if($currentTask) onTaskReset()
   $: if(solutionText) setSolution(solutionText)
-
   afterUpdate(() => {
     if (divTask?.scrollTop == 0) {
       // on first time we added all p elements, restore scroll position
@@ -36,7 +30,7 @@
   export function getVisibleParagraphs() {
     const top = currentScrolledParagraphIndex('top')
     const bottom = currentScrolledParagraphIndex('bottom')
-    let visibleParagraphs = taskParagraphs.slice(top, bottom+1).map(p => p.words.map(token => token.word).join('')).join('\n')
+    let visibleParagraphs = taskComponent.getTaskParagraphs().slice(top, bottom+1).map(p => p.words.map(token => token.word).join('')).join('\n')
     return visibleParagraphs
   }
 
@@ -76,54 +70,7 @@
     el.scrollTop = (el.children[paragraphIndex] as HTMLElement)?.offsetTop - (el.children[0] as HTMLElement)?.offsetTop;    
   }
 
-  /**
-   * Set a document as the currently shown task
-   * @param {DocumentC} doc Document containing the task
-   */
-  async function setTask(doc: DocumentC) {        
-    if (!divTask || !solutionField) {
-      return
-    }
-    let _taskParagraphs = []
-
-    divTask.scrollTop = 0
-    solutionField.scrollTop = 0
-
-    taskParagraphs = []
-    await tick();
-    
-    phase = "prompting"
-
-    let space = {word: ' ', lemma_: '', pos: -1}
-    for (const translatableText of [doc.title, doc.text]) {
-      let paragraph = []	
-      let char_index = 0	
-      for (const start_char in translatableText.tokens) {                       
-        while (char_index < (start_char as unknown as number)) { // insert whitespace and newlines
-          if (translatableText.text[char_index] == '\n' && paragraph.length > 0) {
-            // next paragraph
-            const headingLevel = getHeadingLevelForTask(paragraph)
-            _taskParagraphs.push({htmlTag: headingLevel ? 'h'+headingLevel : 'p', words: paragraph.slice(headingLevel)})
-            paragraph = []
-          } else if (paragraph.length > 0) { // length>0 cause we do not want to push leading spaces to paragraphs
-            paragraph.push(space)
-          }
-          char_index++
-        }
-        // now our char indexes are synced
-
-        let token_obj = translatableText.tokens[char_index]
-        let token_word = token_obj?.word
-
-        if (!token_word.trim()) continue // only proceed if it wasn't only some kind of whitespace
-        paragraph.push(token_obj)
-        char_index += token_word.length
-      }
-      const headingLevel = getHeadingLevelForTask(paragraph)
-      _taskParagraphs.push({htmlTag: headingLevel ? 'h'+headingLevel : 'p', words: paragraph.slice(headingLevel)})
-    }
-    taskParagraphs = _taskParagraphs
-  }
+  
 
   async function setSolution(solution: string) {
     solutionParagraphs = []
@@ -136,32 +83,6 @@
       solutionParagraphs.push({htmlTag: headingLevel ? 'h'+headingLevel : 'p', string: paragraph.slice(headingLevel)})
     });
     solutionParagraphs = solutionParagraphs
-  }
-
-  function onWordClick(token: Token) {
-    if ($failedWords?.has(token?.word)) {
-      $failedWords?.delete(token.word)
-    } else {
-      trySpeak(token?.word)
-      $failedWords?.add(token.word)
-    }
-    $failedWords = $failedWords
-  }
-
-  /**
-   * Calculate heading level from number of leading hashtags #
-   * @param paragraphWords Array of Tokens of the paragraph
-   */
-  function getHeadingLevelForTask(paragraphWords: Array<any>) {
-    let level = 0;
-    for (let i = 0; i < Math.min(4, paragraphWords.length); i++) {
-      if (paragraphWords[i]?.word === '#') {
-        level++;
-      } else {
-        break;
-      }
-    }
-    return level;
   }
 
   /**
@@ -180,22 +101,17 @@
     return level;
   }
 
+  async function onTaskReset() {
+    if (divTask) divTask.scrollTop = 0
+    if (solutionField) solutionField.scrollTop = 0
+    phase = "prompting"
+  }
+
 </script>
 
 <div class="card" id="contentbox">
   <div id="divTask" class:hidden={!taskVisible} bind:this={divTask} on:scroll={onScroll}>
-    {#each taskParagraphs as taskParagraph (taskParagraph.words)} <!-- The "key" specified in parentheses is important cause svelte will otherwise use the array index and try to only insert new indexes or do nothing if the array length doesn't change -->
-      <svelte:element this={taskParagraph.htmlTag}>
-        {#each taskParagraph.words as token}
-          <TokenComponent 
-            word={token?.word} 
-            isFailed={$failedWords?.has(token?.word)}
-            isSrWord={srWords?.has(token?.lemma_)}
-            isClickable={!NON_CLICKABLE_POS_IDS.has(token?.pos)}
-            on:click={() => {onWordClick(token)}} />
-        {/each}          
-      </svelte:element>
-    {/each}
+    <TaskComponent task={$currentTask} srWords={srWords} trySpeak={trySpeak} bind:this={taskComponent} />
     <div>
       <slot name="afterTask" />
     </div>
