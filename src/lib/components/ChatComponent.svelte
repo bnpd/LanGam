@@ -75,8 +75,8 @@
             let response
             if ($user) {
                 response = partialContext 
-                                 ? await sendChat(messageHistoryForChatGpt($chatHistory.concat([newMessage])), undefined, undefined, readerComponent.getVisibleParagraphs())
-                                 : await sendChat(messageHistoryForChatGpt($chatHistory.concat([newMessage])), $targetLang, $currentTask.docId, undefined);
+                                 ? await sendChat(messageHistoryForChatGpt($chatHistory.concat([newMessage])), inline, undefined, undefined, readerComponent.getVisibleParagraphs())
+                                 : await sendChat(messageHistoryForChatGpt($chatHistory.concat([newMessage])), inline, $targetLang, $currentTask.docId, undefined);
                 console.log(response);
             } else {
                 response = DocumentC.partialDocument(ANON_RESPONSE, $nativeLang, undefined, undefined)

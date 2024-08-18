@@ -62,14 +62,16 @@ function EndpointGetUserTaskStats(targetLang, docId) {return `/user_task_stats/$
  * @param {string} targetLang
  */
 function EndpointReview(targetLang) {return `/review/${targetLang}`;}
-/** EITHER docId+targetLang or contextParagraphs should be specified, if both are present, contextParagraphs will be prioritized.
+/**
+ * EITHER docId+targetLang+isInline or contextParagraphs should be specified, if both are present, contextParagraphs will be prioritized. Inline needs both docId & targetLang
  * @param {string} chatHistoryString
+ * @param {boolean} isInline
  * @param {string | undefined} targetLang
  * @param {string | undefined} docId
  * @param {string | undefined} contextParagraphs
  */
-function EndpointChat(chatHistoryString, targetLang=undefined, docId=undefined, contextParagraphs=undefined) {
-	return `/chat?hist=${chatHistoryString}` + (contextParagraphs ? `&ctx=${contextParagraphs}` : docId && targetLang ? `&docId=${docId}&targetLang=${targetLang}` : '');
+function EndpointChat(chatHistoryString, isInline, targetLang=undefined, docId=undefined, contextParagraphs=undefined) {
+	return `/chat?hist=${chatHistoryString}` + (contextParagraphs ? `&ctx=${contextParagraphs}` : docId && targetLang ? `&docId=${docId}&targetLang=${targetLang}`+(isInline ? '&inline=true' : '') : '');
 }
 
 
@@ -173,18 +175,19 @@ export async function isTaskCached(targetLang, docId){
 
 /**
  * EITHER docId or contextParagraphs should be specified, if both are present, contextParagraphs will be prioritized.
- * @param {{ role: string; content: string; }[]} chatHistory
+ * @param {{role: string;content: string;}[]} chatHistory
+ * @param {boolean} isInline
  * @param {string | undefined} targetLang
  * @param {string | undefined} docId
  * @param {string | undefined} contextParagraphs
  * @returns {Promise<DocumentC>} This document will have only the key text.text defined unless docId and targetLang were given as inputs //TODO: add a parameter inline to this function and the backend endpoint instead of this assumption
  */
-export async function sendChat(chatHistory, targetLang=undefined, docId=undefined, contextParagraphs=undefined) {
+export async function sendChat(chatHistory, isInline, targetLang=undefined, docId=undefined, contextParagraphs=undefined) {
 	const chatHistoryText = JSON.stringify(chatHistory.slice(-MAX_CHAT_HISTORY_LENGTH))
 	if (chatHistoryText.length > MAX_CHAT_HISTORY_CHARS) {
 		throw new Error("Chat history too long.");		
 	}
-	return DocumentC.fromJson(await backendGet(EndpointChat(chatHistoryText, targetLang, docId, contextParagraphs))) //TODO: properly http-encode so that we don't get problems with # in responses
+	return DocumentC.fromJson(await backendGet(EndpointChat(chatHistoryText, isInline, targetLang, docId, contextParagraphs))) //TODO: properly http-encode so that we don't get problems with # in responses
 }
 
 
