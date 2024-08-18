@@ -1,10 +1,10 @@
-import { writable } from 'svelte/store';
+import { writable, type Writable } from 'svelte/store';
 
 /* Global Stores */
 export const user = createPersistentStore('username', null);
 export const targetLang = createPersistentStore('target_lang', null);
 export const nativeLang = createPersistentStore('native_lang', null);
-export const loadingTask = writable()
+export const loadingTask: Writable<boolean> = writable()
 
 /* Study Component Stores */
 export const isSoundOn = createPersistentStore('isSoundOn', true);
@@ -15,10 +15,13 @@ export const failedWords = createPersistentStore('failedWords', new Set());
 export const currentTask = createPersistentStore('currentTask', null);
 export const currentlyScrolledParagraphIndex = createPersistentStore('currentScrolledParagraphIndex', 0);
 
+/* Chat Component Stores */
+export const inlineChatHistory: Writable<{role: string, content: string}[]> = createPersistentStore('inlineChatHistory', []);
+export const inlineChatHistoryTranslation: Writable<{role: string, content: string}[]> = createPersistentStore('inlineChatHistoryTranslation', []);
 
 /* Store Creation Functions */
 
-function createPersistentStore(key: string, initialValue: any) {
+function createPersistentStore(key: string, initialValue: any): Writable<any> {
     let storedValue;
     if (typeof localStorage !== 'undefined') {
         storedValue = localStorage.getItem(key);

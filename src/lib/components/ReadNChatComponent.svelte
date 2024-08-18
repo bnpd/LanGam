@@ -2,7 +2,7 @@
     import { onMount } from 'svelte';
     import ReaderComponent from './ReaderComponent.svelte';
     import { getTask, getUserTaskStats, sendReview } from './backend';
-    import { user, nativeLang, targetLang, isSoundOn, currentTask, reviews, failedWords, reviewDocIds, currentlyScrolledParagraphIndex, loadingTask } from '$lib/stores';
+    import { user, nativeLang, targetLang, isSoundOn, currentTask, reviews, failedWords, reviewDocIds, currentlyScrolledParagraphIndex, loadingTask, inlineChatHistory, inlineChatHistoryTranslation } from '$lib/stores';
 	import { goto } from '$app/navigation';
 	import Toast from './Toast.svelte';
 	import ChatComponent from './ChatComponent.svelte';
@@ -30,7 +30,7 @@
     let statsClosedPromiseResolve: Function;
     let reviewsSentPromise: Promise<undefined>;
     $: chatFocussed = phase === 'chatting'; // focus chat when entering chatting phase (ChatComponent can still manage it's focus independently after this, e.g. unfocus even though we are in chatting phase)
-    
+
 
     $: console.table($currentTask);
 
@@ -48,7 +48,7 @@
         
         if(urldoc) goto('/', {replaceState: true}); // remove URL param docId since we have saved it
                 
-        if ($failedWords.size > 0) {
+        if ($failedWords.size > 0 || $inlineChatHistory.length > 1) {
             // we have a saved state from last session to restore
             await nextTask($currentTask?.docId, true);
 
@@ -72,7 +72,8 @@
                 textRejectToast = TEXT_REJECT_SAVED_TASK
             }			
         } else {
-            nextTask(urldoc); 
+            await nextTask(urldoc); 
+            initChatHistory();
         }
     })
 
@@ -133,7 +134,8 @@
             }
             
             if ($user) {
-                nextTask(getUrlDoc()) // IMPROVEMENT: we could even pre-fetch the next task while stats popup is shown
+                await nextTask(getUrlDoc()) // IMPROVEMENT: we could even pre-fetch the next task while stats popup is shown
+                initChatHistory()
                 goto('/', {replaceState: true})
             } else {
                 goto('/signup')
@@ -189,6 +191,7 @@
         
         solutionText = doc?.title?.translations[$nativeLang] + '\n\n' + doc?.text?.translations[$nativeLang]
 
+
         if (!restoreScrollPosition) {
             $currentlyScrolledParagraphIndex = 0
         }
@@ -203,14 +206,19 @@
         }
     }
 
+    function initChatHistory() {
+        $inlineChatHistory = $currentTask?.question?.text ? [{role: 'assistant', content: $currentTask?.question?.text}] : [];
+        $inlineChatHistoryTranslation = $currentTask?.question?.translations?.en ? [{role: 'assistant', content: $currentTask?.question?.translations?.en}] : [];
+    }
+
 </script>
 
 {#if !$user}
     <strong>In this demo text, you learn the fabulous <em>Drnuk</em> language (and how this app works).</strong> <!-- If you want to dive right in with Polish, create an account at the bottom.-->
 {/if}
 <ReaderComponent phase={phase} trySpeak={tts?.trySpeak} solutionText={solutionText} taskVisible={!$loadingTask} srWords={srWords} bind:this={readerComponent}>
-    <span slot="afterTask"><ChatComponent readerComponent={readerComponent} chatFocussed={chatFocussed} inline={true}/></span>
-    <span slot="afterSolution">Hola</span>
+    <span slot="afterTask" hidden={!$currentTask}><ChatComponent readerComponent={readerComponent} chatFocussed={chatFocussed} inline={true} chatBoxTitle="Twoja odpowiedź 🤙" chatHistory={inlineChatHistory}/></span>
+    <span slot="afterSolution"><ChatComponent readerComponent={readerComponent} chatFocussed={chatFocussed} inline={true} chatBoxTitle={undefined} chatHistory={inlineChatHistoryTranslation}/></span>
 </ReaderComponent>
 <button id="answbtn" class:loading={$loadingTask} on:click={onAnswbtnClick}>
     {#if phase === 'prompting'}
@@ -221,7 +229,7 @@
         {answbtnTxtWhileChatting}
     {/if}
 </button>
-<ChatComponent readerComponent={readerComponent} chatFocussed={chatFocussed} inline={false}/>
+<ChatComponent readerComponent={readerComponent} chatFocussed={chatFocussed} inline={false} chatBoxTitle="Ask me ✨"/>
 <Toast message={toast} textReject={textRejectToast} onReject={() => {
     $failedWords = [];
     location.reload();

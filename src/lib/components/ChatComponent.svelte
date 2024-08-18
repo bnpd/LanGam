@@ -4,6 +4,7 @@
 	import BadgeComponent from "./BadgeComponent.svelte";
 	import type ReaderComponent from "./ReaderComponent.svelte";
 	import { sendChat } from "./backend";
+	import { writable, type Writable } from "svelte/store";
 
     const ANON_RESPONSE = 'AI cannot help with the Drnuk language yet - but sign up to get help with Polish.'
     
@@ -12,21 +13,21 @@
      */
     $: lastFailed = Array.from($failedWords).at(-1);
     $: lastFailedLemma = lastFailed ? findLemma(lastFailed) : undefined
-    $: if ($currentTask && $currentTask?.question?.text?.length) chatHistory = [{role: 'assistant', content: $currentTask.question.text}]; // reset question on changes to currentTask
     $: if (typeof document !== 'undefined' && !inline) {            
             let mainContent = document?.getElementById('contentbox')
             if (mainContent) {
-                mainContent.style.opacity = (chatHistory.length && (chatFocussed || loading)) ? "0.2" : "1"
+                mainContent.style.opacity = ($chatHistory.length && (chatFocussed || loading)) ? "0.2" : "1"
             }
         }
     
     export let readerComponent: ReaderComponent;
     export let chatFocussed: boolean = false;
     export let inline: boolean;
+    export let chatBoxTitle: string | undefined = undefined;
+    export let chatHistory: Writable<{role: string, content: string}[]> = new writable([]);
     let chatPrompt: string | undefined
     let iChat: HTMLDivElement
     let loading: boolean = false
-    let chatHistory: {role: string, content: string}[] = [];
     let messageHistoryContainer: HTMLDivElement
 
     /**
@@ -46,9 +47,9 @@
         loading = true
         chatPrompt = (e.currentTarget as HTMLButtonElement).innerText
         const newMessage = {role: 'user', content: chatPrompt}
-        let new_history = chatHistory
+        let new_history = $chatHistory
         try {
-            const response = {role: 'assistant', content: ($user ? await sendChat(chatHistory.filter(el => el.role!='internal').concat([newMessage]), undefined, undefined, readerComponent.getVisibleParagraphs())
+            const response = {role: 'assistant', content: ($user ? await sendChat(new_history.filter(el => el.role!='internal').concat([newMessage]), undefined, undefined, readerComponent.getVisibleParagraphs())
                          : ANON_RESPONSE)};
             new_history.push(newMessage) // we only push user prompt now cause we don't want it here if connection error
             new_history.push(response)
@@ -62,7 +63,7 @@
         } finally {
             loading = false
         }
-        chatHistory = new_history
+        $chatHistory = new_history
         await tick();
         iChat?.focus()
         messageHistoryContainer.scroll({top: messageHistoryContainer.scrollHeight, behavior: 'smooth'})
@@ -72,9 +73,9 @@
         if (chatPrompt) {
             loading = true
             const newMessage = {role: 'user', content: chatPrompt}
-            let new_history = chatHistory
+            let new_history = $chatHistory
             try {
-                let response = {role: 'assistant', content: ($user ? await sendChat(chatHistory.filter(el => el.role!='internal').concat([newMessage]), $targetLang, $currentTask.docId, undefined)
+                let response = {role: 'assistant', content: ($user ? await sendChat(new_history.filter(el => el.role!='internal').concat([newMessage]), $targetLang, $currentTask.docId, undefined)
                                  : ANON_RESPONSE)};
                 new_history.push(newMessage) // we only push user prompt now cause we don't want it here if connection error
                 new_history.push(response)
@@ -88,7 +89,7 @@
             } finally {
                 loading = false
             }
-            chatHistory = new_history
+            $chatHistory = new_history
             await tick();
             iChat?.focus()
             messageHistoryContainer.scroll({top: messageHistoryContainer.scrollHeight, behavior: 'smooth'})
@@ -195,7 +196,7 @@
 
 <div id="chatComponent" on:focus|capture={()=>{chatFocussed = true}} on:focusout|capture={()=>{chatFocussed = false}}>
     <div id="messageHistoryContainer" bind:this={messageHistoryContainer} class:chatHistoryHidden={!chatFocussed && !loading && !inline} class:floatAboveParent={!inline} class:inline={inline}>
-        {#each chatHistory as msg, i}
+        {#each $chatHistory as msg, i}
                 {#if msg.role === 'assistant'}
                     <div class="card assistant" id="responseBox">
                         <em><strong><BadgeComponent text='AI' tooltip="AI's response"/></strong></em>&nbsp;
@@ -206,7 +207,7 @@
                         <em><strong><BadgeComponent text='You' tooltip="Your response"/></strong></em>&nbsp;
                         <span class="chatMessage">{msg.content}</span>
                     </div>
-                {:else if msg.role === 'internal' && i == chatHistory.length-1}
+                {:else if msg.role === 'internal' && i == $chatHistory.length-1}
                     <div class="card internal" id="responseBox">
                         <em><strong><BadgeComponent text='Error' tooltip="Error"/></strong></em>&nbsp;
                         <span class="chatMessage">{msg.content}</span>
@@ -217,34 +218,36 @@
             <div class="card" class:loading/>
         {/if}
     </div>
-    {#if !inline}   
-    <div class="promptSuggestions">
-        <button class="promptSuggestion" on:click={onClickChatSuggestion} disabled={loading}>
-            How is the past tense formed?
-        </button>
-        {#if lastFailed}
-            {#if lastFailedLemma !== lastFailed}
+    {#if chatBoxTitle != undefined}
+        {#if !inline}   
+            <div class="promptSuggestions">
                 <button class="promptSuggestion" on:click={onClickChatSuggestion} disabled={loading}>
-                    Why is it {lastFailed} and not {lastFailedLemma} here?
+                    How is the past tense formed?
                 </button>
-            {/if}
-            <button class="promptSuggestion" on:click={onClickChatSuggestion} disabled={loading}>
-                Why is {lastFailed} used here?
-            </button>
+                {#if lastFailed}
+                    {#if lastFailedLemma !== lastFailed}
+                        <button class="promptSuggestion" on:click={onClickChatSuggestion} disabled={loading}>
+                            Why is it {lastFailed} and not {lastFailedLemma} here?
+                        </button>
+                    {/if}
+                    <button class="promptSuggestion" on:click={onClickChatSuggestion} disabled={loading}>
+                        Why is {lastFailed} used here?
+                    </button>
+                {/if}
+            </div>
         {/if}
-    </div>
+        <div id="chatInputContainer">
+            <div contenteditable id="iChat" data-placeholder={chatBoxTitle} bind:innerText={chatPrompt} bind:this={iChat}/>
+            {#if chatFocussed && $chatHistory.length }
+                <button id="closeChat" on:click={() => {document?.activeElement?.blur()}}>x</button>       
+            {/if}    
+            <button id="submitChat" on:click={onSubmitChatPrompt} disabled={loading}><b><em>
+                {#if chatPrompt}
+                ➥
+                {:else}
+                AI            
+                {/if}
+            </em></b></button>
+        </div>
     {/if}
-    <div id="chatInputContainer">
-        <div contenteditable id="iChat" data-placeholder="Ask me ✨" bind:innerText={chatPrompt} bind:this={iChat}/>
-        {#if chatFocussed && chatHistory.length }
-            <button id="closeChat" on:click={() => {document?.activeElement?.blur()}}>x</button>       
-        {/if}    
-        <button id="submitChat" on:click={onSubmitChatPrompt} disabled={loading}><b><em>
-            {#if chatPrompt}
-            ➥
-            {:else}
-            AI            
-            {/if}
-        </em></b></button>
-    </div>
 </div>
