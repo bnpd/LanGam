@@ -226,7 +226,7 @@
                 {:else if msg.role === 'internal' && i == $chatHistory.length-1}
                     <div class="card internal" id="responseBox">
                         <em><strong><BadgeComponent text='Error' tooltip="Error"/></strong></em>&nbsp;
-                        <span class="chatMessage">{msg.content}</span>
+                        <span class="chatMessage">{msg.content?.text?.text}</span>
                     </div>
                 {/if}
         {/each}
