@@ -70,6 +70,7 @@
         loading = true
         const newMessage = {role: 'user', content: DocumentC.partialDocument(chatPrompt, $targetLang, undefined, undefined)}
         let new_history = $chatHistory
+        let isEditedRes = false
         try {
             let responseMsg
             if ($user) {
@@ -80,6 +81,9 @@
                 console.log(response);
                 if (correction) {
                     newMessage.content = correction // replace user's message with corrected message
+                    if (isEdited(correction)) {
+                        newMessage.role = 'correction'
+                    }
                 }
                 (newMessage.content.text.translations ||= {})[$nativeLang] = chatPrompt // replace translation by user's (wrong) message
                 responseMsg = {role: 'assistant', content: response};
@@ -114,6 +118,10 @@
         const elementsToScroll = (inline ? [readerComponent.getDivTask(), readerComponent.getSolutionField()] : [messageHistoryContainer])
         elementsToScroll.forEach(el => el.scroll({top: el.scrollHeight, behavior: 'smooth'}))
         // FIXME: solutionField automatically gets scrolled when divTask does, which means it will snap back afterwards. For now it's fine
+    }
+
+    function isEdited(correction: DocumentC) {
+        return correction.text.text !== chatPrompt
     }
 
 </script>
@@ -201,7 +209,7 @@
         background-color: var(--body-background-color);
     }
 
-    .card.user {
+    .card.user, .card.correction {
         margin-inline-start: auto;
         margin-inline-end: 0;
     }
@@ -215,10 +223,13 @@
 <div id="chatComponent" on:focus|capture={()=>{chatFocussed = true}} on:focusout|capture={()=>{chatFocussed = false}}>
     <div id="messageHistoryContainer" bind:this={messageHistoryContainer} class:chatHistoryHidden={!chatFocussed && !loading && !inline} class:floatAboveParent={!inline} class:inline={inline}>
         {#each $chatHistory as msg, i}
-                {#if msg.role === 'assistant' || msg.role === 'user'}
-                    {@const isUser = msg.role === 'user'}
+                {#if msg.role === 'assistant' || msg.role === 'user' || msg.role === 'correction'}
                     <div class={"card "+msg.role} id="responseBox">
-                        <em><strong><BadgeComponent text={isUser ? 'You' : 'AI'} tooltip={isUser ? "Your" : "AI's" + " response"}/></strong></em>&nbsp;
+                        <em><strong>
+                            <BadgeComponent 
+                                text={msg.role === 'user' ? 'You' : msg.role === 'assistant' ? 'AI' : (translationLang === 'original' ? 'You+AI' : 'You')} 
+                                tooltip={msg.role === 'user' ? "Your response" : msg.role === 'assistant' ? "AI's response" : (translationLang === 'original' ? 'Your response, corrected by AI. Feel free to ask, why AI wrote it like this.' : 'Your original response.')}/>
+                        </strong></em>&nbsp;
                         {#if translationLang === 'original'}
                             {#if msg.content.text?.tokens}
                                 <TaskComponent task={msg.content} srWords={srWords} trySpeak={trySpeak}/>
