@@ -71,7 +71,7 @@ function EndpointReview(targetLang) {return `/review/${targetLang}`;}
  * @param {string | undefined} contextParagraphs
  */
 function EndpointChat(chatHistoryString, isInline, targetLang=undefined, docId=undefined, contextParagraphs=undefined) {
-	return `/chat?hist=${chatHistoryString}` + (contextParagraphs ? `&ctx=${contextParagraphs}` : docId && targetLang ? `&docId=${docId}&targetLang=${targetLang}`+(isInline ? '&inline=true' : '') : '');
+	return `/chat?hist=${encodeURIComponent(chatHistoryString)}` + (contextParagraphs ? `&ctx=${contextParagraphs}` : docId && targetLang ? `&docId=${docId}&targetLang=${targetLang}`+(isInline ? '&inline=true' : '') : '');
 }
 
 
