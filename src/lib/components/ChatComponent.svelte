@@ -7,6 +7,7 @@
 	import { writable, type Writable } from "svelte/store";
 	import TaskComponent from "./TaskComponent.svelte";
 	import DocumentC from "$lib/DocumentC";
+	import { error } from "@sveltejs/kit";
 
     const ANON_RESPONSE = 'AI cannot help with the Drnuk language yet - but sign up to get help with Polish.'
     const MAX_LENGTH_RESPONSE = "This chat has reached it's maximum length. Try chatting about another text."
@@ -67,21 +68,25 @@
 
     async function submitChat(partialContext: boolean) {
         loading = true
-        const newMessageTranslationJson = {}
-        newMessageTranslationJson[$nativeLang] = chatPrompt // for now we use what user wrote both for message and message's translation
-        const newMessage = {role: 'user', content: DocumentC.partialDocument(chatPrompt, $targetLang, newMessageTranslationJson, undefined)}
+        const newMessage = {role: 'user', content: DocumentC.partialDocument(chatPrompt, $targetLang, undefined, undefined)}
         let new_history = $chatHistory
         try {
-            let response
+            let responseMsg
             if ($user) {
-                response = partialContext 
+                let {correction, response} = partialContext 
                                  ? await sendChat(messageHistoryForChatGpt($chatHistory.concat([newMessage])), inline, undefined, undefined, readerComponent.getVisibleParagraphs())
                                  : await sendChat(messageHistoryForChatGpt($chatHistory.concat([newMessage])), inline, $targetLang, $currentTask.docId, undefined);
+                console.log(correction);
                 console.log(response);
+                if (correction) {
+                    newMessage.content = correction // replace user's message with corrected message
+                }
+                (newMessage.content.text.translations ||= {})[$nativeLang] = chatPrompt // replace translation by user's (wrong) message
+                responseMsg = {role: 'assistant', content: response};
             } else {
-                response = DocumentC.partialDocument(ANON_RESPONSE, $nativeLang, undefined, undefined)
+                let response = DocumentC.partialDocument(ANON_RESPONSE, $nativeLang, undefined, undefined)
+                responseMsg = {role: 'assistant', content: response};
             }
-            const responseMsg = {role: 'assistant', content: response};
             new_history.push(newMessage) // we only push user prompt now cause we don't want it here if connection error
             new_history.push(responseMsg)
             chatPrompt = ''
@@ -89,6 +94,7 @@
             if (err.message === "Chat history too long.") {
                 new_history.push({role: 'internal', content: DocumentC.partialDocument(MAX_LENGTH_RESPONSE, $nativeLang, undefined, undefined)})                
             } else {
+                console.error(err)
                 new_history.push({role: 'internal', content: DocumentC.partialDocument(OTHER_ERROR_RESPONSE, $nativeLang, undefined, undefined)})
             }
         } finally {
