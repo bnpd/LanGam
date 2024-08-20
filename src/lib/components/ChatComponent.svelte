@@ -111,7 +111,7 @@
     }
 
     function messageHistoryForChatGpt(history: {role: string, content: DocumentC}[]) {
-        return history.filter(el => el.role!='internal').map(el => ({role: el.role, content: el.content.text.text}))
+        return history.filter(el => el.role!='internal').map(el => ({role: (el.role == 'correction' ? 'user' : el.role), content: el.content.text.text}))
     }
 
     function scrollToLatestChatMessage() {
