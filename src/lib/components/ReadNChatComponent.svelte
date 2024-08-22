@@ -231,4 +231,4 @@
     $inlineChatHistory = [];
     location.reload();
 }}/>
-<SuccessPopup message={congratsMessage} onClose={goToChat=>{congratsMessage = undefined; statsClosedPromiseResolve(goToChat)}} chatPrompt={$currentTask?.question?.text}/>
+<SuccessPopup message={congratsMessage} onClose={()=>{congratsMessage = undefined; statsClosedPromiseResolve()}}/>
