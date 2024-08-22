@@ -258,7 +258,7 @@
                     How is the past tense formed?
                 </button>
                 {#if lastFailed}
-                    {#if lastFailedLemma !== lastFailed}
+                    {#if lastFailedLemma && lastFailedLemma !== lastFailed}
                         <button class="promptSuggestion" on:click={onClickChatSuggestion} disabled={loading}>
                             Why is it {lastFailed} and not {lastFailedLemma} here?
                         </button>
