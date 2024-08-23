@@ -37,6 +37,8 @@
   function onScroll(e: Event) {    
     // Scroll the solutionField to the same paragraph index as divTask
     const newScrollIndex = currentScrolledParagraphIndex()
+    console.log({newScrollIndex});
+    
     if (newScrollIndex != $currentlyScrolledParagraphIndex) {
       $currentlyScrolledParagraphIndex = newScrollIndex
       scrollToParagraph(solutionField, newScrollIndex)
@@ -48,22 +50,36 @@
 
   // Find index of the paragraph at the top/mid/bottom (depending on ref param) position of divTask 
   // if ref='mid' && min/max scrolled, then first/last index is returned)
+  // TODO: cache the result of this function for a few milliseconds?
   function currentScrolledParagraphIndex(ref: string = 'mid') {
-    let paragraphs = divTask.children
-    if (ref == 'mid' && divTask?.scrollTop + (paragraphs[0] as HTMLElement)?.offsetTop == divTask?.scrollHeight) {
+    let paragraphs = divTask.querySelectorAll('p, h1, h2, h3, h4, h5, h6, h7')
+    
+    const firstParagraphOffsetTop = (paragraphs[0] as HTMLElement).offsetTop;
+    const firstParagraphsOffsetParentElement = (paragraphs[0] as HTMLElement).offsetParent;
+
+    // Determine if at the very top or very bottom
+    if (ref == 'mid' && divTask.scrollTop + divTask.offsetHeight == divTask.scrollHeight) {
       return paragraphs.length -1
     }
-    if (ref == 'mid' && divTask?.scrollTop == 0) return 0
+    if (ref == 'mid' && divTask.scrollTop == 0) return 0
 
+      // Calculate the position to compare with paragraph offset
+    const scrollOffset = divTask.scrollTop + (ref === 'top' ? 0 : ref === 'mid' ? 0.5 : 1) * divTask.offsetHeight + firstParagraphOffsetTop;
     for (var i = 0; i < paragraphs.length; i++) {
-      if (
-        divTask?.scrollTop + (ref=='top' ? 0 : ref=='mid' ? 0.5 : 1) * divTask?.offsetHeight 
-        < (paragraphs[i] as HTMLElement)?.offsetTop - (paragraphs[0] as HTMLElement)?.offsetTop
-      ) {
+      if (scrollOffset < findOffsetToFirstParagraphsOffsetParentElement(paragraphs[i] as HTMLElement)) {
         return i-1;
       }
     }
     return paragraphs.length-1;
+
+    function findOffsetToFirstParagraphsOffsetParentElement(el: HTMLElement) {
+      let res = el.offsetTop
+      while (el.offsetParent && el.offsetParent != firstParagraphsOffsetParentElement) {
+        el = el.offsetParent as HTMLElement;
+        res += el.offsetTop;
+      }      
+      return res
+    }
   }
 
   function scrollToParagraph(el: HTMLElement, paragraphIndex: number) {    
