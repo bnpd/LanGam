@@ -41,8 +41,10 @@
                 paragraph.push(token_obj)
                 char_index += token_word.length
             }
-            const headingLevel = getHeadingLevelForTask(paragraph)
-            resParas.push({htmlTag: headingLevel ? 'h'+headingLevel : 'p', words: paragraph.slice(headingLevel)})
+            if(paragraph.length > 0) {
+                const headingLevel = getHeadingLevelForTask(paragraph)
+                resParas.push({htmlTag: headingLevel ? 'h'+headingLevel : 'p', words: paragraph.slice(headingLevel)})
+            }
         }
         return resParas
     }
