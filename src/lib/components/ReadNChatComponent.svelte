@@ -189,7 +189,7 @@
         solutionText = doc?.title?.translations[$nativeLang] + '\n\n' + doc?.text?.translations[$nativeLang]
 
 
-        if (!restoreScrollPosition) {
+        if (!restoreScrollPosition) {            
             $currentlyScrolledParagraphIndex = 0
         }
 
@@ -213,8 +213,8 @@
     <strong>In this demo text, you learn the fabulous <em>Drnuk</em> language (and how this app works).</strong> <!-- If you want to dive right in with Polish, create an account at the bottom.-->
 {/if}
 <ReaderComponent phase={phase} trySpeak={tts?.trySpeak} solutionText={solutionText} taskVisible={!$loadingTask} srWords={srWords} bind:this={readerComponent}>
-    <span slot="afterTask" hidden={!$currentTask}><ChatComponent readerComponent={readerComponent} chatFocussed={chatFocussed} inline={true} chatBoxTitle="Twoja odpowiedź 🤙" chatHistory={inlineChatHistory} srWords={srWords} trySpeak={tts?.trySpeak}/></span>
-    <span slot="afterSolution"><ChatComponent readerComponent={readerComponent} chatFocussed={chatFocussed} inline={true} chatBoxTitle={undefined} chatHistory={inlineChatHistory} translationLang='en'/></span>
+    <span slot="afterTask" hidden={!$currentTask}><ChatComponent readerComponent={readerComponent} inline={true} chatBoxTitle="Twoja odpowiedź 🤙" chatHistory={inlineChatHistory} srWords={srWords} trySpeak={tts?.trySpeak}/></span>
+    <span slot="afterSolution"><ChatComponent readerComponent={readerComponent} inline={true} chatBoxTitle={undefined} chatHistory={inlineChatHistory} translationLang='en'/></span>
 </ReaderComponent>
 <button id="answbtn" class:loading={$loadingTask} on:click={onAnswbtnClick}>
     {#if phase === 'prompting'}

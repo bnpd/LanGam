@@ -38,8 +38,6 @@
     let loading: boolean = false
     let messageHistoryContainer: HTMLDivElement
 
-    $: console.table($chatHistory)
-
     /**
      * Finds the first occurrence of word in the text and returns the corresponding lemma (thus not necessarily the lemma for that ocurrence that the user clicked)
      * @param word The word of which the lemma is wanted
@@ -234,16 +232,16 @@
                             {#if msg.content.text?.tokens}
                                 <TaskComponent task={msg.content} srWords={srWords} trySpeak={trySpeak}/>
                             {:else}
-                                <span class="chatMessage">{msg.content.text.text}</span>
+                                <p class="chatMessage">{msg.content.text.text}</p>
                             {/if}
                         {:else if msg.content.text?.translations?.[translationLang]}
-                            <span class="chatMessage">{msg.content.text.translations[translationLang]}</span>
+                            <p class="chatMessage">{msg.content.text.translations[translationLang]}</p>
                         {/if}
                     </div>
                 {:else if msg.role === 'internal' && i == $chatHistory.length-1}
                     <div class="card internal" id="responseBox">
                         <em><strong><BadgeComponent text='Error' tooltip="Error"/></strong></em>&nbsp;
-                        <span class="chatMessage">{msg.content?.text?.text}</span>
+                        <p class="chatMessage">{msg.content?.text?.text}</p>
                     </div>
                 {/if}
         {/each}

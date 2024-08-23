@@ -3,6 +3,8 @@
 	import { afterUpdate, tick } from "svelte";
 	import TaskComponent from "./TaskComponent.svelte";
 
+  enum FIELD {TASK, SOLUTION}
+
 
   let solutionField: HTMLDivElement
   export function getSolutionField() {return solutionField}
@@ -10,6 +12,9 @@
   export function getDivTask() {return divTask}
   let solutionParagraphs: Array<{htmlTag: string, string: string}> = []
   let taskComponent: TaskComponent
+  let taskAndChatParagraphs: NodeListOf<Element>
+  let solutionAndChatParagraphs: NodeListOf<Element>
+  let scrollRestored = false
 
   export let phase: string
   export let trySpeak: Function
@@ -19,11 +24,18 @@
 
   $: if($currentTask) onTaskReset()
   $: if(solutionText) setSolution(solutionText)
-  afterUpdate(() => {
-    if (divTask?.scrollTop == 0) {
-      // on first time we added all p elements, restore scroll position
-      scrollToParagraph(divTask, Math.max($currentlyScrolledParagraphIndex - 1, 0))
-      scrollToParagraph(solutionField, $currentlyScrolledParagraphIndex - 1)
+  afterUpdate(async () => {
+    await tick();    
+    taskAndChatParagraphs = divTask?.querySelectorAll('p, h1, h2, h3, h4, h5, h6, h7')
+    solutionAndChatParagraphs = solutionField?.querySelectorAll('p, h1, h2, h3, h4, h5, h6, h7')
+    if (!scrollRestored     
+      && taskAndChatParagraphs.length >= $currentlyScrolledParagraphIndex 
+      && solutionAndChatParagraphs.length >= $currentlyScrolledParagraphIndex
+    ) {
+      scrollRestored = true
+      // on first time we added all paragraphs, restore scroll position      
+      scrollToParagraph(FIELD.TASK, Math.max($currentlyScrolledParagraphIndex - 1, 0))
+      scrollToParagraph(FIELD.SOLUTION, Math.max($currentlyScrolledParagraphIndex - 1, 0))
     }
   })
 
@@ -36,12 +48,10 @@
 
   function onScroll(e: Event) {    
     // Scroll the solutionField to the same paragraph index as divTask
-    const newScrollIndex = currentScrolledParagraphIndex()
-    console.log({newScrollIndex});
-    
+    const newScrollIndex = currentScrolledParagraphIndex()    
     if (newScrollIndex != $currentlyScrolledParagraphIndex) {
       $currentlyScrolledParagraphIndex = newScrollIndex
-      scrollToParagraph(solutionField, newScrollIndex)
+      scrollToParagraph(FIELD.SOLUTION, newScrollIndex)
     }
 
     // adjust height of the background image (reaches 100hv when fully scrolled down)
@@ -51,54 +61,63 @@
   // Find index of the paragraph at the top/mid/bottom (depending on ref param) position of divTask 
   // if ref='mid' && min/max scrolled, then first/last index is returned)
   // TODO: cache the result of this function for a few milliseconds?
-  function currentScrolledParagraphIndex(ref: string = 'mid') {
-    let paragraphs = divTask.querySelectorAll('p, h1, h2, h3, h4, h5, h6, h7')
-    
-    const firstParagraphOffsetTop = (paragraphs[0] as HTMLElement).offsetTop;
-    const firstParagraphsOffsetParentElement = (paragraphs[0] as HTMLElement).offsetParent;
+  function currentScrolledParagraphIndex(ref: string = 'mid') {    
+    const firstParagraphOffsetTop = (taskAndChatParagraphs[0] as HTMLElement).offsetTop;
+    const firstParagraphsOffsetParentElement = (taskAndChatParagraphs[0] as HTMLElement).offsetParent;
 
     // Determine if at the very top or very bottom
     if (ref == 'mid' && divTask.scrollTop + divTask.offsetHeight == divTask.scrollHeight) {
-      return paragraphs.length -1
+      return taskAndChatParagraphs.length -1
     }
     if (ref == 'mid' && divTask.scrollTop == 0) return 0
 
       // Calculate the position to compare with paragraph offset
     const scrollOffset = divTask.scrollTop + (ref === 'top' ? 0 : ref === 'mid' ? 0.5 : 1) * divTask.offsetHeight + firstParagraphOffsetTop;
-    for (var i = 0; i < paragraphs.length; i++) {
-      if (scrollOffset < findOffsetToFirstParagraphsOffsetParentElement(paragraphs[i] as HTMLElement)) {
+    for (var i = 0; i < taskAndChatParagraphs.length; i++) {
+      if (scrollOffset < findOffsetToAncestor(taskAndChatParagraphs[i] as HTMLElement, firstParagraphsOffsetParentElement!)) {
         return i-1;
       }
     }
-    return paragraphs.length-1;
-
-    function findOffsetToFirstParagraphsOffsetParentElement(el: HTMLElement) {
-      let res = el.offsetTop
-      while (el.offsetParent && el.offsetParent != firstParagraphsOffsetParentElement) {
-        el = el.offsetParent as HTMLElement;
-        res += el.offsetTop;
-      }      
-      return res
-    }
+    return taskAndChatParagraphs.length-1;
   }
 
-  function scrollToParagraph(el: HTMLElement, paragraphIndex: number) {    
-    el.scrollTop = (el.children[paragraphIndex] as HTMLElement)?.offsetTop - (el.children[0] as HTMLElement)?.offsetTop;    
+  function findOffsetToAncestor(el: HTMLElement, ancestor: Element) {
+    let res = el.offsetTop
+    while (el.offsetParent && el.offsetParent != ancestor) {
+      el = el.offsetParent as HTMLElement;
+      res += el.offsetTop;
+    }      
+    return res
+  }
+
+  function scrollToParagraph(which: FIELD, paragraphIndex: number) {
+    let paragraphs, elToScroll
+    switch (which) {
+      case FIELD.TASK:
+        paragraphs = taskAndChatParagraphs
+        elToScroll = divTask
+        break;
+      case FIELD.SOLUTION:
+        paragraphs = solutionAndChatParagraphs
+        elToScroll = solutionField        
+        break;
+    }    
+    elToScroll.scrollTop = findOffsetToAncestor(paragraphs[paragraphIndex] as HTMLElement, (paragraphs[0] as HTMLElement).offsetParent!) - (paragraphs[0] as HTMLElement)?.offsetTop;    
   }
 
   
 
   async function setSolution(solution: string) {
-    solutionParagraphs = []
+    const newSolutionParagraphs: { htmlTag: string; string: string; }[] = []
     await tick();
     solution = solution.replace('\r', '').replace('\n\n', '\n')
     let row = 1
     solution.split('\n').map(paragraph => {
       if (!paragraph.trim()) return // if it was only some kind of whitespace, don't bother
       const headingLevel = getHeadingLevelForSolution(paragraph)
-      solutionParagraphs.push({htmlTag: headingLevel ? 'h'+headingLevel : 'p', string: paragraph.slice(headingLevel)})
+      newSolutionParagraphs.push({htmlTag: headingLevel ? 'h'+headingLevel : 'p', string: paragraph.slice(headingLevel)})
     });
-    solutionParagraphs = solutionParagraphs
+    solutionParagraphs = newSolutionParagraphs
   }
 
   /**
@@ -119,7 +138,7 @@
 
   async function onTaskReset() {
     if (divTask) divTask.scrollTop = 0
-    if (solutionField) solutionField.scrollTop = 0
+    // solutionField is synced automatically
     phase = "prompting"
   }
 
