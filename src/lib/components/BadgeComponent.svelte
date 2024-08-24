@@ -3,6 +3,7 @@
 <script>
     export let text;
     export let tooltip = '';
+    export let backgroundColor = '#007bff'
     let showTooltip = false;
   
   function toggleTooltip() {
@@ -17,7 +18,6 @@
     .badge {
       display: inline-block;
       padding: 0.5em 1em;
-      background-color: #007bff;
       color: white;
       border-radius: 1em;
       cursor: pointer;
@@ -51,6 +51,7 @@
   
   <div 
     class="badge" 
+    style={'background-color: '+backgroundColor}
     on:mouseenter={toggleTooltip} 
     on:mouseleave={toggleTooltip}
     on:click={toggleTooltip}
