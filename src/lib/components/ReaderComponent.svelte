@@ -1,7 +1,7 @@
 <script lang="ts">
-  import { currentTask, failedWords, currentlyScrolledParagraphIndex } from '../stores';
+  import { currentTask, currentlyScrolledParagraphIndex } from '../stores';
 	import { afterUpdate, tick } from "svelte";
-	import TaskComponent from "./TaskComponent.svelte";
+	import TaskComponent from './TaskComponent.svelte';
 
   enum FIELD {TASK, SOLUTION}
 
@@ -11,7 +11,6 @@
   let divTask: HTMLDivElement
   export function getDivTask() {return divTask}
   let solutionParagraphs: Array<{htmlTag: string, string: string}> = []
-  let taskComponent: TaskComponent
   let taskAndChatParagraphs: NodeListOf<Element>
   let solutionAndChatParagraphs: NodeListOf<Element>
   let scrollRestored = false
@@ -39,10 +38,10 @@
     }
   })
 
-  export function getVisibleParagraphs() {
+  export function getVisibleParagraphs(): string {
     const top = currentScrolledParagraphIndex('top')
     const bottom = currentScrolledParagraphIndex('bottom')
-    let visibleParagraphs = taskComponent.getTaskParagraphs().slice(top, bottom+1).map(p => p.words.map(token => token.word).join('')).join('\n')
+    let visibleParagraphs = Array.from(divTask?.querySelectorAll('p, h1, h2, h3, h4, h5, h6, h7')).slice(top, bottom+1).map(p => p.textContent).join('\n')
     return visibleParagraphs
   }
 
@@ -146,7 +145,7 @@
 
 <div class="card" id="contentbox">
   <div id="divTask" class:hidden={!taskVisible} bind:this={divTask} on:scroll={onScroll}>
-    <TaskComponent task={$currentTask} srWords={srWords} trySpeak={trySpeak} bind:this={taskComponent} />
+    <TaskComponent task={$currentTask} srWords={srWords} trySpeak={trySpeak} />
     <div>
       <slot name="afterTask" />
     </div>

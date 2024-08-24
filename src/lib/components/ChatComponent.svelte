@@ -72,9 +72,9 @@
         try {
             let responseMsg
             if ($user) {
-                let {correction, response} = partialContext 
-                                 ? await sendChat(messageHistoryForChatGpt($chatHistory.concat([newMessage])), inline, undefined, undefined, readerComponent.getVisibleParagraphs())
-                                 : await sendChat(messageHistoryForChatGpt($chatHistory.concat([newMessage])), inline, $targetLang, $currentTask.docId, undefined);
+                let {correction, response} = 
+                    partialContext ? await sendChat(messageHistoryForChatGpt($chatHistory.concat([newMessage])), inline, undefined, undefined, readerComponent.getVisibleParagraphs())
+                                   : await sendChat(messageHistoryForChatGpt($chatHistory.concat([newMessage])), inline, $targetLang, $currentTask.docId, undefined);
                 console.log(correction);
                 console.log(response);
                 if (correction) {

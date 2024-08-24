@@ -10,7 +10,6 @@
     export let srWords: Set<String> | undefined
     export let trySpeak: Function | undefined
     let taskParagraphs: Array<{htmlTag: string, words: Array<any>}> = []
-    export function getTaskParagraphs() {return taskParagraphs}
     $: if(task) taskParagraphs = makeTask(task)
 
     function makeTask(doc: DocumentC) {
