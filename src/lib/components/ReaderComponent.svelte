@@ -138,7 +138,6 @@
   async function onTaskReset() {
     if (divTask) divTask.scrollTop = 0
     // solutionField is synced automatically
-    phase = "prompting"
   }
 
 </script>

@@ -11,8 +11,7 @@
 	import type TtsComponent from './TtsComponent.svelte';
 
     const answbtnTxtWhilePrompting = "Show translation"
-    const answbtnTxtWhileSolutionShown = "Next"
-    const answbtnTxtWhileChatting = "Next Text"
+    const answbtnTxtWhileSolutionShown = "Next text"
     const TOAST_REDIRECTED_SAVED_TASK = "Your selected text has been queued cause you have a saved text."
     const TEXT_REJECT_SAVED_TASK = "Discard saved"
 
@@ -29,7 +28,6 @@
     let statsClosedPromise: Promise<boolean>;
     let statsClosedPromiseResolve: Function;
     let reviewsSentPromise: Promise<undefined>;
-    $: chatFocussed = phase === 'chatting'; // focus chat when entering chatting phase (ChatComponent can still manage it's focus independently after this, e.g. unfocus even though we are in chatting phase)
 
     onMount(async () => {
         let urlparams = new URLSearchParams(window.location.search)
@@ -103,23 +101,12 @@
                   + (correctedWords ? `You remembered ${correctedWords} word families you had wrong before!\n` : '')
                 ) || 'Keep up that pace! 🏃';
 
-            let goToChat = await statsClosedPromise
+            await statsClosedPromise
 
-            if (goToChat) {
-                phase = "chatting"
-                
-            } else {
-                phase = "done"
-            }
-        } else if (phase === 'chatting') {
-            phase = 'done'
-        }
-
-        if (phase === "done") {
             $currentTask = undefined
             solutionText = ''
             $loadingTask = true
-
+    
             try {
                 await reviewsSentPromise
             } catch (rejection) {
@@ -137,7 +124,9 @@
             } else {
                 goto('/signup')
             }
-		}
+        } else {
+            console.error('Unknown Phase: '+phase);
+        }
     }
 
     function getUrlDoc() {
@@ -221,11 +210,9 @@
         {answbtnTxtWhilePrompting}
     {:else if phase === 'solutionShown'}
         {answbtnTxtWhileSolutionShown}
-    {:else if phase === 'chatting'}
-        {answbtnTxtWhileChatting}
     {/if}
 </button>
-<ChatComponent readerComponent={readerComponent} chatFocussed={chatFocussed} inline={false} chatBoxTitle="Ask me ✨"/>
+<ChatComponent readerComponent={readerComponent} inline={false} chatBoxTitle="Ask me ✨"/>
 <Toast message={toast} textReject={textRejectToast} onReject={() => {
     $failedWords = new Set();
     $inlineChatHistory = [];

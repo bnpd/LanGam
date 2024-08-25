@@ -7,7 +7,6 @@
 	import { writable, type Writable } from "svelte/store";
 	import TaskComponent from "./TaskComponent.svelte";
 	import DocumentC from "$lib/DocumentC";
-	import { error } from "@sveltejs/kit";
 
     const ANON_RESPONSE = 'AI cannot help with the Drnuk language yet - but sign up to get help with Polish.'
     const MAX_LENGTH_RESPONSE = "This chat has reached it's maximum length. Try chatting about another text."
@@ -26,13 +25,13 @@
         }
     
     export let readerComponent: ReaderComponent;
-    export let chatFocussed: boolean = false;
     export let inline: boolean;
     export let chatBoxTitle: string | undefined = undefined;
     export let chatHistory: Writable<{role: string, content: DocumentC}[]> = new writable([]);
     export let translationLang: string = 'original'
     export let srWords: Set<string> | undefined = undefined
     export let trySpeak: Function | undefined = undefined
+    let chatFocussed: boolean = false;
     let chatPrompt: string = ''
     let iChat: HTMLDivElement
     let loading: boolean = false
