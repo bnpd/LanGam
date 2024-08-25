@@ -162,9 +162,9 @@ export async function getTopTasks(targetLang, query){
  */
 export async function isTaskCached(targetLang, docId){
 	try {
-		let res = await fetch(
+		await fetch(
 			config.backend + EndpointGetTask(targetLang, docId),
-			{method:'Head',cache:'force-cache'}
+			{method: 'Head', cache:'force-cache'}
 		);
 		return true
 	} catch (_) {
@@ -202,7 +202,7 @@ export async function backendGet(path, authRequired=true) {
 		goto('/login')
 		return Promise.reject('Not logged in.')
 	}
-	const response = await fetch(config.backend + path, authRequired ? {headers: {Authorization: `Bearer ${pb.authStore.token}`}} : undefined)
+	const response = await fetch(config.backend + path, authRequired ? {headers: {Authorization: `Bearer ${pb.authStore.token}`}, cache: navigator.onLine ? 'default' : 'force-cache'} : undefined)
 	if (!response.ok) {
 		if (response.status == 401) {
 			goto('/login')
