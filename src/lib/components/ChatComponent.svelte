@@ -118,7 +118,7 @@
     }
 
     function isEdited(correction: DocumentC) {
-        return correction.text.text !== chatPrompt
+        return correction.text.text.replaceAll(/\W+/g, '') !== chatPrompt.replaceAll(/\W+/g, '') // remove everything that is not a word, then compare
     }
 
 </script>
