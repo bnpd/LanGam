@@ -8,8 +8,16 @@
     let contactConsent: boolean = getUserData()?.email?.length
     let email: string = getUserData()?.email
     let toast: string
+    let textRejectOffline: string
 
     async function onPopupClosed() {
+        if (!navigator.onLine) {
+            toast = ''
+            textRejectOffline = ''
+            toast = 'Cannot send, offline.'
+            textRejectOffline = 'Close.'
+            return
+        }
         isOpen = !isOpen
         if (feedbackText) {
             await sendFeedback(feedbackText, email)
@@ -34,5 +42,5 @@
     <button id="btnFeedback" on:click={() => {isOpen = !isOpen}}>
         Feedback
     </button>
-    <Toast message={toast}/>
 {/if}
+<Toast message={toast} textReject={textRejectOffline} onReject={()=> isOpen = false}/>
