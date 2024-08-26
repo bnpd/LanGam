@@ -8,8 +8,26 @@
     let docs: any[][] = []
 </script>
 
-{#await getTopTasks($targetLang, filter) then docs}
-    {#each docs as docId_doc}
-        <DocPreviewComponent docId={docId_doc[0]} doc={docId_doc[1]}/>    
-    {/each}
-{/await}
+<style>
+    .two-columns {
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+    }
+
+    .two-columns > * {
+        width: 50%;
+        box-sizing: border-box;
+        padding: 5px;
+    }
+</style>
+
+<div class="two-columns">
+    {#await getTopTasks($targetLang, filter) then docs}
+        {#each docs as docId_doc}
+        <div>
+            <DocPreviewComponent docId={docId_doc[0]} doc={docId_doc[1]}/>    
+        </div>
+        {/each}
+    {/await}
+</div>

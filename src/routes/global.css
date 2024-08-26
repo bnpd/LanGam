@@ -2,6 +2,7 @@
   --button-height: 40px;
   --body-background-color: #eeeeee;
   --body-background-color-half-opaque: #eeeeee80;
+  --card-border-radius: 2em;
 }
 
 body {
@@ -97,11 +98,11 @@ div[contenteditable]:focus {
   outline-color: blue;
 }
 
-.card {
+.card, .image-card {
   --padding-card: 22px;
   padding: var(--padding-card);
   background-color: aliceblue;
-  border-radius: 2em;
+  border-radius: var(--card-border-radius);
   margin: 5px 0;
   box-shadow: #80808010 0 3px 5px 1px; /* Downwards shadow and on left and right side*/
 }
