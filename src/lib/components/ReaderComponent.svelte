@@ -46,6 +46,12 @@
   }
 
   function onScroll(e: Event) {    
+    console.log({top: currentScrolledParagraphIndex('top')});
+    console.log({bot: currentScrolledParagraphIndex('bottom')});
+    console.log('-----------');
+    
+    
+    
     // Scroll the solutionField to the same paragraph index as divTask
     const newScrollIndex = currentScrolledParagraphIndex()    
     if (newScrollIndex != $currentlyScrolledParagraphIndex) {
@@ -72,6 +78,19 @@
 
       // Calculate the position to compare with paragraph offset
     const scrollOffset = divTask.scrollTop + (ref === 'top' ? 0 : ref === 'mid' ? 0.5 : 1) * divTask.offsetHeight + firstParagraphOffsetTop;
+    for (var i = 0; i < taskAndChatParagraphs.length; i++) {
+      if (scrollOffset < findOffsetToAncestor(taskAndChatParagraphs[i] as HTMLElement, firstParagraphsOffsetParentElement!)) {
+        return i-1;
+      }
+    }
+
+    // if we got here, it is either because we are fully scrolled, or because onUpdate did not properly run and taskAndChatParagraphs has not been updated
+    // update taskAndChatParagraphs and re-try the above loop, otherwise return last paragraph
+    const prevNParas = taskAndChatParagraphs.length
+    taskAndChatParagraphs = divTask?.querySelectorAll('p, h1, h2, h3, h4, h5, h6, h7')
+    if (prevNParas != taskAndChatParagraphs.length) { // if that changed sth, also update solutionAndChatParagraphs
+      solutionAndChatParagraphs = solutionField?.querySelectorAll('p, h1, h2, h3, h4, h5, h6, h7')
+    }
     for (var i = 0; i < taskAndChatParagraphs.length; i++) {
       if (scrollOffset < findOffsetToAncestor(taskAndChatParagraphs[i] as HTMLElement, firstParagraphsOffsetParentElement!)) {
         return i-1;
