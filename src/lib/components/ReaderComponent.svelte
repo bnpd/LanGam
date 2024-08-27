@@ -45,13 +45,7 @@
     return visibleParagraphs
   }
 
-  function onScroll(e: Event) {    
-    console.log({top: currentScrolledParagraphIndex('top')});
-    console.log({bot: currentScrolledParagraphIndex('bottom')});
-    console.log('-----------');
-    
-    
-    
+  function onScroll(e: Event) {
     // Scroll the solutionField to the same paragraph index as divTask
     const newScrollIndex = currentScrolledParagraphIndex()    
     if (newScrollIndex != $currentlyScrolledParagraphIndex) {
