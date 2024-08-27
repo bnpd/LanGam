@@ -3,6 +3,8 @@
   --body-background-color: #eeeeee;
   --body-background-color-half-opaque: #eeeeee80;
   --card-border-radius: 2em;
+  --box-shadow-light: 0 5px 4px rgba(100, 100, 100, 0.1);
+  --box-shadow-strong: 0 5px 4px rgba(100, 100, 100, 0.3);
 }
 
 body {
@@ -43,7 +45,7 @@ button, input[type="submit"] {
   line-height: 34px;
   margin-top: 10px;
   border-radius: 1em;
-  box-shadow: #80808010 0 3px 5px 1px; /* Downwards shadow and on left and right side*/
+  box-shadow: var(--box-shadow-strong); /* Downwards shadow and on left and right side*/
 }
 
 textarea {
@@ -76,7 +78,7 @@ div[contenteditable] {
   box-sizing: border-box;
   padding: 10px calc(var(--button-height) + 8px);
   overflow: auto;
-  box-shadow: #80808018 0 2px 5px 2px; /* Downwards shadow and on left and right side*/
+  box-shadow: var(--box-shadow-light); /* Downwards shadow and on left and right side*/
   line-height: 1.3em;
 }
 
@@ -104,7 +106,7 @@ div[contenteditable]:focus {
   background-color: aliceblue;
   border-radius: var(--card-border-radius);
   margin: 5px 0;
-  box-shadow: #80808010 0 3px 5px 1px; /* Downwards shadow and on left and right side*/
+  box-shadow: var(--box-shadow-strong); /* Downwards shadow and on left and right side*/
 }
 
 .card > *:first-child, .card > *:first-child > *:first-child {

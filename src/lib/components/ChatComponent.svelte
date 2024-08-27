@@ -204,6 +204,7 @@
 
     .inline .card { /* TODO: only for inline (probably use in html instead )*/
         background-color: var(--body-background-color);
+        box-shadow: var(--box-shadow-light);
     }
 
     .card.user, .card.correction {

@@ -24,6 +24,7 @@
       position: relative;
       font-size: x-small;
       transform: translateY(-0.25em);
+      box-shadow: var(--box-shadow-light);
     }
   
     .tooltip {
