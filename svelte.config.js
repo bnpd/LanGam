@@ -26,7 +26,12 @@ const config = {
 			fallback: undefined,
 			precompress: false,
 			strict: true
-		})
+		}),
+		csp: {
+			directives: {
+				'script-src': ['self']
+			}
+		}
 	}
 };
 
