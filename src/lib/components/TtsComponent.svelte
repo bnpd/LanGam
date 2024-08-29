@@ -1,4 +1,4 @@
-<script lang="ts">
+<script lang="ts" defer>
 	import { currentTask, isSoundOn, targetLang, ttsSpeed } from "$lib/stores";
 	import { onMount } from "svelte";
 

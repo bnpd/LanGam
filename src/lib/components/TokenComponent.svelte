@@ -1,6 +1,6 @@
 <!-- svelte-ignore a11y-no-static-element-interactions -->
 <!-- svelte-ignore a11y-click-events-have-key-events -->
-<script lang="ts">
+<script lang="ts" defer>
 	import { nativeLang, targetLang } from "$lib/stores";
 
     export let word: string;

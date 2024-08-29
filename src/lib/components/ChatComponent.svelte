@@ -1,4 +1,4 @@
-<script lang="ts">
+<script lang="ts" defer>
 	import { currentTask, failedWords, nativeLang, targetLang, user } from "$lib/stores";
 	import { tick } from "svelte";
 	import BadgeComponent from "./BadgeComponent.svelte";

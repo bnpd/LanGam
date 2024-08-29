@@ -1,4 +1,4 @@
-<script lang="ts">
+<script lang="ts" defer>
 	import { getTopTasks } from "./backend";
 	import { targetLang } from "$lib/stores";
 	import DocPreviewComponent from "./DocPreviewComponent.svelte";

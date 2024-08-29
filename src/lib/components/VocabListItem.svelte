@@ -1,4 +1,4 @@
-<script lang="ts">
+<script lang="ts" defer>
     export let title: string | undefined = undefined;
 </script>
 

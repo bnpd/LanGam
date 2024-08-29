@@ -1,4 +1,4 @@
-<script lang="ts">
+<script lang="ts" defer>
     import { login, newUserLang, signup } from '$lib/components/backend';
     import { goto } from '$app/navigation';
 	import { failedWords, inlineChatHistory, nativeLang, reviews, targetLang, user } from '$lib/stores';

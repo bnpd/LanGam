@@ -1,4 +1,4 @@
-<script lang="ts">
+<script lang="ts" defer>
 	import type DocumentC from "$lib/DocumentC";
 	import { failedWords } from "$lib/stores";
 	import type Token from "$lib/Token";

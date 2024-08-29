@@ -1,4 +1,4 @@
-<script lang="ts">
+<script lang="ts" defer>
     import DocumentC from "$lib/DocumentC";
 	import { isTaskCached } from "./backend";
 	import { targetLang, user } from "$lib/stores";
@@ -43,7 +43,11 @@
 <div class="image-card" hidden={hidden}>
     <a href={$user ? "/?doc="+docId : "/signup"}>
         <div style:position="relative">
-            <img src={doc.img ? `/images/illustrations/${doc.img}.avif` : FALLBACK_IMAGE} alt={doc.title.text.replaceAll('#', '') + " Image"} style:opacity={doc.img ? 'unset' : '0.1'}>
+            <img 
+                src={doc.img ? `/images/illustrations/${doc.img}.avif` : FALLBACK_IMAGE} 
+                loading="lazy"
+                alt={doc.title.text.replaceAll('#', '') + " Image"} 
+                style:opacity={doc.img ? 'unset' : '0.1'}>
             <div class="difficulty-badge">
                 <BadgeComponent 
                     text={doc.difficulty > 5 ? 'advanced' : doc.difficulty < 4 ? 'beginner' : 'intermediate'} 

@@ -1,4 +1,4 @@
-<script lang="ts">
+<script lang="ts" defer>
 import type Token from "$lib/Token";
 import { getVocab } from "$lib/components/backend.js"
 import { targetLang } from '$lib/stores';

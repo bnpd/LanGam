@@ -1,4 +1,4 @@
-<script lang="ts">
+<script lang="ts" defer>
     import WebPushSubscription from './WebPushSubscription.svelte';
     import { user } from '$lib/stores';
 	import { goto } from '$app/navigation';

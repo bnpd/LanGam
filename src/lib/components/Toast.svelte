@@ -1,6 +1,6 @@
 <!-- svelte-ignore a11y-no-static-element-interactions -->
 <!-- svelte-ignore a11y-click-events-have-key-events -->
-<script lang="ts">
+<script lang="ts" defer>
 	import { fly } from "svelte/transition";
 
     export let message: string | undefined = undefined;

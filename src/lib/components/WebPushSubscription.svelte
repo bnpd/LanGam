@@ -1,4 +1,4 @@
-<script lang="ts">
+<script lang="ts" defer>
 import { onMount } from 'svelte';
 import { requestNotifications } from './backend';
 import { loadingTask } from '$lib/stores';

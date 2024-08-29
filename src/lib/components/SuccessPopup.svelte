@@ -1,4 +1,4 @@
-<script lang="ts">
+<script lang="ts" defer>
 	import BadgeComponent from "./BadgeComponent.svelte";
 	import Popup from "./Popup.svelte";
 

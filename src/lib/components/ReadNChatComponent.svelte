@@ -1,4 +1,4 @@
-<script lang="ts">
+<script lang="ts" defer>
     import { onMount } from 'svelte';
     import ReaderComponent from './ReaderComponent.svelte';
     import { getTask, getUserTaskStats, sendReview } from './backend';

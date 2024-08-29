@@ -1,4 +1,4 @@
-<script lang="ts">
+<script lang="ts" defer>
   import '../global.css';
 	import { targetLang } from '$lib/stores';
 	import { backendPost } from '$lib/components/backend';

@@ -1,4 +1,4 @@
-<script lang="ts">
+<script lang="ts" defer>
   import { currentTask, currentlyScrolledParagraphIndex } from '../stores';
 	import { afterUpdate, tick } from "svelte";
 	import TaskComponent from './TaskComponent.svelte';

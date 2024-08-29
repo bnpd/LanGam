@@ -1,4 +1,4 @@
-<script lang="ts">
+<script lang="ts" defer>
 	import Popup from "./Popup.svelte";
     import { getUserData, sendFeedback } from '$lib/components/backend'
 	import Toast from "./Toast.svelte";

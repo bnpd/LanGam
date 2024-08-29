@@ -1,4 +1,4 @@
-<script lang="ts">
+<script lang="ts" defer>
     import '../global.css';
     import LoginComponent from '$lib/components/LoginComponent.svelte';
 	import config from '../../config';
