@@ -8,8 +8,20 @@
 	import ReadNChatComponent from './ReadNChatComponent.svelte';
 	import TtsComponent from './TtsComponent.svelte';
 	import TitleWithBackgroundImageComponent from './TitleWithBackgroundImageComponent.svelte';
+	import { onMount } from 'svelte';
 
     let tts: TtsComponent
+
+    onMount(()=>{
+        // after 10 seconds, cache assets
+        setTimeout(() => {
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.ready.then((registration) => {
+                    registration.active.postMessage({ type: 'CACHE_STATIC_ASSETS' });
+                });
+            }
+        }, 10000);
+    })
 </script>
 
 <TitleWithBackgroundImageComponent>Automated Language Learning AI</TitleWithBackgroundImageComponent>

@@ -11,14 +11,26 @@ const ASSETS = [
 	...files  // everything in `static`
 ];
 
-self.addEventListener('install', (event) => {
-	// Create a new cache and add all files to it
-	async function addFilesToCache() {
-		const cache = await caches.open(CACHE);
-		await cache.addAll(ASSETS);
-	}
+self.addEventListener('message', (event) => {
+	if (event.data && event.data.type === 'CACHE_STATIC_ASSETS') {
+		// Get cache for this app version and add files to it if not already there
+		async function addMissingFilesToCache() {
+			const cache = await caches.open(CACHE);
 
-	event.waitUntil(addFilesToCache());
+			// Check each asset in ASSETS and add it to cache if it's not already present
+			for (const asset of ASSETS) {
+				const response = await cache.match(asset);
+				if (!response) {
+					try {
+						await cache.add(asset);
+					} catch (err) {
+						console.error(`Failed to cache ${asset}:`, err);
+					}
+				}
+			}
+		}
+		event.waitUntil(addMissingFilesToCache());
+	}
 });
 
 self.addEventListener('activate', (event) => {
