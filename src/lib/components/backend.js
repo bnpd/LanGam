@@ -151,6 +151,7 @@ export async function getUserTaskStats(targetLang, docId){
 /**
  * @param {string} targetLang
  * @param {any} query
+ * @returns {Promise<any[][]>}
  */
 export async function getTopTasks(targetLang, query){
 	return backendGet(EndpointGetTopTasks(targetLang, JSON.stringify(query)), false)
