@@ -222,7 +222,7 @@
     <div id="messageHistoryContainer" bind:this={messageHistoryContainer} class:chatHistoryHidden={!chatFocussed && !loading && !inline} class:floatAboveParent={!inline} class:inline={inline}>
         {#each $chatHistory as msg, i}
                 {#if msg.role === 'assistant' || msg.role === 'user' || msg.role === 'correction'}
-                    <div class={"card "+msg.role} id="responseBox">
+                    <div class={"card "+msg.role}>
                         <em><strong>
                             <BadgeComponent 
                                 text={msg.role === 'user' ? 'You' : msg.role === 'assistant' ? 'AI' : (translationLang === 'original' ? 'You+AI' : 'You')} 
@@ -239,7 +239,7 @@
                         {/if}
                     </div>
                 {:else if msg.role === 'internal' && i == $chatHistory.length-1}
-                    <div class="card internal" id="responseBox">
+                    <div class="card internal">
                         <em><strong><BadgeComponent text='Error' tooltip="Error"/></strong></em>&nbsp;
                         <p class="chatMessage">{msg.content?.text?.text}</p>
                     </div>

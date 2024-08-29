@@ -226,7 +226,7 @@ div[contenteditable]:focus {
 }
 
 
-#messageHistoryContainer p {
+#messageHistoryContainer p:first-of-type { /* First one is next to Badge, thus needs to be inline*/
   display: inline;
 }
 
