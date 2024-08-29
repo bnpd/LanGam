@@ -5,7 +5,7 @@
 	import BadgeComponent from "./BadgeComponent.svelte";
 	import { onMount } from "svelte";
 
-    let FALLBACK_IMAGE = '/images/illustrations/_d835551b-5ef3-409e-b051-c5e56274fd15.avif'
+    let FALLBACK_IMAGE = '/images/illustrations/placeholder.avif'
 
     //export let img: ; // included in DocumentC?
     export let docId: number;
