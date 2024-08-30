@@ -20,8 +20,8 @@
     
     const key_value = $page.params.category.split(';', 2)
     if (key_value.length != 2) throw error(404)
-    category_name = key_value[1]
-    filter[key_value[0]] = category_name
+    category_name = key_value[1].replaceAll(',', ', ')
+    filter[key_value[0]] = key_value[1]
 
     docs = await getTopTasks($targetLang, filter)
   
@@ -32,10 +32,9 @@
 </script>
 
 <svelte:head>
-	<title>Catalog - Automated Language Learning AI</title>
-  <meta name="description" content="Catalog of all our texts - learn languages the fun way: talk about texts with AI.">
+	<title>{category_name} - Automated Language Learning AI</title>
+  <meta name="description" content="Texts in the {category_name} category - learn languages the fun way: talk about texts with AI.">
   <link rel="preconnect" href={config.backend}>
-  
 </svelte:head>
 
 <style>
@@ -53,7 +52,7 @@
 </style>
 
 {#if category_name && docs}
-<TitleWithBackgroundImageComponent>{category_name.replaceAll(',', ', ')}</TitleWithBackgroundImageComponent>
+<TitleWithBackgroundImageComponent>{category_name}</TitleWithBackgroundImageComponent>
   <div class="two-columns">
     {#each docs as docId_doc}
     <div>
