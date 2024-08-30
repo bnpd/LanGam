@@ -11,7 +11,6 @@
     export let docId: number;
     export let doc: DocumentC;
     let hidden = false
-    $: if(doc && doc.img) console.log(doc.img);
 
     async function onOffline() {
         hidden = ! await isTaskCached($targetLang, docId.toString())
