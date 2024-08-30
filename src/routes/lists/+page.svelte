@@ -92,6 +92,7 @@ function reloadLists() {
     </div>
   </div>
 </div>
+<br><br>
 <NavbarComponent>
   <button on:click={()=>goto("/")}>◄ Back</button>
 </NavbarComponent>
