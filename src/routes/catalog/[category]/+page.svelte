@@ -37,20 +37,6 @@
   <link rel="preconnect" href={config.backend}>
 </svelte:head>
 
-<style>
-  .two-columns {
-      display: flex;
-      flex-direction: row;
-      flex-wrap: wrap;
-  }
-
-  .two-columns > * {
-      width: 50%;
-      box-sizing: border-box;
-      padding: 5px;
-  }
-</style>
-
 {#if category_name && docs}
 <TitleWithBackgroundImageComponent>{category_name}</TitleWithBackgroundImageComponent>
   <div class="two-columns">

@@ -114,10 +114,6 @@ div[contenteditable]:focus {
   line-height: 1em;
 }
 
-.forceOneLine > * {
-  display: inline-block;
-}
-
 .pointer {
   cursor: pointer;
 }
@@ -128,6 +124,28 @@ div[contenteditable]:focus {
 
 .srWord {
   color: goldenrod;
+}
+
+.two-columns {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: stretch;
+}
+
+.two-columns > * {
+    width: 50%;
+    box-sizing: border-box;
+    padding: 5px;
+    display: flex;
+}
+
+.two-columns .card {
+  flex: 1;
+  display: flex;
+  align-items: center; /* Center content vertically */
+  justify-content: center; /* Center content horizontally */
+  text-align: center; /* Center text */
 }
 
 #divTask, #solutionField {

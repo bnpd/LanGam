@@ -4,20 +4,25 @@
 	import DocPreviewComponent from "./DocPreviewComponent.svelte";
 	import BadgeComponent from "./BadgeComponent.svelte";
 	import TitleWithBackgroundImageComponent from "./TitleWithBackgroundImageComponent.svelte";
+	import NavbarComponent from "./NavbarComponent.svelte";
+	import { goto } from "$app/navigation";
 
-    let filters: Array<{title: string; filter: {[filter: string]: string[]}}> = [
+    let content_types: Array<{title: string; filter: {[filter: string]: string[]}}> = [
         {title: 'Extra Short', filter: {content_type: ['Extra short']}},
         {title: 'Short Stories', filter: {content_type: ['Story']}},
         {title: 'Long Stories', filter: {content_type: ['Long Story']}},
         {title: 'Articles', filter: {content_type: ['Article']}},
-        {title: 'Adventures', filter: {topic: ['Adventure']}},
+    ]
+
+    let topics: Array<{title: string; filter: {[filter: string]: string[]}}> = [
         {title: 'About Friendship', filter: {topic: ['Friendship']}},
-        {title: 'About Work', filter: {topic: ['Work']}},
-        {title: 'Village Life', filter: {topic: ['Village Life']}},
-        {title: 'Seaside Bliss', filter: {topic: ['Seaside Bliss']}},
         {title: 'Hobbies & Food', filter: {topic: ['Hobbies', 'Food']}},
+        {title: 'About Work', filter: {topic: ['Work']}},
+        {title: 'Adventures', filter: {topic: ['Adventure']}},
         {title: 'Learning', filter: {topic: ['Learning']}},
         {title: 'Polish Culture', filter: {topic: ['Culture']}},
+        {title: 'Seaside Bliss', filter: {topic: ['Seaside Bliss']}},
+        {title: 'Village Life', filter: {topic: ['Village Life']}},
     ]
 
     let offline = false
@@ -52,12 +57,29 @@
         <p>Create an account so we can save your progress when you read any of the following stories:</p>
     </div>
 {/if}
-<div style:opacity={$user ? '1' : '0.3'}>
-    <h2>Categories</h2>
-    {#each filters as filter}
+<h2>Categories</h2>
+<div style:opacity={$user ? '1' : '0.3'} class="two-columns">
+    {#each content_types as filter}
         {@const key = Object.keys(filter.filter)[0]}
-        <h3>
-            <a href="/catalog/{key};{filter.filter[key]}">{filter.title}</a>
-        </h3>
+            <a href="/catalog/{key};{filter.filter[key]}">
+                <div class="card">
+                    <h3 style="margin-bottom: 0">{filter.title}</h3>
+                </div>
+            </a>
     {/each}
 </div>
+<h2>Topics</h2>
+<div style:opacity={$user ? '1' : '0.3'} class="two-columns">
+    {#each topics as filter}
+        {@const key = Object.keys(filter.filter)[0]}
+            <a href="/catalog/{key};{filter.filter[key]}">
+                <div class="card">
+                    <h3 style="margin-bottom: 0">{filter.title}</h3>
+                </div>
+            </a>
+    {/each}
+</div>
+<br><br>
+<NavbarComponent>
+  <button on:click={()=>goto("/")}>◄ Back</button>
+</NavbarComponent>
