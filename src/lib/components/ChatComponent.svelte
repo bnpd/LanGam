@@ -232,16 +232,16 @@
                             {#if msg.content.text?.tokens}
                                 <TaskComponent task={msg.content} srWords={srWords} trySpeak={trySpeak}/>
                             {:else}
-                                <p class="chatMessage">{msg.content.text.text}</p>
+                                <p class="chatMessage">{msg.content.text.text.trim()}</p>
                             {/if}
                         {:else if msg.content.text?.translations?.[translationLang]}
-                            <p class="chatMessage">{msg.content.text.translations[translationLang]}</p>
+                            <p class="chatMessage">{msg.content.text.translations[translationLang].trim()}</p>
                         {/if}
                     </div>
                 {:else if msg.role === 'internal' && i == $chatHistory.length-1}
                     <div class="card internal">
                         <em><strong><BadgeComponent text='Error' tooltip="Error"/></strong></em>&nbsp;
-                        <p class="chatMessage">{msg.content?.text?.text}</p>
+                        <p class="chatMessage">{msg.content?.text?.text.trim()}</p>
                     </div>
                 {/if}
         {/each}

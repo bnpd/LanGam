@@ -2,6 +2,7 @@
   import { currentTask, currentlyScrolledParagraphIndex } from '../stores';
 	import { afterUpdate, tick } from "svelte";
 	import TaskComponent from './TaskComponent.svelte';
+	import type TtsComponent from './TtsComponent.svelte';
 
   enum FIELD {TASK, SOLUTION}
 
@@ -15,8 +16,8 @@
   let solutionAndChatParagraphs: NodeListOf<Element>
   let scrollRestored = false
 
-  export let phase: string
-  export let trySpeak: Function
+  let solutionShown: boolean = false
+  export let tts: TtsComponent
   export let solutionText: string
   export let taskVisible: boolean
   export let srWords: Set<String> | undefined
@@ -50,7 +51,9 @@
     const newScrollIndex = currentScrolledParagraphIndex()    
     if (newScrollIndex != $currentlyScrolledParagraphIndex) {
       $currentlyScrolledParagraphIndex = newScrollIndex
-      scrollToParagraph(FIELD.SOLUTION, newScrollIndex)
+      if (solutionShown) {
+        scrollToParagraph(FIELD.SOLUTION, newScrollIndex)
+      }
     }
 
     // adjust height of the background image (reaches 100hv when fully scrolled down)
@@ -114,7 +117,7 @@
         elToScroll = solutionField        
         break;
     }    
-    elToScroll.scrollTop = findOffsetToAncestor(paragraphs[paragraphIndex] as HTMLElement, (paragraphs[0] as HTMLElement).offsetParent!) - (paragraphs[0] as HTMLElement)?.offsetTop;    
+    elToScroll.scroll({top: findOffsetToAncestor(paragraphs[paragraphIndex] as HTMLElement, (paragraphs[0] as HTMLElement).offsetParent!) - (paragraphs[0] as HTMLElement)?.offsetTop, behavior: 'smooth'});    
   }
 
   
@@ -150,27 +153,38 @@
 
   async function onTaskReset() {
     if (divTask) divTask.scrollTop = 0
+    solutionShown = false
     // solutionField is synced automatically
   }
 
+
+
+	function onShowSolution(event: MouseEvent & { currentTarget: EventTarget & HTMLButtonElement; }) {
+    solutionShown = true
+    tts.trySpeakCurrentTask()
+	}
 </script>
 
 <div class="card" id="contentbox">
+  {#if !solutionShown}
+    <button on:click={onShowSolution} style="margin-left: 50%; transform: translateX(-50%)">Show translation</button>
+  {:else}
+  <div id="solutionField" bind:this={solutionField}>
+      {#each solutionParagraphs as para, row}
+      <svelte:element this={para.htmlTag} style:gridRow={row}>
+        {para.string}
+      </svelte:element>
+      {/each}  
+      <div>
+        <slot name="afterSolution" />
+      </div>
+    </div>
+    {/if}
+  <hr>
   <div id="divTask" class:hidden={!taskVisible} bind:this={divTask} on:scroll={onScroll}>
-    <TaskComponent task={$currentTask} srWords={srWords} trySpeak={trySpeak} />
+    <TaskComponent task={$currentTask} srWords={srWords} trySpeak={tts?.trySpeak} />
     <div>
       <slot name="afterTask" />
-    </div>
-  </div>
-  <hr>
-  <div id="solutionField" bind:this={solutionField} class:hidden={phase !== "solutionShown"}>
-    {#each solutionParagraphs as para, row}
-    <svelte:element this={para.htmlTag} style:gridRow={row}>
-      {para.string}
-    </svelte:element>
-    {/each}  
-    <div>
-      <slot name="afterSolution" />
     </div>
   </div>
 </div>

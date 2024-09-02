@@ -10,7 +10,6 @@
 	import DocumentC from '$lib/DocumentC';
 	import type TtsComponent from './TtsComponent.svelte';
 
-    const answbtnTxtWhilePrompting = "Show translation"
     const answbtnTxtWhileSolutionShown = "Next text"
     const TOAST_REDIRECTED_SAVED_TASK = "Your selected text has been queued cause you have a saved text."
     const TEXT_REJECT_SAVED_TASK = "Discard saved"
@@ -18,7 +17,6 @@
     export let tts: TtsComponent;
 
     let solutionText = ''
-    var phase = "prompting"; // or "solutionShown"
     let toast: string | undefined;
     let textRejectToast: string | undefined;
     let readerComponent: ReaderComponent;
@@ -73,59 +71,52 @@
     })
 
     async function onAnswbtnClick () {
-		if (phase === "prompting") {
-            phase = "solutionShown"
-            tts.trySpeakCurrentTask()
-		} else if (phase === "solutionShown") {
-            speechSynthesis.cancel()
+        speechSynthesis.cancel()
 
-            const correctedWords = (srWords?.difference($failedWords))?.size // this is kinda cheating cause srWords are lemmas and failedWords are forms, but it's not easily fixable without saving the whole Token object somewhere
+        const correctedWords = (srWords?.difference($failedWords))?.size // this is kinda cheating cause srWords are lemmas and failedWords are forms, but it's not easily fixable without saving the whole Token object somewhere
 
-            if ($currentTask && $user) {
-                $reviews.push(structuredClone($failedWords))
-                $reviews = $reviews
-                $reviewDocIds.push($currentTask.docId)
-                $reviewDocIds = $reviewDocIds
-                $failedWords.clear()
-                $failedWords = $failedWords
-            }
+        if ($currentTask && $user) {
+            $reviews.push(structuredClone($failedWords))
+            $reviews = $reviews
+            $reviewDocIds.push($currentTask.docId)
+            $reviewDocIds = $reviewDocIds
+            $failedWords.clear()
+            $failedWords = $failedWords
+        }
 
-            reviewsSentPromise = sendPendingReviews()
+        reviewsSentPromise = sendPendingReviews()
 
-            statsClosedPromise = new Promise<boolean>((resolve, reject) => {
-                statsClosedPromiseResolve = resolve
-            })
-            congratsMessage = 
-                (
-                    (nNewForms ? `You just encountered ${nNewForms} new words!\n` : '')
-                  + (correctedWords ? `You remembered ${correctedWords} word families you had wrong before!\n` : '')
-                ) || 'Keep up that pace! 🏃';
+        statsClosedPromise = new Promise<boolean>((resolve, reject) => {
+            statsClosedPromiseResolve = resolve
+        })
+        congratsMessage = 
+            (
+                (nNewForms ? `You just encountered ${nNewForms} new words!\n` : '')
+                + (correctedWords ? `You remembered ${correctedWords} word families you had wrong before!\n` : '')
+            ) || 'Keep up that pace! 🏃';
 
-            await statsClosedPromise
+        await statsClosedPromise
 
-            $currentTask = undefined
-            solutionText = ''
-            $loadingTask = true
-    
-            try {
-                await reviewsSentPromise
-            } catch (rejection) {
-                toast = "Offline. Your data was saved."
-                setTimeout(() => {
-                    goto('/catalog')
-                }, 1500);
-                return
-            }
-            
-            if ($user) {
-                await nextTask(getUrlDoc()) // IMPROVEMENT: we could even pre-fetch the next task while stats popup is shown
-                initChatHistory()
-                goto('/', {replaceState: true})
-            } else {
-                goto('/signup')
-            }
+        $currentTask = undefined
+        solutionText = ''
+        $loadingTask = true
+
+        try {
+            await reviewsSentPromise
+        } catch (rejection) {
+            toast = "Offline. Your data was saved."
+            setTimeout(() => {
+                goto('/catalog')
+            }, 1500);
+            return
+        }
+        
+        if ($user) {
+            await nextTask(getUrlDoc()) // IMPROVEMENT: we could even pre-fetch the next task while stats popup is shown
+            initChatHistory()
+            goto('/', {replaceState: true})
         } else {
-            console.error('Unknown Phase: '+phase);
+            goto('/signup')
         }
     }
 
@@ -171,7 +162,6 @@
         }
         
         if (doc) $loadingTask = false;
-        phase = "prompting"
         $currentTask = doc
         
         
@@ -201,16 +191,12 @@
 {#if !$user}
     <strong>In this demo text, you learn the fabulous <em>Drnuk</em> language (and how this app works).</strong> <!-- If you want to dive right in with Polish, create an account at the bottom.-->
 {/if}
-<ReaderComponent phase={phase} trySpeak={tts?.trySpeak} solutionText={solutionText} taskVisible={!$loadingTask} srWords={srWords} bind:this={readerComponent}>
+<ReaderComponent tts={tts} solutionText={solutionText} taskVisible={!$loadingTask} srWords={srWords} bind:this={readerComponent}>
     <span slot="afterTask" hidden={!$currentTask}><ChatComponent readerComponent={readerComponent} inline={true} chatBoxTitle="Twoja odpowiedź 🤙" chatHistory={inlineChatHistory} srWords={srWords} trySpeak={tts?.trySpeak}/></span>
     <span slot="afterSolution"><ChatComponent readerComponent={readerComponent} inline={true} chatBoxTitle={undefined} chatHistory={inlineChatHistory} translationLang='en'/></span>
 </ReaderComponent>
 <button id="answbtn" class:loading={$loadingTask} on:click={onAnswbtnClick}>
-    {#if phase === 'prompting'}
-        {answbtnTxtWhilePrompting}
-    {:else if phase === 'solutionShown'}
-        {answbtnTxtWhileSolutionShown}
-    {/if}
+    {answbtnTxtWhileSolutionShown}
 </button>
 <ChatComponent readerComponent={readerComponent} inline={false} chatBoxTitle="Ask me ✨"/>
 <Toast message={toast} textReject={textRejectToast} onReject={() => {
