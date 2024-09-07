@@ -67,7 +67,6 @@
         loading = true
         const newMessage = {role: 'user', content: DocumentC.partialDocument(chatPrompt, $targetLang, undefined, undefined)}
         let new_history = $chatHistory
-        let isEditedRes = false
         try {
             let responseMsg
             if ($user) {

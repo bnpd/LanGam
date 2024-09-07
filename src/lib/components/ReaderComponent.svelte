@@ -46,7 +46,7 @@
     return visibleParagraphs
   }
 
-  function onScroll(e: Event) {
+  function onScroll() {
     // Scroll the solutionField to the same paragraph index as divTask
     const newScrollIndex = currentScrolledParagraphIndex()    
     if (newScrollIndex != $currentlyScrolledParagraphIndex) {
@@ -159,17 +159,21 @@
 
 
 
-	function onShowSolution(event: MouseEvent & { currentTarget: EventTarget & HTMLButtonElement; }) {
+	async function onShowSolution(event: MouseEvent & { currentTarget: EventTarget & HTMLButtonElement; }) {
     solutionShown = true
     tts.trySpeakCurrentTask()
+    await tick()
+    setTimeout(() => { // without this timeout, UI hasn't finished adding all the solution paragraphs, which are needed for scrolling
+      onScroll()
+    }, 100);
 	}
 </script>
 
 <div class="card" id="contentbox">
-  {#if !solutionShown}
+  {#if !solutionShown && scrollRestored}
     <button on:click={onShowSolution} style="margin-left: 50%; transform: translateX(-50%)">Show translation</button>
   {:else}
-  <div id="solutionField" bind:this={solutionField}>
+    <div id="solutionField" bind:this={solutionField}>
       {#each solutionParagraphs as para, row}
       <svelte:element this={para.htmlTag} style:gridRow={row}>
         {para.string}
@@ -179,7 +183,7 @@
         <slot name="afterSolution" />
       </div>
     </div>
-    {/if}
+  {/if}
   <hr>
   <div id="divTask" class:hidden={!taskVisible} bind:this={divTask} on:scroll={onScroll}>
     <TaskComponent task={$currentTask} srWords={srWords} trySpeak={tts?.trySpeak} />
