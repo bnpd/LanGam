@@ -62,8 +62,11 @@ function EndpointGetUserTaskStats(targetLang, docId) {return `/user_task_stats/$
  * @param {string} targetLang
  */
 function EndpointReview(targetLang) {return `/review/${targetLang}`;}
+
 /**
- * EITHER docId+targetLang+isInline or contextParagraphs should be specified, if both are present, contextParagraphs will be prioritized. Inline needs both docId & targetLang
+ * Specify EITHER: 
+ * isInline=true + docId+targetLang or
+ * isInline=false + (docId+targetLang OR contextParagraphs)
  * @param {string} chatHistoryString
  * @param {boolean} isInline
  * @param {string | undefined} targetLang
@@ -71,7 +74,10 @@ function EndpointReview(targetLang) {return `/review/${targetLang}`;}
  * @param {string | undefined} contextParagraphs
  */
 function EndpointChat(chatHistoryString, isInline, targetLang=undefined, docId=undefined, contextParagraphs=undefined) {
-	return `/chat?hist=${encodeURIComponent(chatHistoryString)}` + (contextParagraphs ? `&ctx=${encodeURIComponent(contextParagraphs)}` : docId && targetLang ? `&docId=${docId}&targetLang=${targetLang}`+(isInline ? '&inline=true' : '') : '');
+	if (isInline && !(docId && targetLang)) throw 'EndpointChat: Incompatible parameters: isInline without docId+targetLang'
+	if (docId && targetLang && contextParagraphs) throw 'EndpointChat: Incompatible parameters: docId+targetLang+contextParagraphs'
+	return isInline ? `/chat_tandem?hist=${encodeURIComponent(chatHistoryString)}` + (`&docId=${docId}&targetLang=${targetLang}`)
+					: `/chat_tutor?hist=${encodeURIComponent(chatHistoryString)}` + (contextParagraphs ? `&ctx=${encodeURIComponent(contextParagraphs)}` : docId && targetLang ? `&docId=${docId}&targetLang=${targetLang}` : '');;
 }
 
 

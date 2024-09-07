@@ -151,7 +151,8 @@ div[contenteditable]:focus {
 #divTask, #solutionField {
   padding: 0 0.2em;
   line-height: 1.8em;
-  flex-grow: 1;
+  flex-grow: 1.618;
+  height: 0px; /* just need to have a value for flex-grow to work */
   overflow-y: scroll;
   overflow-x: hidden;
 }
@@ -162,6 +163,7 @@ div[contenteditable]:focus {
 
 #solutionField {
   opacity: 50%;
+  flex-grow: 1;
 }
 
 #answbtn, input[type="submit"] {
@@ -177,8 +179,10 @@ div[contenteditable]:focus {
 }
 #contentbox {
   text-align: justify;
-  height: 5em; /* overridden by flex-grow, but has to be set*/
-  flex-grow: 1;
+  height: 100%; /* due to use of flex-grow by children, height of this element does not matter, as long as it is big enough it will be equivalent to fill-available */
+  height: -moz-available; 
+  height: -webkit-fill-available;
+  height: fill-available;
   display: flex; 
   flex-direction: column; 
 }

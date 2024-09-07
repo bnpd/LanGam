@@ -68,43 +68,47 @@
   </script>
 
 <TitleWithBackgroundImageComponent>{isSignup ? 'Welcome :)' : 'Welcome back =)'}</TitleWithBackgroundImageComponent>
-<form class="card" on:submit|preventDefault={onSubmit}>
-	<input type="email" name="email" placeholder="Email" autocomplete="email" id="email" required />
-	<input type="password" name="password" placeholder="Password" autocomplete="new-password" id="password" required minlength="8"/>
-    {#if isSignup}
-        <input type="password" name="passwordConfirm" placeholder="Confirm Password" autocomplete="new-password" required minlength="8"/>
-        <!-- <input type="text" list="languages" name="native_lang" placeholder="Preferred Language" autocomplete="language" id="native_lang" required/> -->
-        <datalist id="languages">
-            <option value="en">English</option>
-            <!--
-            <option value="ar">Arabic</option>
-            <option value="zh">Chinese</option>
-            <option value="nl">Dutch</option>
-            <option value="fr">French</option>
-            <option value="de">German</option>
-            <option value="hi">Hindi</option>
-            <option value="it">Italian</option>
-            <option value="ja">Japanese</option>
-            <option value="ko">Korean</option>
-            <option value="pl">Polish</option>
-            <option value="pt">Portuguese</option>
-            <option value="ru">Russian</option>
-            <option value="es">Spanish</option>
-            <option value="tr">Turkish</option>
-            -->
-        </datalist>
-    {/if}
+<div style="text-align: center">
+    <form class="card" on:submit|preventDefault={onSubmit}>
+        <input type="email" name="email" placeholder="Email" autocomplete="email" id="email" required />
+        <br>
+        <input type="password" name="password" placeholder="Password" autocomplete="new-password" id="password" required minlength="8"/>
+        {#if isSignup}
+            <br>
+            <input type="password" name="passwordConfirm" placeholder="Confirm Password" autocomplete="new-password" required minlength="8"/>
+            <!-- <input type="text" list="languages" name="native_lang" placeholder="Preferred Language" autocomplete="language" id="native_lang" required/> -->
+            <datalist id="languages">
+                <option value="en">English</option>
+                <!--
+                <option value="ar">Arabic</option>
+                <option value="zh">Chinese</option>
+                <option value="nl">Dutch</option>
+                <option value="fr">French</option>
+                <option value="de">German</option>
+                <option value="hi">Hindi</option>
+                <option value="it">Italian</option>
+                <option value="ja">Japanese</option>
+                <option value="ko">Korean</option>
+                <option value="pl">Polish</option>
+                <option value="pt">Portuguese</option>
+                <option value="ru">Russian</option>
+                <option value="es">Spanish</option>
+                <option value="tr">Turkish</option>
+                -->
+            </datalist>
+        {/if}
+        <br>
+        <input id="submit" type="submit" value={isSignup ? "Register" : "Login"} disabled={loading}>
+        {#if loading}
+            <div class:loading/>
+        {/if}
+    </form>
     <br>
-    <input id="submit" type="submit" value={isSignup ? "Register" : "Login"} disabled={loading}>
-    {#if loading}
-        <div class:loading/>
+    {#if isSignup}
+        <p>Already registered?</p>
+        <a href="/login" style:width="fit-content">Go to login</a>
+    {:else}
+        <p>New here?</p>
+        <a href="/signup" style:width="fit-content">Register</a>
     {/if}
-</form>
-<br>
-{#if isSignup}
-    <p>Already registered?</p>
-    <a href="/login">Go to login</a>
-{:else}
-    <p>New here?</p>
-    <a href="/signup">Register</a>
-{/if}
+</div>
