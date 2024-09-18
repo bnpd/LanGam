@@ -11,7 +11,7 @@
         {title: 'Extra Short', filter: {content_type: ['Extra short']}},
         {title: 'Short Stories', filter: {content_type: ['Story']}},
         {title: 'Long Stories', filter: {content_type: ['Long Story']}},
-        {title: 'Articles', filter: {content_type: ['Article']}},
+        {title: 'Articles', filter: {content_type: ['Article']}}
     ]
 
     let topics: Array<{title: string; filter: {[filter: string]: string[]}}> = [
@@ -46,6 +46,11 @@
             </h2>
             <DocPreviewComponent docId={doc.docId} doc={doc}/> 
         {/await}
+        <a href="/games">
+            <div class="card">
+                <h3 style="margin-bottom: 0">Games</h3>
+            </div>
+        </a>
     {/if}
 {:else}
     <div class="card">

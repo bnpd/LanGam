@@ -233,7 +233,16 @@ export async function completeLevel(playerId, seqId, outcome) {
 		playerId: playerId, 
 		seqId: seqId, 
 		outcome: outcome
-	}})
+	}}).then(res => res.player)
+}
+
+/**
+ * List all available games
+ * @param {string} lang
+ * @returns {Promise<any[]>}
+ */
+export async function getGames(lang) {
+	return pb.collection('games').getFullList({filter: `lang.shortcode = "${lang.toUpperCase()}"`})
 }
 
 /**
@@ -243,6 +252,14 @@ export async function completeLevel(playerId, seqId, outcome) {
  */
 export async function getPlayer(target_lang, gameId) {
 	return pb.send(`/user_lang_game_player/${getUserData()?.id}/${target_lang}/${gameId}`, {})
+}
+
+/**
+ * Get current user's player for the specified game
+ * @param {string} playerId
+ */
+export async function refreshPlayer(playerId) {
+	return pb.collection('players').getFirstListItem(`id = "${playerId}"`)
 }
 
 /**

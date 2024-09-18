@@ -1,7 +1,7 @@
 <script lang="ts" defer>
     import { onMount } from 'svelte';
     import ReaderComponent from './ReaderComponent.svelte';
-    import { completeLevel, getPlayer, getPlayerLevel, getUserTaskStats, sendReview, updatePlayer } from './backend';
+    import { completeLevel, getPlayer, getPlayerLevel, getUserTaskStats, refreshPlayer, sendReview, updatePlayer } from './backend';
     import { user, nativeLang, targetLang, isSoundOn, currentTask, reviews, failedWords, reviewDocIds, currentlyScrolledParagraphIndex, loadingTask, gameChatHistory, player, chatOutcome } from '$lib/stores';
 	import { goto } from '$app/navigation';
 	import Toast from './Toast.svelte';
@@ -9,8 +9,6 @@
 	import SuccessPopup from './SuccessPopup.svelte';
 	import DocumentC from '$lib/DocumentC';
 	import type TtsComponent from './TtsComponent.svelte';
-
-    const answbtnTxtWhileSolutionShown = "Continue"
 
     export let tts: TtsComponent;
 
@@ -74,6 +72,8 @@
         let completeLevelPromise
         if (!$gameChatHistory.length) {
             completeLevelPromise = completeLevel($player.id, $currentTask.docId, "default")
+        } else {
+            completeLevelPromise = refreshPlayer($player.id)
         }
 
         statsClosedPromise = new Promise<boolean>((resolve, reject) => {
@@ -103,7 +103,7 @@
         try {
             console.log(player);
             
-            $player = (await completeLevelPromise).player
+            $player = await completeLevelPromise
         } catch (rejection) {
             console.error(rejection);
             
@@ -160,7 +160,12 @@
             doc = DocumentC.getSampleDoc()
         } else {
             if (!$player) {
-                $player = await getPlayer($targetLang, '4sdspc36rwuf05e') //TODO: remove hardcoded gameId
+                const gameId = new URLSearchParams(window.location.search).get('gameId')
+                if (!gameId) {
+                    goto('/games')
+                } else {
+                    $player = await getPlayer($targetLang, gameId)
+                }
             }
             const level = (await getPlayerLevel($player.id).catch(_offline => {
                 toast = "Text has not been downloaded offline. Going to catalog."
@@ -210,12 +215,14 @@
     <span slot="afterTask" hidden={!$currentTask}>{#if $gameChatHistory?.length}<ChatComponent readerComponent={readerComponent} inline={true} chatBoxTitle="Twoja odpowiedź 🤙" chatHistory={gameChatHistory} srWords={srWords} trySpeak={tts?.trySpeak} isGame={true}/>{/if}</span>
     <span slot="afterSolution">{#if $gameChatHistory?.length}<ChatComponent readerComponent={readerComponent} inline={true} chatBoxTitle={undefined} chatHistory={gameChatHistory} translationLang='en' isGame={true}/>{/if}</span>
 </ReaderComponent>
-<button id="levelBackbtn" class:loading={$loadingTask} on:click={onLevelBackbtnClick} hidden={!$player?.level_history}>
-    Back
-</button>
-<button id="answbtn" class:loading={$loadingTask} on:click={onAnswbtnClick} hidden={!$chatOutcome}>
-    {answbtnTxtWhileSolutionShown}
-</button>
+<div style="margin: auto">
+    <button id="levelBackbtn" class:loading={$loadingTask} on:click={onLevelBackbtnClick} hidden={!$player?.level_history?.order?.length}>
+        ◀
+    </button>
+    <button id="answbtn" class:loading={$loadingTask} on:click={onAnswbtnClick} hidden={!$chatOutcome}>
+        ▶
+    </button>
+</div>
 <ChatComponent readerComponent={readerComponent} inline={false} chatBoxTitle="Ask me ✨"/>
 <Toast message={toast} />
 <SuccessPopup title={congratsTitle} message={congratsMessage} onClose={()=>{congratsMessage = undefined; congratsTitle = undefined; statsClosedPromiseResolve()}}/>
