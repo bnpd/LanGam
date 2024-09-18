@@ -251,7 +251,7 @@ export async function getGames(lang) {
  * @param {string} gameId
  */
 export async function getPlayer(target_lang, gameId) {
-	return pb.send(`/user_lang_game_player/${getUserData()?.id}/${target_lang}/${gameId}`, {})
+	return pb.send(`/user_lang_game_player/${getUserData()?.id}/${target_lang.toUpperCase()}/${gameId}`, {})
 }
 
 /**
