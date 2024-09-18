@@ -1,16 +1,16 @@
 <script lang="ts" defer>
-	import './global.css';
-	import config from '../config';
+	import '../global.css';
+	import config from '../../config';
 	import { user } from '$lib/stores';
 	import { goto } from '$app/navigation';
+	import { onMount } from 'svelte';
 	import FeedbackComponent from '$lib/components/FeedbackComponent.svelte';
+	import GameComponent from '$lib/components/GameComponent.svelte';
 	import Install from '$lib/components/Install.svelte';
 	import NavbarComponent from '$lib/components/NavbarComponent.svelte';
 	import TitleWithBackgroundImageComponent from '$lib/components/TitleWithBackgroundImageComponent.svelte';
 	import TtsComponent from '$lib/components/TtsComponent.svelte';
 	import WebPushSubscription from '$lib/components/WebPushSubscription.svelte';
-	import { onMount } from 'svelte';
-	import ReadNChatComponent from '$lib/components/ReadNChatComponent.svelte';
 
 	let tts: TtsComponent;
 
@@ -28,12 +28,12 @@
 
 <svelte:head>
 	<title>Automated Language Learning AI</title>
-	<meta name="description" content="Learn languages the fun way: talk about texts with AI." />
+	<meta name="description" content="Learn languages like play." />
 	<link rel="preconnect" href={config.backend} />
 </svelte:head>
 
 <TitleWithBackgroundImageComponent>Automated Language Learning AI</TitleWithBackgroundImageComponent>
-<ReadNChatComponent {tts}></ReadNChatComponent>
+<GameComponent {tts}></GameComponent>
 <NavbarComponent>
 	<button on:click={() => goto('/catalog')}>Texts</button>
 	<TtsComponent bind:this={tts} />

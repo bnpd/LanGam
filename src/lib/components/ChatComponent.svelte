@@ -1,9 +1,9 @@
 <script lang="ts" defer>
-	import { currentTask, failedWords, nativeLang, targetLang, user } from "$lib/stores";
+	import { chatOutcome, currentTask, failedWords, nativeLang, player, targetLang, user } from "$lib/stores";
 	import { tick } from "svelte";
 	import BadgeComponent from "./BadgeComponent.svelte";
 	import type ReaderComponent from "./ReaderComponent.svelte";
-	import { sendChat } from "./backend";
+	import { sendChat, sendGameChat } from "./backend";
 	import { writable, type Writable } from "svelte/store";
 	import TaskComponent from "./TaskComponent.svelte";
 	import DocumentC from "$lib/DocumentC";
@@ -31,6 +31,7 @@
     export let translationLang: string = 'original'
     export let srWords: Set<string> | undefined = undefined
     export let trySpeak: Function | undefined = undefined
+    export let isGame: boolean = false
     let chatFocussed: boolean = false;
     let chatPrompt: string = ''
     let iChat: HTMLDivElement
@@ -70,11 +71,17 @@
         try {
             let responseMsg
             if ($user) {
-                let {correction, response} = 
-                    partialContext ? await sendChat(messageHistoryForChatGpt($chatHistory.concat([newMessage])), inline, undefined, undefined, readerComponent.getVisibleParagraphs())
-                                   : await sendChat(messageHistoryForChatGpt($chatHistory.concat([newMessage])), inline, $targetLang, $currentTask.docId, undefined);
-                console.log(correction);
-                console.log(response);
+                let correction
+                let response
+                if (isGame) {
+                    let end_conversation, outcome
+                    ({end_conversation, outcome, correction, response} = await sendGameChat(messageHistoryForChatGpt($chatHistory.concat([newMessage])), $player.id, $player.level));
+                    $chatOutcome = end_conversation ? outcome : null
+                } else {
+                    ({correction, response} = 
+                        partialContext ? await sendChat(messageHistoryForChatGpt($chatHistory.concat([newMessage])), inline, undefined, undefined, readerComponent.getVisibleParagraphs())
+                                       : await sendChat(messageHistoryForChatGpt($chatHistory.concat([newMessage])), inline, $targetLang, $currentTask.docId, undefined));
+                }
                 if (correction) {
                     newMessage.content = correction // replace user's message with corrected message
                     if (isEdited(correction)) {
@@ -248,7 +255,7 @@
             <div class="card" class:loading/>
         {/if}
     </div>
-    {#if chatBoxTitle != undefined}
+    {#if chatBoxTitle != undefined && (!$chatOutcome || !isGame)}
         {#if !inline}   
             <div class="promptSuggestions">
                 <button class="promptSuggestion" on:click={onClickChatSuggestion} disabled={loading}>

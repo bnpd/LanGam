@@ -3,6 +3,7 @@ import type DocumentC from './DocumentC';
 
 /* Global Stores */
 export const user = createPersistentStore('username', null);
+export const player = createPersistentStore('player', null);
 export const targetLang = createPersistentStore('target_lang', null);
 export const nativeLang = createPersistentStore('native_lang', null);
 export const loadingTask: Writable<boolean> = writable()
@@ -18,6 +19,8 @@ export const currentlyScrolledParagraphIndex = createPersistentStore('currentScr
 
 /* Chat Component Stores */
 export const inlineChatHistory: Writable<{role: string, content: DocumentC}[]> = createPersistentStore('inlineChatHistory', []);
+export const gameChatHistory: Writable<{role: string, content: DocumentC}[]> = createPersistentStore('gameChatHistory', []);
+export const chatOutcome = createPersistentStore('chatOutcome', null);
 
 /* Store Creation Functions */
 

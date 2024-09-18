@@ -177,6 +177,7 @@ div[contenteditable]:focus {
   font-size: large;
   font-weight: bold;
 }
+
 #contentbox {
   text-align: justify;
   height: 100%; /* due to use of flex-grow by children, height of this element does not matter, as long as it is big enough it will be equivalent to fill-available */
