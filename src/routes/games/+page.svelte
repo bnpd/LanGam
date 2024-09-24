@@ -14,6 +14,9 @@
   let games: any[]
 
   onMount(async () => {
+    if (!$user || !$targetLang) {
+        goto('/signup')
+    }
     games = await getGames($targetLang)
   
     if (!games) throw error(405);

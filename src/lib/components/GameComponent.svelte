@@ -30,9 +30,7 @@
 
     onMount(async () => {
         if (!$user) {
-            $targetLang = 'pl'
-            $nativeLang = 'en'
-            $isSoundOn = false
+            goto('/signup')
         }
                 
         if ($failedWords.size > 0 || $gameChatHistory.length > 1 || $inlineChatHistory.length > 1) {
@@ -76,7 +74,7 @@
 
         const correctedWords = (srWords?.difference($failedWords))?.size // this is kinda cheating cause srWords are lemmas and failedWords are forms, but it's not easily fixable without saving the whole Token object somewhere
 
-        if ($currentTask && $user) {
+        if ($currentTask) {
             $reviews.push(structuredClone($failedWords))
             $reviews = $reviews
             $reviewDocIds.push($currentTask.docId)
@@ -131,12 +129,9 @@
             return
         }
         
-        if ($user) {
-            await nextTask() // IMPROVEMENT: we could even pre-fetch the next task while stats popup is shown
-            initChatHistory()
-        } else {
-            goto('/signup')
-        }
+        await nextTask() // IMPROVEMENT: we could even pre-fetch the next task while stats popup is shown
+        initChatHistory()
+
     }
 
     async function onLevelBackbtnClick() {
@@ -172,30 +167,26 @@
 
 
     async function nextTask(restoreScrollPosition: boolean = false){
-        let doc        
-        if (!$user) { //anonymous mode
-            doc = DocumentC.getSampleDoc()
-        } else {
-            if (!$player) {
-                $currentGameId = $currentGameId ?? new URLSearchParams(window.location.search).get('gameId')
-                if (!$currentGameId) {
-                    goto('/games')
-                } else {
-                    $player = await getPlayer($targetLang, $currentGameId)
-                }
+        let doc
+        if (!$player) {
+            $currentGameId = $currentGameId ?? new URLSearchParams(window.location.search).get('gameId')
+            if (!$currentGameId) {
+                goto('/games')
+            } else {
+                $player = await getPlayer($targetLang, $currentGameId)
             }
-            const level = (await getPlayerLevel($player.id).catch(_offline => {
-                toast = "Text has not been downloaded offline. Going to catalog."
-                setTimeout(() => {
-                    goto('/catalog')
-                }, 2000);
-                return undefined
-            }))
-            $player.level = level.seq_id
-
-            doc = level?.['level']
-            doc.docId = level.seq_id
         }
+        const level = (await getPlayerLevel($player.id).catch(_offline => {
+            toast = "Text has not been downloaded offline. Going to catalog."
+            setTimeout(() => {
+                goto('/catalog')
+            }, 2000);
+            return undefined
+        }))
+        $player.level = level.seq_id
+
+        doc = level?.['level']
+        doc.docId = level.seq_id
         
         if (doc) $loadingTask = false;
         $currentTask = doc
@@ -209,7 +200,7 @@
         }
 
         try {         
-            const [srWords_l, newForms_l] = $user ? await getUserTaskStats($targetLang, (String)(doc?.docId)) : [["ornage"], Object.values(doc?.title?.tokens).map(tok => tok.word).concat(Object.values(doc?.title?.tokens).map(tok => tok.word))]
+            const [srWords_l, newForms_l] = await getUserTaskStats($targetLang, (String)(doc?.docId))
             srWords = new Set(srWords_l)
             nNewForms = newForms_l.length
         } catch (_offline) {
@@ -225,9 +216,6 @@
 
 </script>
 
-{#if !$user}
-    <strong>In this demo text, you learn the fabulous <em>Drnuk</em> language (and how this app works).</strong> <!-- If you want to dive right in with Polish, create an account at the bottom.-->
-{/if}
 <ReaderComponent tts={tts} solutionText={solutionText} taskVisible={!$loadingTask} srWords={srWords} bind:this={readerComponent}>
     <span slot="afterTask" hidden={!$currentTask}>{#if $gameChatHistory?.length}<ChatComponent readerComponent={readerComponent} inline={true} chatBoxTitle="Twoja odpowiedź 🤙" chatHistory={gameChatHistory} srWords={srWords} trySpeak={tts?.trySpeak} isGame={true}/>{/if}</span>
     <span slot="afterSolution">{#if $gameChatHistory?.length}<ChatComponent readerComponent={readerComponent} inline={true} chatBoxTitle={undefined} chatHistory={gameChatHistory} translationLang='en' isGame={true}/>{/if}</span>
