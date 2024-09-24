@@ -24,7 +24,7 @@
 
 <svelte:window on:offline={onOffline} on:online={()=>{hidden = false}}></svelte:window>
 <div class="image-card" hidden={hidden}>
-    <a href={$user ? "/?doc="+docId : "/signup"}>
+    <a href={$user ? "/read?doc="+docId : "/signup"}>
         <div style:position="relative">
             <img 
                 src={doc.img ? `/images/illustrations/${doc.img}.avif` : FALLBACK_IMAGE} 

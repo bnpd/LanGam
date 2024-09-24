@@ -16,6 +16,7 @@ export const reviewDocIds = createPersistentStore('reviewOrder', []);
 export const failedWords = createPersistentStore('failedWords', new Set());
 export const currentTask = createPersistentStore('currentTask', null);
 export const currentlyScrolledParagraphIndex = createPersistentStore('currentScrolledParagraphIndex', 0);
+export const currentGameId = createPersistentStore('currentGameId', null);
 
 /* Chat Component Stores */
 export const inlineChatHistory: Writable<{role: string, content: DocumentC}[]> = createPersistentStore('inlineChatHistory', []);

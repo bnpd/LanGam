@@ -1,6 +1,6 @@
 <script lang="ts" defer>
-	import './global.css';
-	import config from '../config';
+	import '../global.css';
+	import config from '../../config';
 	import { user } from '$lib/stores';
 	import { goto } from '$app/navigation';
 	import FeedbackComponent from '$lib/components/FeedbackComponent.svelte';

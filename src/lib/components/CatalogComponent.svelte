@@ -57,7 +57,7 @@
         <h2>
             <BadgeComponent text='AI' tooltip='This text optimizes the amount of words that are due for spaced repetition to help you keep your vocabulary fresh.'/>
             Recommended: 
-            <a href="/"><h4>Waht AlAli cna do for yuo</h4></a>
+            <a href="/read"><h4>Waht AlAli cna do for yuo</h4></a>
         </h2>
         <p>Create an account so we can save your progress when you read any of the following stories:</p>
     </div>
@@ -86,5 +86,5 @@
 </div>
 <br><br>
 <NavbarComponent>
-  <button on:click={()=>goto("/")}>◄ Back</button>
+  <button on:click={()=>goto("/read")}>◄ Back</button>
 </NavbarComponent>

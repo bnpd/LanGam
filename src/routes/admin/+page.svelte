@@ -25,7 +25,7 @@
     document.body.removeChild(link);
     
     // display that document now
-    goto('/?doc=' + json.docId)
+    goto('/read?doc=' + json.docId)
   }
 
   function onTitleInput() {    

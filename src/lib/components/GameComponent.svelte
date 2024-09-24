@@ -2,7 +2,7 @@
     import { onMount } from 'svelte';
     import ReaderComponent from './ReaderComponent.svelte';
     import { completeLevel, getPlayer, getPlayerLevel, getUserTaskStats, refreshPlayer, sendReview, updatePlayer } from './backend';
-    import { user, nativeLang, targetLang, isSoundOn, currentTask, reviews, failedWords, reviewDocIds, currentlyScrolledParagraphIndex, loadingTask, gameChatHistory, player, chatOutcome } from '$lib/stores';
+    import { user, nativeLang, targetLang, isSoundOn, currentTask, reviews, failedWords, reviewDocIds, currentlyScrolledParagraphIndex, loadingTask, gameChatHistory, player, chatOutcome, currentGameId, inlineChatHistory } from '$lib/stores';
 	import { goto } from '$app/navigation';
 	import Toast from './Toast.svelte';
 	import ChatComponent from './ChatComponent.svelte';
@@ -10,10 +10,14 @@
 	import DocumentC from '$lib/DocumentC';
 	import type TtsComponent from './TtsComponent.svelte';
 
+    const TOAST_REDIRECTED_SAVED_TASK = "Your selected text has been queued cause you have a saved game level."
+    const TEXT_REJECT_SAVED_TASK = "Discard saved"
+
     export let tts: TtsComponent;
 
     let solutionText = ''
     let toast: string | undefined;
+    let textRejectToast: string | undefined;
     let readerComponent: ReaderComponent;
     let srWords: Set<string> | undefined;
     let nNewForms: number | undefined;
@@ -22,6 +26,7 @@
     let statsClosedPromise: Promise<boolean>;
     let statsClosedPromiseResolve: Function;
     let reviewsSentPromise: Promise<undefined>;
+    let redirectedDoc: string | null
 
     onMount(async () => {
         if (!$user) {
@@ -29,10 +34,15 @@
             $nativeLang = 'en'
             $isSoundOn = false
         }
-
                 
-        if ($failedWords.size > 0 || $gameChatHistory.length > 1) {
+        if ($failedWords.size > 0 || $gameChatHistory.length > 1 || $inlineChatHistory.length > 1) {
             // we have a saved state from last session to restore
+            if(!$currentGameId) { // but it doesn't belong to a game, so redirect
+                const urlGameId = new URLSearchParams(window.location.search).get('gameId')
+                goto('/read' + (urlGameId ? `?redirectedGame=${urlGameId}` : ''));
+                return
+            }
+
             await nextTask(true);
 
             // click words, which will add them to $failedWords and mark them on the page
@@ -48,6 +58,13 @@
                 }
             }
             $isSoundOn = savedSoundSetting
+
+            redirectedDoc = new URLSearchParams(window.location.search).get('redirectedDoc')
+
+            if (redirectedDoc) {
+                toast = TOAST_REDIRECTED_SAVED_TASK;
+                textRejectToast = TEXT_REJECT_SAVED_TASK
+            }
         } else {
             await nextTask(); 
             initChatHistory();
@@ -160,11 +177,11 @@
             doc = DocumentC.getSampleDoc()
         } else {
             if (!$player) {
-                const gameId = new URLSearchParams(window.location.search).get('gameId')
-                if (!gameId) {
+                $currentGameId = $currentGameId ?? new URLSearchParams(window.location.search).get('gameId')
+                if (!$currentGameId) {
                     goto('/games')
                 } else {
-                    $player = await getPlayer($targetLang, gameId)
+                    $player = await getPlayer($targetLang, $currentGameId)
                 }
             }
             const level = (await getPlayerLevel($player.id).catch(_offline => {
@@ -224,5 +241,10 @@
     </button>
 </div>
 <ChatComponent readerComponent={readerComponent} inline={false} chatBoxTitle="Ask me ✨"/>
-<Toast message={toast} />
+<Toast message={toast} textReject={textRejectToast} onReject={() => {
+    $currentGameId = undefined;
+    $failedWords = new Set();
+    $gameChatHistory = [];
+    goto('/read?doc='+redirectedDoc);
+}}/>
 <SuccessPopup title={congratsTitle} message={congratsMessage} onClose={()=>{congratsMessage = undefined; congratsTitle = undefined; statsClosedPromiseResolve()}}/>
