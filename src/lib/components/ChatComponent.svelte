@@ -64,6 +64,10 @@
         }
     }
 
+    /**
+     * Submit a chat to backend
+     * @param partialContext whether to only send the currently visible paragraphs as context or whole doc (identified by docId). If global isGame is true, no context is sent.
+     */
     async function submitChat(partialContext: boolean) {
         loading = true
         const newMessage = {role: 'user', content: DocumentC.partialDocument(chatPrompt, $targetLang, undefined, undefined)}
@@ -271,6 +275,14 @@
                         Why is {lastFailed} used here?
                     </button>
                 {/if}
+            </div>
+        {:else if isGame && $currentTask?.suggested_replies?.length}
+            <div class="promptSuggestions">
+                {#each $currentTask?.suggested_replies as suggestion}
+                    <button class="promptSuggestion" on:click={onClickChatSuggestion} disabled={loading}>
+                        {suggestion}
+                    </button>                    
+                {/each}
             </div>
         {/if}
         <div id="chatInputContainer">
