@@ -12,6 +12,8 @@
 
     const TOAST_REDIRECTED_SAVED_TASK = "Your selected text has been queued cause you have a saved game level."
     const TEXT_REJECT_SAVED_TASK = "Discard saved"
+    const DEFAULT_CONGRATS_MESSAGE = 'Well done, keep up the pace!'
+    const DEFAULT_CONGRATS_TITLE = 'Level complete 🙌'
 
     export let tts: TtsComponent;
 
@@ -31,6 +33,18 @@
     onMount(async () => {
         if (!$user) {
             goto('/signup')
+        }
+        if (!$player) {
+            
+            $currentGameId = $currentGameId ?? new URLSearchParams(window.location.search).get('gameId')
+            if (!$currentGameId) {
+                goto('/games')
+                return
+            } else {
+                console.log('no player');
+                $player = await getPlayer($targetLang, $currentGameId)
+                console.log($player);
+            }
         }
                 
         if ($failedWords.size > 0 || $gameChatHistory.length > 1 || $inlineChatHistory.length > 1) {
@@ -96,8 +110,8 @@
         })
         console.log($chatOutcome);
         console.log($currentTask?.outcomes);        
-        congratsMessage = $currentTask?.outcomes?.[$chatOutcome]?.text ?? 'Keep going.'
-        congratsTitle = $currentTask?.outcomes?.[$chatOutcome]?.title ?? 'Well done, student!'
+        congratsMessage = $currentTask?.outcomes?.[$chatOutcome]?.text ?? DEFAULT_CONGRATS_MESSAGE
+        congratsTitle = $currentTask?.outcomes?.[$chatOutcome]?.title ?? DEFAULT_CONGRATS_TITLE
 
         await statsClosedPromise
 
@@ -167,15 +181,6 @@
 
 
     async function nextTask(restoreScrollPosition: boolean = false){
-        let doc
-        if (!$player) {
-            $currentGameId = $currentGameId ?? new URLSearchParams(window.location.search).get('gameId')
-            if (!$currentGameId) {
-                goto('/games')
-            } else {
-                $player = await getPlayer($targetLang, $currentGameId)
-            }
-        }
         const level = (await getPlayerLevel($player.id).catch(_offline => {
             toast = "Text has not been downloaded offline. Going to catalog."
             setTimeout(() => {
@@ -185,7 +190,7 @@
         }))
         $player.level = level.seq_id
 
-        doc = level?.['level']
+        let doc = level?.['level']
         doc.docId = level.seq_id
         
         if (doc) $loadingTask = false;
