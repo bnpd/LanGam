@@ -94,28 +94,6 @@
         "type": "image/png"
       }],
       "url": "/lists"
-    },
-    {
-      "name": "Admin",
-      "short_name": "Admin",
-      "description": "Admin View",
-      "icons": [{
-        "src": "/images/icons/icon-admin-view-96x96.png",
-        "sizes": "96x96",
-        "type": "image/png"
-      }],
-      "url": "/admin"
-    },
-    {
-      "name": "Errors",
-      "short_name": "Errors",
-      "description": "Error list",
-      "icons": [{
-        "src": "/images/icons/icon-admin-view-96x96.png",
-        "sizes": "96x96",
-        "type": "image/png"
-      }],
-      "url": "/errors"
     }
   ]
 }
