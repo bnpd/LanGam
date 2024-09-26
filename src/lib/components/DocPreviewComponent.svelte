@@ -22,25 +22,9 @@
 
 </script>
 
-<style>
-    .image-card img {
-    margin-top: calc(-1 * var(--padding-card));
-    margin-left: calc(-1 * var(--padding-card));
-    margin-bottom: calc(0.5 * var(--padding-card));
-    width: calc(100% + 2 * var(--padding-card));
-    border-radius: var(--card-border-radius) var(--card-border-radius) 0 0;
-    }
-
-    .difficulty-badge {
-        position: absolute;
-        bottom: 1.5em;
-        z-index: 1;
-    }
-</style>
-
 <svelte:window on:offline={onOffline} on:online={()=>{hidden = false}}></svelte:window>
 <div class="image-card" hidden={hidden}>
-    <a href={$user ? "/?doc="+docId : "/signup"}>
+    <a href={$user ? "/read?doc="+docId : "/signup"}>
         <div style:position="relative">
             <img 
                 src={doc.img ? `/images/illustrations/${doc.img}.avif` : FALLBACK_IMAGE} 

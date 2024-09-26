@@ -2,7 +2,7 @@
     import { onMount } from 'svelte';
     import ReaderComponent from './ReaderComponent.svelte';
     import { getTask, getUserTaskStats, sendReview } from './backend';
-    import { user, nativeLang, targetLang, isSoundOn, currentTask, reviews, failedWords, reviewDocIds, currentlyScrolledParagraphIndex, loadingTask, inlineChatHistory } from '$lib/stores';
+    import { user, nativeLang, targetLang, isSoundOn, currentTask, reviews, failedWords, reviewDocIds, currentlyScrolledParagraphIndex, loadingTask, inlineChatHistory, currentGameId, gameChatHistory } from '$lib/stores';
 	import { goto } from '$app/navigation';
 	import Toast from './Toast.svelte';
 	import ChatComponent from './ChatComponent.svelte';
@@ -11,7 +11,8 @@
 	import type TtsComponent from './TtsComponent.svelte';
 
     const answbtnTxtWhileSolutionShown = "Next text"
-    const TOAST_REDIRECTED_SAVED_TASK = "Your selected text has been queued cause you have a saved text."
+    const TOAST_REDIRECTED_FROM_TASK = "Your selected text has been queued cause you have a saved text."
+    const TOAST_REDIRECTED_FROM_GAME = "Your selected game has been queued cause you have a saved text."
     const TEXT_REJECT_SAVED_TASK = "Discard saved"
 
     export let tts: TtsComponent;
@@ -26,6 +27,7 @@
     let statsClosedPromise: Promise<boolean>;
     let statsClosedPromiseResolve: Function;
     let reviewsSentPromise: Promise<undefined>;
+    let redirectedGame: string | null
 
     onMount(async () => {
         let urlparams = new URLSearchParams(window.location.search)
@@ -39,10 +41,16 @@
         // load task (restore saved state or next due task or given by doc url parameter)
         let urldoc = urlparams.get('doc') || urlparams.get('queuedDoc');
         
-        if(urldoc) goto('/', {replaceState: true}); // remove URL param docId since we have saved it
+        if(urldoc) goto('/read', {replaceState: true}); // remove URL param docId since we have saved it
                 
-        if ($failedWords.size > 0 || $inlineChatHistory.length > 1) {
+        if ($failedWords.size > 0 || $inlineChatHistory.length > 1 || $gameChatHistory.length > 1) {
             // we have a saved state from last session to restore
+
+            if($currentGameId) { // but it belongs to a game, so redirect
+                goto('/game' + (urldoc ? `?redirectedDoc=${urldoc}` : ''));
+                return
+            }
+
             await nextTask($currentTask?.docId, true);
 
             // click words, which will add them to $failedWords and mark them on the page
@@ -59,9 +67,14 @@
             }
             $isSoundOn = savedSoundSetting
 
-            if (urldoc && urldoc != $currentTask?.docId) {
-                goto('/?queuedDoc=' + urldoc, {replaceState: true}); //= urlparams.set('queuedDoc', urldoc)
-                toast = TOAST_REDIRECTED_SAVED_TASK;
+            redirectedGame = new URLSearchParams(window.location.search).get('redirectedGame')
+
+            if (redirectedGame) {
+                toast = TOAST_REDIRECTED_FROM_GAME;
+                textRejectToast = TEXT_REJECT_SAVED_TASK
+            } else if (urldoc && urldoc != $currentTask?.docId) {
+                goto('/read?queuedDoc=' + urldoc, {replaceState: true}); //= urlparams.set('queuedDoc', urldoc)
+                toast = TOAST_REDIRECTED_FROM_TASK;
                 textRejectToast = TEXT_REJECT_SAVED_TASK
             }			
         } else {
@@ -114,7 +127,7 @@
         if ($user) {
             await nextTask(getUrlDoc()) // IMPROVEMENT: we could even pre-fetch the next task while stats popup is shown
             initChatHistory()
-            goto('/', {replaceState: true})
+            goto('/read', {replaceState: true})
         } else {
             goto('/signup')
         }
@@ -202,6 +215,11 @@
 <Toast message={toast} textReject={textRejectToast} onReject={() => {
     $failedWords = new Set();
     $inlineChatHistory = [];
-    location.reload();
+    if (redirectedGame) {
+        $currentGameId = redirectedGame;
+        goto('/game')
+    } else {
+        location.reload();
+    }
 }}/>
 <SuccessPopup message={congratsMessage} onClose={()=>{congratsMessage = undefined; statsClosedPromiseResolve()}}/>

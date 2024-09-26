@@ -1,0 +1,48 @@
+<script lang="ts" defer>
+	import '../global.css';
+	import config from '../../config';
+	import { user } from '$lib/stores';
+	import { goto } from '$app/navigation';
+	import FeedbackComponent from '$lib/components/FeedbackComponent.svelte';
+	import Install from '$lib/components/Install.svelte';
+	import NavbarComponent from '$lib/components/NavbarComponent.svelte';
+	import TitleWithBackgroundImageComponent from '$lib/components/TitleWithBackgroundImageComponent.svelte';
+	import TtsComponent from '$lib/components/TtsComponent.svelte';
+	import WebPushSubscription from '$lib/components/WebPushSubscription.svelte';
+	import { onMount } from 'svelte';
+	import ReadNChatComponent from '$lib/components/ReadNChatComponent.svelte';
+
+	let tts: TtsComponent;
+
+	onMount(() => {
+		// after 10 seconds, cache assets
+		setTimeout(() => {
+			if ('serviceWorker' in navigator) {
+				navigator.serviceWorker.ready.then((registration) => {
+					registration.active.postMessage({ type: 'CACHE_STATIC_ASSETS' });
+				});
+			}
+		}, 10000);
+	});
+</script>
+
+<svelte:head>
+	<title>Automated Language Learning AI</title>
+	<meta name="description" content="Learn languages the fun way: talk about texts with AI." />
+	<link rel="preconnect" href={config.backend} />
+</svelte:head>
+
+<TitleWithBackgroundImageComponent>Automated Language Learning AI</TitleWithBackgroundImageComponent>
+<ReadNChatComponent {tts}></ReadNChatComponent>
+<NavbarComponent>
+	<button on:click={() => goto('/catalog')}>Texts</button>
+	<TtsComponent bind:this={tts} />
+	<Install />
+	<FeedbackComponent />
+	{#if $user}
+		<button on:click={() => goto('/lists')}>My vocab</button>
+		<WebPushSubscription />
+	{:else}
+		<button on:click={() => goto('/signup')}><b>Sign up 👤</b></button>
+	{/if}
+</NavbarComponent>

@@ -102,7 +102,7 @@ div[contenteditable]:focus {
 
 .card, .image-card {
   --padding-card: 22px;
-  padding: var(--padding-card);
+  padding: var(--padding-card) !important;
   background-color: aliceblue;
   border-radius: var(--card-border-radius);
   margin: 5px 0;
@@ -148,6 +148,20 @@ div[contenteditable]:focus {
   text-align: center; /* Center text */
 }
 
+.image-card img {
+margin-top: calc(-1 * var(--padding-card));
+margin-left: calc(-1 * var(--padding-card));
+margin-bottom: calc(0.5 * var(--padding-card));
+width: calc(100% + 2 * var(--padding-card));
+border-radius: var(--card-border-radius) var(--card-border-radius) 0 0;
+}
+
+.difficulty-badge {
+    position: absolute;
+    bottom: 1.5em;
+    z-index: 1;
+}
+
 #divTask, #solutionField {
   padding: 0 0.2em;
   line-height: 1.8em;
@@ -166,7 +180,7 @@ div[contenteditable]:focus {
   flex-grow: 1;
 }
 
-#answbtn, input[type="submit"] {
+#answbtn, #levelBackbtn, input[type="submit"] {
   margin: 5px auto;
   padding: 0 1em;
   outline: none;
@@ -177,6 +191,12 @@ div[contenteditable]:focus {
   font-size: large;
   font-weight: bold;
 }
+
+#levelBackbtn {
+  background-color: aliceblue;
+  color: darkblue;
+}
+
 #contentbox {
   text-align: justify;
   height: 100%; /* due to use of flex-grow by children, height of this element does not matter, as long as it is big enough it will be equivalent to fill-available */
@@ -297,8 +317,7 @@ div[contenteditable]:focus {
     margin: 0.5em 0;
   }
 
-  #divTask,
-  #solutionField {
+  #divTask {
     font-size: large;
   }
 }

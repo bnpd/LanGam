@@ -11,7 +11,7 @@
       "sizes": "512x512",
       "type": "image/png"
     }],
-  "start_url": "/",
+  "start_url": "/game",
   "display": "standalone",
   "background_color": "#3E4EB8",
   "theme_color": "#2F3BA2",
@@ -74,15 +74,15 @@
       "url": "/catalog"
     },
     {
-      "name": "Admin",
-      "short_name": "Admin",
-      "description": "Admin View",
+      "name": "Change user",
+      "short_name": "Login",
+      "description": "Login as another user",
       "icons": [{
-        "src": "/images/icons/icon-admin-view-96x96.png",
+        "src": "/images/icons/icon-vocab-view-96x96.png",
         "sizes": "96x96",
         "type": "image/png"
       }],
-      "url": "/admin"
+      "url": "/login"
     },
     {
       "name": "Your vocab",
@@ -94,6 +94,28 @@
         "type": "image/png"
       }],
       "url": "/lists"
+    },
+    {
+      "name": "Admin",
+      "short_name": "Admin",
+      "description": "Admin View",
+      "icons": [{
+        "src": "/images/icons/icon-admin-view-96x96.png",
+        "sizes": "96x96",
+        "type": "image/png"
+      }],
+      "url": "/admin"
+    },
+    {
+      "name": "Errors",
+      "short_name": "Errors",
+      "description": "Error list",
+      "icons": [{
+        "src": "/images/icons/icon-admin-view-96x96.png",
+        "sizes": "96x96",
+        "type": "image/png"
+      }],
+      "url": "/errors"
     }
   ]
 }

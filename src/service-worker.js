@@ -101,6 +101,13 @@ self.addEventListener('fetch', (event) => {
 
 self.addEventListener('push', evt => {
     if (evt.data) {
+		if (evt.data.json().title == 'AllAi Exception') {
+			const prevErrors = JSON.parse(localStorage.getItem('errors'))
+			localStorage.setItem(
+				'errors', 
+				JSON.stringify([evt.data.json().body].concat(prevErrors ?? []))
+			)
+		}
         self.registration.showNotification(
             evt.data.json().title, {
                 body: evt.data.json().body,
@@ -111,8 +118,11 @@ self.addEventListener('push', evt => {
     }
 })
 
-self.addEventListener('notificationclick', event => {
-    event.notification.close()
+self.addEventListener('notificationclick', evt => {
+	if (evt.notification.title == 'AllAi Exception') {
+		clients.openWindow(config["frontend"]+'/errors')
+	}
+    evt.notification.close()
     clients.openWindow(config["frontend"])
     clients.focus()
 })

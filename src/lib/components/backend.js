@@ -80,6 +80,15 @@ function EndpointChat(chatHistoryString, isInline, targetLang=undefined, docId=u
 					: `/chat_tutor?hist=${encodeURIComponent(chatHistoryString)}` + (contextParagraphs ? `&ctx=${encodeURIComponent(contextParagraphs)}` : docId && targetLang ? `&docId=${docId}&targetLang=${targetLang}` : '');;
 }
 
+/**
+ * @param {string} chatHistoryString
+ * @param {number} levelSeqId
+ * @param {string} playerId
+ */
+function EndpointGameChat(chatHistoryString, playerId, levelSeqId) {
+	return `/chat_game?hist=${encodeURIComponent(chatHistoryString)}&playerId=${playerId}&seqId=${levelSeqId}`
+}
+
 
 // backend functions
 /**
@@ -146,8 +155,8 @@ export async function getTask(targetLang, docId){
  */
 export async function getUserTaskStats(targetLang, docId){
 	try { 
-		const responseJson = await backendGet(await EndpointGetUserTaskStats(targetLang, docId))
-		return [responseJson['sr_words'], responseJson['new_forms']]
+		//const responseJson = await backendGet(await EndpointGetUserTaskStats(targetLang, docId))
+		return [[], []]// [responseJson['sr_words'], responseJson['new_forms']]
 	} catch (error) {
 		console.error(error)
 		return Promise.reject(error)
@@ -194,8 +203,88 @@ export async function sendChat(chatHistory, isInline, targetLang=undefined, docI
 	if (chatHistoryText.length > MAX_CHAT_HISTORY_CHARS) {
 		throw new Error("Chat history too long.");		
 	}
-	let {correction, response} = await backendGet(EndpointChat(chatHistoryText, isInline, targetLang, docId, contextParagraphs))
-	return {correction: correction ? DocumentC.fromJson(correction) : undefined, response: DocumentC.fromJson(response)}
+	let {correction_of_learner_message, response} = await backendGet(EndpointChat(chatHistoryText, isInline, targetLang, docId, contextParagraphs))
+	return {correction: correction_of_learner_message ? DocumentC.fromJson(correction_of_learner_message) : undefined, response: DocumentC.fromJson(response)}
+}
+
+// /**
+//  * @param {string} gameId
+//  * @param {string} seqId
+//  */
+// export async function getLevel(gameId, seqId) {
+// 	return pb.collection('levels').getFirstListItem(`game="${gameId}" && seq_id=${seqId}`)
+// }
+
+/**
+ * @param {string} playerId
+ */
+export async function getPlayerLevel(playerId) {	
+	return pb.send(`/player_level/${playerId}`, {})
+}
+
+/**
+ * @param {string} playerId
+ * @param {number} seqId
+ * @param {string} outcome
+ * @returns {Promise<any>} The updated player
+ */
+export async function completeLevel(playerId, seqId, outcome) {
+	return pb.send(`/complete_level`, {method: 'POST', body: {
+		playerId: playerId, 
+		seqId: seqId, 
+		outcome: outcome
+	}}).then(res => res.player)
+}
+
+/**
+ * List all available games
+ * @param {string} lang
+ * @returns {Promise<any[]>}
+ */
+export async function getGames(lang) {
+	return pb.collection('games').getFullList({filter: `lang.shortcode = "${lang.toUpperCase()}"`})
+}
+
+/**
+ * Get current user's player for the specified game
+ * @param {string} target_lang
+ * @param {string} gameId
+ */
+export async function getPlayer(target_lang, gameId) {
+	return pb.send(`/user_lang_game_player/${gameId}`, {})
+}
+
+/**
+ * Get current user's player for the specified game
+ * @param {string} playerId
+ */
+export async function refreshPlayer(playerId) {
+	return pb.collection('players').getFirstListItem(`id = "${playerId}"`)
+}
+
+/**
+ * Update the current player in the backend
+ * @param {any} player
+ */
+export async function updatePlayer(player) {
+	return pb.collection('players').update(player.id, player)
+}
+    
+
+/**
+ * Send chat in game mode
+ * @param {{role: string;content: string;}[]} chatHistory
+ * @param {string} playerId
+ * @param {Number} levelSeqId
+ * @returns {Promise<{end_conversation: boolean;outcome: string;correction: DocumentC | undefined;response: DocumentC;}>} This document will have only the key text.text defined unless docId and targetLang were given as inputs //TODO: add a parameter inline to this function and the backend endpoint instead of this assumption
+ */
+export async function sendGameChat(chatHistory, playerId, levelSeqId) {
+	const chatHistoryText = JSON.stringify(chatHistory.slice(-MAX_CHAT_HISTORY_LENGTH))
+	if (chatHistoryText.length > MAX_CHAT_HISTORY_CHARS) {
+		throw new Error("Chat history too long.");		
+	}
+	let {correction_of_learner_message, response, end_conversation, outcome} = await backendGet(EndpointGameChat(chatHistoryText, playerId, levelSeqId))
+	return {end_conversation: end_conversation, outcome: outcome, correction: correction_of_learner_message ? DocumentC.fromJson(correction_of_learner_message) : undefined, response: DocumentC.fromJson(response)}
 }
 
 

@@ -11,7 +11,7 @@
         {title: 'Extra Short', filter: {content_type: ['Extra short']}},
         {title: 'Short Stories', filter: {content_type: ['Story']}},
         {title: 'Long Stories', filter: {content_type: ['Long Story']}},
-        {title: 'Articles', filter: {content_type: ['Article']}},
+        {title: 'Articles', filter: {content_type: ['Article']}}
     ]
 
     let topics: Array<{title: string; filter: {[filter: string]: string[]}}> = [
@@ -46,13 +46,18 @@
             </h2>
             <DocPreviewComponent docId={doc.docId} doc={doc}/> 
         {/await}
+        <a href="/games">
+            <div class="card">
+                <h3 style="margin-bottom: 0">Games</h3>
+            </div>
+        </a>
     {/if}
 {:else}
     <div class="card">
         <h2>
             <BadgeComponent text='AI' tooltip='This text optimizes the amount of words that are due for spaced repetition to help you keep your vocabulary fresh.'/>
             Recommended: 
-            <a href="/"><h4>Waht AlAli cna do for yuo</h4></a>
+            <a href="/read"><h4>Waht AlAli cna do for yuo</h4></a>
         </h2>
         <p>Create an account so we can save your progress when you read any of the following stories:</p>
     </div>
@@ -81,5 +86,5 @@
 </div>
 <br><br>
 <NavbarComponent>
-  <button on:click={()=>goto("/")}>◄ Back</button>
+  <button on:click={()=>goto("/read")}>◄ Back</button>
 </NavbarComponent>
