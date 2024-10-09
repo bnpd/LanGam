@@ -41,7 +41,7 @@
 	<FeedbackComponent />
 	{#if $user}
 		<button on:click={() => goto('/lists')}>My vocab</button>
-		<WebPushSubscription />
+		<!--<WebPushSubscription />-->
 	{:else}
 		<button on:click={() => goto('/signup')}><b>Sign up 👤</b></button>
 	{/if}
