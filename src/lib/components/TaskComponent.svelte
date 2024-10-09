@@ -36,7 +36,7 @@
                 let token_obj = translatableText.tokens[char_index]
                 let token_word = token_obj?.word
 
-                if (!token_word.trim()) continue // only proceed if it wasn't only some kind of whitespace
+                if (!token_word?.trim()) continue // only proceed if it wasn't only some kind of whitespace
                 paragraph.push(token_obj)
                 char_index += token_word.length
             }

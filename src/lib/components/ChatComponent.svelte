@@ -123,7 +123,7 @@
 
     function scrollToLatestChatMessage() {
         const elementsToScroll = (inline ? [readerComponent.getDivTask(), readerComponent.getSolutionField()] : [messageHistoryContainer])
-        elementsToScroll.forEach(el => el.scroll({top: el.scrollHeight, behavior: 'smooth'}))
+        elementsToScroll.forEach(el => el?.scroll({top: el.scrollHeight, behavior: 'smooth'}))
         // FIXME: solutionField automatically gets scrolled when divTask does, which means it will snap back afterwards. For now it's fine
     }
 
