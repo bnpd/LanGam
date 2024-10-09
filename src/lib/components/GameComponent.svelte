@@ -1,7 +1,7 @@
 <script lang="ts" defer>
     import { onMount } from 'svelte';
     import ReaderComponent from './ReaderComponent.svelte';
-    import { completeLevel, getPlayer, getPlayerLevel, getUserTaskStats, refreshPlayer, sendReview, updatePlayer } from './backend';
+    import { completeLevel, getPlayer, getPlayerLevel, getUserTaskStats, refreshPlayer, updatePlayer } from './backend';
     import { user, nativeLang, targetLang, isSoundOn, currentTask, reviews, failedWords, reviewDocIds, currentlyScrolledParagraphIndex, loadingTask, gameChatHistory, player, chatOutcome, currentGameId, inlineChatHistory } from '$lib/stores';
 	import { goto } from '$app/navigation';
 	import Toast from './Toast.svelte';
@@ -9,6 +9,7 @@
 	import SuccessPopup from './SuccessPopup.svelte';
 	import DocumentC from '$lib/DocumentC';
 	import type TtsComponent from './TtsComponent.svelte';
+	import PowersComponent from './PowersComponent.svelte';
 
     const TOAST_REDIRECTED_SAVED_TASK = "Your selected text has been queued cause you have a saved game level."
     const TEXT_REJECT_SAVED_TASK = "Discard saved"
@@ -229,6 +230,7 @@
     <button id="levelBackbtn" class:loading={$loadingTask} on:click={onLevelBackbtnClick} hidden={!$player?.level_history?.order?.length}>
         ◀
     </button>
+    <PowersComponent />
     <button id="answbtn" class:loading={$loadingTask} on:click={onAnswbtnClick} hidden={!$chatOutcome}>
         ▶
     </button>
