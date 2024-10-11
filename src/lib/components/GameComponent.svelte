@@ -1,7 +1,7 @@
 <script lang="ts" defer>
     import { onMount } from 'svelte';
     import ReaderComponent from './ReaderComponent.svelte';
-    import { completeLevel, getPlayer, getPlayerLevel, getUserTaskStats, refreshPlayer, updatePlayer } from './backend';
+    import { completeLevel, getPlayer, getPlayerLevel, getUserLang, getUserTaskStats, refreshPlayer, updatePlayer } from './backend';
     import { username, nativeLang, targetLang, isSoundOn, currentTask, reviews, failedWords, reviewDocIds, currentlyScrolledParagraphIndex, loadingTask, gameChatHistory, player, chatOutcome, currentGameId, inlineChatHistory } from '$lib/stores';
 	import { goto } from '$app/navigation';
 	import Toast from './Toast.svelte';
@@ -16,13 +16,16 @@
     const DEFAULT_CONGRATS_MESSAGE = 'Well done, keep up the pace!'
     const DEFAULT_CONGRATS_TITLE = 'Level complete 🙌'
 
+    const UNKNOWN_POS = 0
+    const STUDIED_POS = new Set([UNKNOWN_POS, 84, 86, 92, 93, 100])
+    const TRACKED_POS = new Set([...STUDIED_POS, 85, 87, 89, 90, 91, 94, 95, 98])
+
     export let tts: TtsComponent;
 
     let solutionText = ''
     let toast: string | undefined;
     let textRejectToast: string | undefined;
     let readerComponent: ReaderComponent;
-    let srWords: Set<string> | undefined;
     let nNewForms: number | undefined;
     let congratsTitle: string | undefined;
     let congratsMessage: string | undefined;
@@ -86,8 +89,6 @@
 
     async function onAnswbtnClick () {
         speechSynthesis.cancel()
-
-        const correctedWords = (srWords?.difference($failedWords))?.size // this is kinda cheating cause srWords are lemmas and failedWords are forms, but it's not easily fixable without saving the whole Token object somewhere
 
         if ($currentTask) {
             $reviews.push(structuredClone($failedWords))
@@ -205,14 +206,19 @@
             $currentlyScrolledParagraphIndex = 0
         }
 
-        try {         
-            const [srWords_l, newForms_l] = await getUserTaskStats($targetLang, (String)(doc?.docId))
-            srWords = new Set(srWords_l)
-            nNewForms = newForms_l.length
-        } catch (_offline) {
-            srWords = undefined
+        // the following calculation of new word count runs async in the background
+        getUserLang($username, $targetLang).then(user_lang => {
+            const prev_seen_words = new Set(Object.keys(user_lang.seen_words))
+            let new_forms = new Set(Object.values(doc?.title?.tokens).concat(Object.values(doc?.text?.tokens).concat(Object.values(doc?.question?.tokens)))
+                            .filter(tok => TRACKED_POS.has(tok.pos))
+                            .map(tok => tok.lemma_))
+            new_forms = new_forms.difference(prev_seen_words)
+            console.log(new_forms);
+            
+            nNewForms = new_forms.size
+        }).catch(_offline => {
             nNewForms = undefined
-        }
+        })
     }
 
     function initChatHistory() {
@@ -222,8 +228,8 @@
 
 </script>
 
-<ReaderComponent tts={tts} solutionText={solutionText} taskVisible={!$loadingTask} srWords={srWords} bind:this={readerComponent}>
-    <span slot="afterTask" hidden={!$currentTask}>{#if $gameChatHistory?.length}<ChatComponent readerComponent={readerComponent} inline={true} chatBoxTitle="Twoja odpowiedź 🤙" chatHistory={gameChatHistory} srWords={srWords} trySpeak={tts?.trySpeak} isGame={true}/>{/if}</span>
+<ReaderComponent tts={tts} solutionText={solutionText} taskVisible={!$loadingTask} srWords={new Set()} bind:this={readerComponent}>
+    <span slot="afterTask" hidden={!$currentTask}>{#if $gameChatHistory?.length}<ChatComponent readerComponent={readerComponent} inline={true} chatBoxTitle="Twoja odpowiedź 🤙" chatHistory={gameChatHistory} srWords={new Set()} trySpeak={tts?.trySpeak} isGame={true}/>{/if}</span>
     <span slot="afterSolution">{#if $gameChatHistory?.length}<ChatComponent readerComponent={readerComponent} inline={true} chatBoxTitle={undefined} chatHistory={gameChatHistory} translationLang='en' isGame={true}/>{/if}</span>
 </ReaderComponent>
 <div style="margin: auto">
@@ -242,4 +248,4 @@
     $gameChatHistory = [];
     goto('/read?doc='+redirectedDoc);
 }}/>
-<SuccessPopup title={congratsTitle} message={congratsMessage} onClose={()=>{congratsMessage = undefined; congratsTitle = undefined; statsClosedPromiseResolve()}}/>
+<SuccessPopup title={congratsTitle} message={congratsMessage} footnote={nNewForms ? `You just encountered ${nNewForms} new words!\n` : ''} onClose={()=>{congratsMessage = undefined; congratsTitle = undefined; statsClosedPromiseResolve()}}/>
