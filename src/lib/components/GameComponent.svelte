@@ -2,7 +2,7 @@
     import { onMount } from 'svelte';
     import ReaderComponent from './ReaderComponent.svelte';
     import { completeLevel, getPlayer, getPlayerLevel, getUserTaskStats, refreshPlayer, updatePlayer } from './backend';
-    import { user, nativeLang, targetLang, isSoundOn, currentTask, reviews, failedWords, reviewDocIds, currentlyScrolledParagraphIndex, loadingTask, gameChatHistory, player, chatOutcome, currentGameId, inlineChatHistory } from '$lib/stores';
+    import { username, nativeLang, targetLang, isSoundOn, currentTask, reviews, failedWords, reviewDocIds, currentlyScrolledParagraphIndex, loadingTask, gameChatHistory, player, chatOutcome, currentGameId, inlineChatHistory } from '$lib/stores';
 	import { goto } from '$app/navigation';
 	import Toast from './Toast.svelte';
 	import ChatComponent from './ChatComponent.svelte';
@@ -32,10 +32,10 @@
     let redirectedDoc: string | null
 
     onMount(async () => {
-        if (!$user) {
+        if (!$username) {
             goto('/signup')
         }
-        if (!$player) {
+        if (!$player?.id) {
             
             $currentGameId = $currentGameId ?? new URLSearchParams(window.location.search).get('gameId')
             if (!$currentGameId) {
@@ -43,7 +43,7 @@
                 return
             } else {
                 console.log('no player');
-                $player = await getPlayer($targetLang, $currentGameId)
+                $player = await getPlayer($currentGameId)
                 console.log($player);
             }
         }

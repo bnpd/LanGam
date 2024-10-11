@@ -1,5 +1,5 @@
 <script lang="ts" defer>
-	import { chatOutcome, currentTask, failedWords, nativeLang, player, targetLang, user } from "$lib/stores";
+	import { chatOutcome, currentTask, failedWords, nativeLang, player, targetLang, username } from "$lib/stores";
 	import { tick } from "svelte";
 	import BadgeComponent from "./BadgeComponent.svelte";
 	import type ReaderComponent from "./ReaderComponent.svelte";
@@ -74,7 +74,7 @@
         let new_history = $chatHistory
         try {
             let responseMsg
-            if ($user) {
+            if ($username) {
                 let correction
                 let response
                 if (isGame) {

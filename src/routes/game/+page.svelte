@@ -1,7 +1,7 @@
 <script lang="ts" defer>
 	import '../global.css';
 	import config from '../../config';
-	import { user } from '$lib/stores';
+	import { username } from '$lib/stores';
 	import { goto } from '$app/navigation';
 	import { onMount } from 'svelte';
 	import FeedbackComponent from '$lib/components/FeedbackComponent.svelte';
@@ -39,7 +39,7 @@
 	<TtsComponent bind:this={tts} />
 	<Install />
 	<FeedbackComponent />
-	{#if $user}
+	{#if $username}
 		<button on:click={() => goto('/lists')}>My vocab</button>
 		<!--<WebPushSubscription />-->
 	{:else}

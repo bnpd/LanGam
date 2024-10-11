@@ -122,16 +122,11 @@ export async function sendReview(targetLang, docId, failedTokens) {
   
 
 /**
+ * @param {string} user
  * @param {string} targetLang
  */
-export async function getVocab(targetLang){
-	try { 
-		const responseJson = await backendGet(EndpointGetVocab(targetLang))
-		return [responseJson['scheduled'], responseJson['all_forms']]
-	} catch (error) {
-		console.error(error)
-		return Promise.reject(error)
-	}
+export async function getUserLang(user, targetLang){
+	return pb.collection('user_langs').getFirstListItem(`user = "${user}" && target_lang.shortcode = "${targetLang.toUpperCase()}"`)
 }
 
 /**
@@ -247,15 +242,14 @@ export async function getGames(lang) {
 
 /**
  * Get current user's player for the specified game
- * @param {string} target_lang
  * @param {string} gameId
  */
-export async function getPlayer(target_lang, gameId) {
-	return pb.send(`/user_lang_game_player/${gameId}`, {})
+export async function getPlayer(gameId) {
+	return pb.send(`/user_player/${gameId}`, {})
 }
 
 /**
- * Get current user's player for the specified game
+ * Fetch the current player from the backend
  * @param {string} playerId
  */
 export async function refreshPlayer(playerId) {
@@ -288,7 +282,7 @@ export async function sendGameChat(chatHistory, playerId, levelSeqId) {
 }
 
 
-// lowlevel backend communication
+// lowlevel python backend communication
 /**
  * @param {string} path
  * @param {boolean} [authRequired] whether this endpoint requires authorization token

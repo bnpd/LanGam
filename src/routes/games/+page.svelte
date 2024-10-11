@@ -4,7 +4,7 @@
 	import { onMount } from 'svelte';
 	import { getGames } from '$lib/components/backend';
 	import { error } from '@sveltejs/kit';
-	import { targetLang, user } from '$lib/stores';
+	import { targetLang, username } from '$lib/stores';
 	import TitleWithBackgroundImageComponent from '$lib/components/TitleWithBackgroundImageComponent.svelte';
 	import NavbarComponent from '$lib/components/NavbarComponent.svelte';
 	import { goto } from '$app/navigation';
@@ -14,7 +14,7 @@
   let games: any[]
 
   onMount(async () => {
-    if (!$user || !$targetLang) {
+    if (!$username || !$targetLang) {
         goto('/signup')
     }
     games = await getGames($targetLang)
@@ -34,7 +34,7 @@
   <div class="two-columns">
     {#each games as game}
       <div class="image-card">
-          <a href={$user ? "/game?gameId="+game.id : "/signup"}>
+          <a href={$username ? "/game?gameId="+game.id : "/signup"}>
               <div style:position="relative">
                   <img 
                       src={game.img ? `/images/illustrations/${game.img}.avif` : FALLBACK_IMAGE} 

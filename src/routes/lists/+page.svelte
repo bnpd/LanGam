@@ -1,7 +1,7 @@
 <script lang="ts" defer>
 import type Token from "$lib/Token";
-import { getVocab } from "$lib/components/backend.js"
-import { targetLang } from '$lib/stores';
+import { getUserLang } from "$lib/components/backend.js"
+import { targetLang, username } from '$lib/stores';
 	import { onMount } from "svelte";
 import '../global.css';
 import './lists.css';
@@ -12,7 +12,7 @@ import './lists.css';
 	import BadgeComponent from "$lib/components/BadgeComponent.svelte";
 	import config from '../../config';
 
-let scheduledTokens: {[key: string]: Token} = {}
+let scheduledTokens: {[key: string]: any} = {}
 let seenTokens: {[key: string]: string[]} = {}
 onMount(() => {
   reloadLists()
@@ -29,11 +29,9 @@ function reloadLists() {
   seenTokens = {}
 
   // load lists
-  getVocab($targetLang).then(vocab => {
-      let scheduledMap, allFormsMap
-      [scheduledMap, allFormsMap] = [...vocab]
-      scheduledTokens = scheduledMap
-      seenTokens = allFormsMap
+  getUserLang($username, $targetLang).then(user_lang => {
+      scheduledTokens = user_lang.sr_words
+      seenTokens = user_lang.seen_words
   })
 }
 
@@ -94,5 +92,5 @@ function reloadLists() {
 </div>
 <br><br>
 <NavbarComponent>
-  <button on:click={history.back}>◄ Back</button>
+  <button on:click={()=>{history.back()}}>◄ Back</button>
 </NavbarComponent>

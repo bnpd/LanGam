@@ -2,7 +2,7 @@ import { writable, type Writable } from 'svelte/store';
 import type DocumentC from './DocumentC';
 
 /* Global Stores */
-export const user = createPersistentStore('username', null);
+export const username = createPersistentStore('username', null);
 export const player = createPersistentStore('player', null);
 export const targetLang = createPersistentStore('target_lang', null);
 export const nativeLang = createPersistentStore('native_lang', null);

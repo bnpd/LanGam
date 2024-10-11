@@ -1,7 +1,7 @@
 <script lang="ts" defer>
     import DocumentC from "$lib/DocumentC";
 	import { isTaskCached } from "./backend";
-	import { targetLang, user } from "$lib/stores";
+	import { targetLang, username } from "$lib/stores";
 	import BadgeComponent from "./BadgeComponent.svelte";
 	import { onMount } from "svelte";
 
@@ -24,7 +24,7 @@
 
 <svelte:window on:offline={onOffline} on:online={()=>{hidden = false}}></svelte:window>
 <div class="image-card" hidden={hidden}>
-    <a href={$user ? "/read?doc="+docId : "/signup"}>
+    <a href={$username ? "/read?doc="+docId : "/signup"}>
         <div style:position="relative">
             <img 
                 src={doc.img ? `/images/illustrations/${doc.img}.avif` : FALLBACK_IMAGE} 
