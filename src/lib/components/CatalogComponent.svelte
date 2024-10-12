@@ -86,5 +86,5 @@
 </div>
 <br><br>
 <NavbarComponent>
-  <button on:click={()=>goto("/read")}>◄ Back</button>
+  <button on:click={()=>history.back()}>◄ Back</button>
 </NavbarComponent>

@@ -49,5 +49,5 @@
 {/if}
 <br><br>
 <NavbarComponent>
-  <button on:click={()=>goto("/catalog")}>◄ Back</button>
+  <button on:click={()=>history.back()}>◄ Back</button>
 </NavbarComponent>
