@@ -26,6 +26,7 @@
 		height: 100%;
 		background-color: rgba(0, 0, 0, 0.6);
 		animation: fadeIn 0.5s;
+		z-index: 100;
 	}
 
 	.popup {
@@ -34,6 +35,7 @@
 		border-radius: 10px;
 		text-align: center;
 		animation: slideIn 0.5s;
+		z-index: 101;
 	}
 
 	@keyframes fadeIn {
