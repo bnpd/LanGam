@@ -32,6 +32,7 @@
     export let srWords: Set<string> | undefined = undefined
     export let trySpeak: Function | undefined = undefined
     export let isGame: boolean = false
+    export let showGameChatSuggestions: boolean = true
     let chatFocussed: boolean = false;
     let chatPrompt: string = ''
     let iChat: HTMLDivElement
@@ -276,7 +277,7 @@
                     </button>
                 {/if}
             </div>
-        {:else if isGame && $currentTask?.suggested_replies?.length}
+        {:else if isGame && $currentTask?.suggested_replies?.length && showGameChatSuggestions}
             <div class="promptSuggestions">
                 {#each $currentTask?.suggested_replies as suggestion}
                     <button class="promptSuggestion" on:click={onClickChatSuggestion} disabled={loading}>

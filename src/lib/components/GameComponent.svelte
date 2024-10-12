@@ -33,6 +33,7 @@
     let statsClosedPromiseResolve: Function;
     let reviewsSentPromise: Promise<undefined>;
     let redirectedDoc: string | null
+    let showGameChatSuggestions: boolean = false; // 
 
     onMount(async () => {
         if (!$username) {
@@ -205,6 +206,7 @@
         if (!restoreScrollPosition) {            
             $currentlyScrolledParagraphIndex = 0
         }
+        showGameChatSuggestions = false
 
         // the following calculation of new word count runs async in the background
         getUserLang($username, $targetLang).then(user_lang => {
@@ -226,17 +228,29 @@
         $chatOutcome = !($gameChatHistory?.length) ? 'default' : null
     }
 
+
+
+	function usePower(power: string): void {
+		switch (power) {
+            case 'super_memory':
+                showGameChatSuggestions = true
+                break;
+            default:
+                console.error('Unknown power: '+power);
+                break;
+        }
+	}
 </script>
 
 <ReaderComponent tts={tts} solutionText={solutionText} taskVisible={!$loadingTask} srWords={new Set()} bind:this={readerComponent}>
-    <span slot="afterTask" hidden={!$currentTask}>{#if $gameChatHistory?.length}<ChatComponent readerComponent={readerComponent} inline={true} chatBoxTitle="Twoja odpowiedź 🤙" chatHistory={gameChatHistory} srWords={new Set()} trySpeak={tts?.trySpeak} isGame={true}/>{/if}</span>
+    <span slot="afterTask" hidden={!$currentTask}>{#if $gameChatHistory?.length}<ChatComponent readerComponent={readerComponent} inline={true} chatBoxTitle="Twoja odpowiedź 🤙" chatHistory={gameChatHistory} srWords={new Set()} trySpeak={tts?.trySpeak} isGame={true} showGameChatSuggestions={showGameChatSuggestions}/>{/if}</span>
     <span slot="afterSolution">{#if $gameChatHistory?.length}<ChatComponent readerComponent={readerComponent} inline={true} chatBoxTitle={undefined} chatHistory={gameChatHistory} translationLang='en' isGame={true}/>{/if}</span>
 </ReaderComponent>
 <div style="margin: auto">
     <button id="levelBackbtn" class:loading={$loadingTask} on:click={onLevelBackbtnClick} hidden={!$player?.level_history?.order?.length}>
         ◀
     </button>
-    <PowersComponent />
+    <PowersComponent on:use_power={e => usePower(e.detail.power)}/>
     <button id="answbtn" class:loading={$loadingTask} on:click={onAnswbtnClick} hidden={!$chatOutcome}>
         ▶
     </button>

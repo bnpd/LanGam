@@ -1,12 +1,25 @@
 <script lang="ts" defer>
 	import Popup from "./Popup.svelte";
 	import { player } from "$lib/stores";
+	import { createEventDispatcher } from 'svelte';
+	import { updatePlayer } from "./backend";
 
     let isOpen = false
+
+    const dispatch = createEventDispatcher();
 
     function toggleIsOpen() {
         isOpen = !isOpen
     }
+
+
+	function usePower(power: string) {
+        //TODO: disable if power already active, disable where not applicable (eg super_memory on a level without chat), keep active for a level forever, not just until nextTask is called)
+        $player.powers[power] -= 1
+        updatePlayer($player)
+		dispatch('use_power', {power})
+        toggleIsOpen()
+	}
 </script>
 
 {#if isOpen}
@@ -27,7 +40,15 @@
             {/each}
             <tr><th>Power</th><th>Uses available</th></tr>
             {#each Object.keys($player.powers) as power}
-                <tr><td>{power}</td><td>{$player.powers[power]}</td><td><button>Use</button></td></tr>
+                <tr>
+                    <td>{power}</td>
+                    <td>{$player.powers[power]}</td>
+                    <td>
+                        {#if $player.powers[power] > 0}
+                        <button on:click={()=>usePower(power)}>Use</button>
+                        {/if}
+                    </td>
+                </tr>
             {/each}
         </table>
         <br>
