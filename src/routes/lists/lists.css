@@ -1,7 +1,12 @@
-#divLeft, #divRight {
-    width: 48%;
-    float: left;
+.flex-row {
+    display: flex;
+    flex-direction: row;
+}
+
+.vocab-column {
     text-align: center;
+    width: 100px;
+    flex-grow: 1;
     margin: 0 1%;
 }
 

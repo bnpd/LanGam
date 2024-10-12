@@ -59,29 +59,31 @@ function reloadLists() {
 </svelte:head>
 
 <TitleWithBackgroundImageComponent>Your vocab</TitleWithBackgroundImageComponent>
-<div>
-  <div id="divLeft">
-    <!--<button id="btnExportSRList" on:click={() => exportObject(scheduledTokens, 'Spaced Repetition Words')}>Export</button>-->
-    <h1>
-      Spaced Repetition
-      <span>{Object.keys(scheduledTokens).length ? "("+Object.keys(scheduledTokens).length+" words)" : ""}</span>
-    </h1>
-    <div id="ulSearchList">
-      {#each Object.keys(scheduledTokens) as key}
-        <VocabListItem title={scheduledTokens[key].word} >
-          <BadgeComponent text='AI' tooltip="Estimate when you are likely to forget it, according to Spaced Repetition science. We'll try to show it before that day."/>
-          Due: {Math.min(9999, scheduledTokens[key]?.interval)}&nbsp;d
-        </VocabListItem>
-      {/each}  
+<div class="flex-row">
+  {#if Object.keys(scheduledTokens)?.length}    
+    <div class="vocab-column">
+      <!--<button id="btnExportSRList" on:click={() => exportObject(scheduledTokens, 'Spaced Repetition Words')}>Export</button>-->
+      <h1>
+        Spaced Repetition
+        <span>{Object.keys(scheduledTokens).length ? "("+Object.keys(scheduledTokens).length+" words)" : ""}</span>
+      </h1>
+      <div>
+        {#each Object.keys(scheduledTokens) as key}
+          <VocabListItem title={scheduledTokens[key].word} >
+            <BadgeComponent text='AI' tooltip="Estimate when you are likely to forget it, according to Spaced Repetition science. We'll try to show it before that day."/>
+            Due: {Math.min(9999, scheduledTokens[key]?.interval)}&nbsp;d
+          </VocabListItem>
+        {/each}  
+      </div>
     </div>
-  </div>
-  <div id="divRight">
+  {/if}
+  <div class="vocab-column">
     <!--<button id="btnExportSeenList" on:click={() => exportObject(seenTokens, 'Seen Words')}>Export</button>-->
     <h1>
       Seen
       <span>{Object.keys(seenTokens).length ? "("+Object.keys(seenTokens).length+" families)" : ""}</span>
     </h1>
-    <div id="ulKnownList">
+    <div>
       {#each Object.keys(seenTokens) as key}
         <VocabListItem>
           {seenTokens[key].join(', ')}
