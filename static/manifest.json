@@ -1,7 +1,7 @@
 {
-  "name": "All AI",
-  "short_name": "All AI",
-  "description": "This app will make learning Polish fun! You can read simple texts about different aspects of Polish culture and chat with AI characters about them.",
+  "name": "LanGam CYOA Game",
+  "short_name": "LanGam",
+  "description": "Learn languages like play by choosing you own adventure story.",
   "icons": [{
       "src": "/images/icons/icon-192x192.png",
       "sizes": "192x192",

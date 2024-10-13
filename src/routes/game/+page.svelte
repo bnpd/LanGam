@@ -27,12 +27,12 @@
 </script>
 
 <svelte:head>
-	<title>Automated Language Learning AI</title>
+	<title>LanGam CYOA - language learning "choose you own adventure" game</title>
 	<meta name="description" content="Learn languages like play." />
 	<link rel="preconnect" href={config.backend} />
 </svelte:head>
 
-<TitleWithBackgroundImageComponent>Automated Language Learning AI</TitleWithBackgroundImageComponent>
+<TitleWithBackgroundImageComponent>LanGam CYOA Game</TitleWithBackgroundImageComponent>
 <GameComponent {tts}></GameComponent>
 <NavbarComponent>
 	<button on:click={() => goto('/catalog')}>Texts</button>

@@ -41,7 +41,7 @@
 </script>
 
 <svelte:head>
-	<title>Admin View - Automated Language Learning AI</title>
+	<title>Admin View - LanGam</title>
 </svelte:head>
 
 <form class="card" on:submit|preventDefault={onSubmit}>

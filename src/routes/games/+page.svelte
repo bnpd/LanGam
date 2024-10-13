@@ -24,7 +24,7 @@
 </script>
 
 <svelte:head>
-	<title>Games - Automated Language Learning AI</title>
+	<title>Games - LanGam CYOA - language learning "choose you own adventure" game</title>
   <meta name="description" content="Games - learn languages like play.">
   <link rel="preconnect" href={config.backend}>
 </svelte:head>

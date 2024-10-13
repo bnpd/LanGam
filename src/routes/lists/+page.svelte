@@ -53,8 +53,8 @@ function reloadLists() {
 </script>
 
 <svelte:head>
-	<title>Your Vocabulary - Automated Language Learning AI</title>
-  <meta name="description" content="Overview of your learned words - learn languages the fun way: talk about texts with AI.">
+	<title>Your Vocabulary - LanGam CYOA - language learning "choose you own adventure" game</title>
+  <meta name="description" content='Overview of your learned words - LanGam CYOA - language learning "choose you own adventure" game.'>
   <link rel="preconnect" href={config.backend}>
 </svelte:head>
 
