@@ -77,7 +77,7 @@
       "short_name": "Login",
       "description": "Login as another user",
       "icons": [{
-        "src": "/images/icons/icon-vocab-view-96x96.png",
+        "src": "/images/icons/icon-admin-view-96x96.png",
         "sizes": "96x96",
         "type": "image/png"
       }],
