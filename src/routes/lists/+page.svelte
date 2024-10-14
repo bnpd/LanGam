@@ -13,6 +13,7 @@ import './lists.css';
 	import config from '../../config';
 
 let scheduledTokens: {[key: string]: any} = {}
+let usedTokens: {[key: string]: string[]} = {}
 let seenTokens: {[key: string]: string[]} = {}
 onMount(() => {
   reloadLists()
@@ -31,6 +32,7 @@ function reloadLists() {
   // load lists
   getUserLang($username, $targetLang).then(user_lang => {
       scheduledTokens = user_lang.sr_words
+      usedTokens = user_lang.used_words
       seenTokens = user_lang.seen_words
   })
 }
@@ -60,9 +62,8 @@ function reloadLists() {
 
 <TitleWithBackgroundImageComponent>Your vocab</TitleWithBackgroundImageComponent>
 <div class="flex-row">
-  {#if Object.keys(scheduledTokens)?.length}    
+  <!-- {#if Object.keys(scheduledTokens)?.length}    
     <div class="vocab-column">
-      <!--<button id="btnExportSRList" on:click={() => exportObject(scheduledTokens, 'Spaced Repetition Words')}>Export</button>-->
       <h1>
         Spaced Repetition
         <span>{Object.keys(scheduledTokens).length ? "("+Object.keys(scheduledTokens).length+" words)" : ""}</span>
@@ -76,9 +77,21 @@ function reloadLists() {
         {/each}  
       </div>
     </div>
-  {/if}
+  {/if} -->
   <div class="vocab-column">
-    <!--<button id="btnExportSeenList" on:click={() => exportObject(seenTokens, 'Seen Words')}>Export</button>-->
+    <h1>
+      Used in chat
+      <span>{Object.keys(usedTokens).length ? "("+Object.keys(usedTokens).length+" words)" : ""}</span>
+    </h1>
+    <div>
+      {#each Object.keys(usedTokens) as key}
+        <VocabListItem>
+          {usedTokens[key].join(', ')}
+        </VocabListItem>
+      {/each}
+    </div>
+  </div>
+  <div class="vocab-column">
     <h1>
       Seen
       <span>{Object.keys(seenTokens).length ? "("+Object.keys(seenTokens).length+" families)" : ""}</span>
