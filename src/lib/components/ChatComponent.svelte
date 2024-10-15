@@ -236,8 +236,8 @@
                     <div class={"card "+msg.role}>
                         <em><strong>
                             <BadgeComponent 
-                                text={msg.role === 'user' ? 'You' : msg.role === 'assistant' ? 'AI' : (translationLang === 'original' ? 'You+AI' : 'You')} 
-                                tooltip={msg.role === 'user' ? "Your response" : msg.role === 'assistant' ? "AI's response" : (translationLang === 'original' ? 'Your response, corrected by AI. Feel free to ask, why AI wrote it like this.' : 'Your original response.')}/>
+                                text={msg.role === 'user' ? 'You' : msg.role === 'assistant' ? ($currentTask?.character ?? 'AI') : (translationLang === 'original' ? 'You+AI' : 'You')} 
+                                tooltip={msg.role === 'user' ? "Your response" : msg.role === 'assistant' ? "AI character" : (translationLang === 'original' ? 'Your response, corrected by AI. Feel free to ask, why AI wrote it like this.' : 'Your original response.')}/>
                         </strong></em>&nbsp;
                         {#if translationLang === 'original'}
                             {#if msg.content.text?.tokens}
