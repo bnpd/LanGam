@@ -81,6 +81,14 @@ function EndpointChat(chatHistoryString, isInline, targetLang=undefined, docId=u
 }
 
 /**
+ * @param {string} chatHistoryText
+ * @param {string} contextParagraphs
+ */
+function EndpointTutorChat(chatHistoryText, contextParagraphs) {
+	return `/chat_tutor?hist=${encodeURIComponent(chatHistoryText)}&ctx=${contextParagraphs}`
+}
+
+/**
  * @param {string} chatHistoryString
  * @param {number} levelSeqId
  * @param {string} playerId
@@ -200,6 +208,22 @@ export async function sendChat(chatHistory, isInline, targetLang=undefined, docI
 	}
 	let {correction_of_learner_message, response} = await backendGet(EndpointChat(chatHistoryText, isInline, targetLang, docId, contextParagraphs))
 	return {correction: correction_of_learner_message ? DocumentC.fromJson(correction_of_learner_message) : undefined, response: DocumentC.fromJson(response)}
+}
+    
+
+/**
+ * Versatile chat, envisioned to be used in the user's native language to ask the tutor about a confusion
+ * @param {{role: string;content: string;}[]} chatHistory
+ * @param {string} contextParagraphs
+ * @returns {Promise<DocumentC>} This document will have only the key text.text defined unless docId and targetLang were given as inputs
+ */
+export async function sendTutorChat(chatHistory, contextParagraphs) {
+	const chatHistoryText = JSON.stringify(chatHistory.slice(-MAX_CHAT_HISTORY_LENGTH))
+	if (chatHistoryText.length > MAX_CHAT_HISTORY_CHARS) {
+		throw new Error("Chat history too long.");		
+	}
+	let {response} = await pb.send(EndpointTutorChat(chatHistoryText, contextParagraphs), {})
+	return DocumentC.fromJson(response)
 }
 
 // /**
