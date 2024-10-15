@@ -1,15 +1,12 @@
 <script lang="ts" defer>
-import type Token from "$lib/Token";
 import { getUserLang } from "$lib/components/backend.js"
 import { targetLang, username } from '$lib/stores';
 	import { onMount } from "svelte";
 import '../global.css';
 import './lists.css';
-	import { goto } from "$app/navigation";
 	import TitleWithBackgroundImageComponent from "$lib/components/TitleWithBackgroundImageComponent.svelte";
 	import VocabListItem from "$lib/components/VocabListItem.svelte";
 	import NavbarComponent from "$lib/components/NavbarComponent.svelte";
-	import BadgeComponent from "$lib/components/BadgeComponent.svelte";
 	import config from '../../config';
 
 let scheduledTokens: {[key: string]: any} = {}

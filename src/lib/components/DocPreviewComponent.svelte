@@ -34,7 +34,7 @@
             <div class="difficulty-badge">
                 <BadgeComponent 
                     text={doc.difficulty > 5 ? 'advanced' : doc.difficulty < 4 ? 'beginner' : 'intermediate'} 
-                    backgroundColor={doc.difficulty > 5 ? 'orange' : doc.difficulty < 4 ? 'lightgreen' : 'lightblue'}/>
+                    htmlClass={'badge-style ' + (doc.difficulty > 5 ? 'background-orange' : doc.difficulty < 4 ? 'background-lightgreen' : 'background-lightblue')}/>
             </div>
         </div>
         <div>

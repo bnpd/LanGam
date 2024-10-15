@@ -10,6 +10,7 @@
 	import DocumentC from '$lib/DocumentC';
 	import type TtsComponent from './TtsComponent.svelte';
 	import PowersComponent from './PowersComponent.svelte';
+	import BadgeComponent from './BadgeComponent.svelte';
 
     const TOAST_REDIRECTED_SAVED_TASK = "Your selected text has been queued cause you have a saved game level."
     const TEXT_REJECT_SAVED_TASK = "Discard saved"
@@ -88,7 +89,7 @@
         }
     })
 
-    async function onAnswbtnClick () {
+    async function onAnswbtnClick(outcome: string) {
         speechSynthesis.cancel()
 
         if ($currentTask) {
@@ -101,20 +102,15 @@
         }
 
         // reviewsSentPromise = sendPendingReviews()
-        let completeLevelPromise
-        if (!$gameChatHistory.length) {
-            completeLevelPromise = completeLevel($player.id, $currentTask.docId, "default")
-        } else {
-            completeLevelPromise = refreshPlayer($player.id)
-        }
+        let completeLevelPromise = completeLevel($player.id, $currentTask.docId, outcome)
 
         statsClosedPromise = new Promise<boolean>((resolve, reject) => {
             statsClosedPromiseResolve = resolve
         })
-        console.log($chatOutcome);
+        console.log(outcome);   
         console.log($currentTask?.outcomes);        
-        congratsMessage = $currentTask?.outcomes?.[$chatOutcome]?.text ?? DEFAULT_CONGRATS_MESSAGE
-        congratsTitle = $currentTask?.outcomes?.[$chatOutcome]?.title ?? DEFAULT_CONGRATS_TITLE
+        congratsMessage = $currentTask?.outcomes?.[outcome]?.text ?? DEFAULT_CONGRATS_MESSAGE
+        congratsTitle = $currentTask?.outcomes?.[outcome]?.title ?? DEFAULT_CONGRATS_TITLE
 
         await statsClosedPromise
 
@@ -247,13 +243,19 @@
     <span slot="afterSolution">{#if $gameChatHistory?.length}<ChatComponent readerComponent={readerComponent} inline={true} chatBoxTitle={undefined} chatHistory={gameChatHistory} translationLang='en' isGame={true}/>{/if}</span>
 </ReaderComponent>
 <div style="margin: auto">
-    <button id="levelBackbtn" class:loading={$loadingTask} on:click={onLevelBackbtnClick} hidden={!$player?.level_history?.order?.length}>
+    <button class="gameNavBtn" class:loading={$loadingTask} on:click={onLevelBackbtnClick} hidden={!$player?.level_history?.order?.length}>
         ◀
     </button>
     <PowersComponent on:use_power={e => usePower(e.detail.power)}/>
-    <button id="answbtn" class:loading={$loadingTask} on:click={onAnswbtnClick} hidden={!$chatOutcome}>
-        ▶
-    </button>
+    {#each (Object.entries($currentTask?.outcomes ?? {})) as [outcome, obj]}
+        {#if $player?.level_history?.[obj.goto] || $chatOutcome == outcome}
+            <button class="gameNavBtn" class:loading={$loadingTask} on:click={()=>onAnswbtnClick(outcome)}>
+                ▶
+            </button>
+        {:else}
+            <BadgeComponent text="🔒" tooltip={`There is a hidden outcome here that you can unlock by chatting with ${$currentTask.character}`} htmlClass="gameNavBtn"/>
+        {/if}
+    {/each}
 </div>
 <ChatComponent readerComponent={readerComponent} inline={false} chatBoxTitle="Ask me ✨"/>
 <Toast message={toast} textReject={textRejectToast} onReject={() => {

@@ -3,7 +3,7 @@
 <script>
     export let text;
     export let tooltip = '';
-    export let backgroundColor = '#007bff'
+    export let htmlClass = undefined;
     let showTooltip = false;
   
   function toggleTooltip() {
@@ -17,14 +17,17 @@
   <style>
     .badge {
       display: inline-block;
+      position: relative;
+      font-size: x-small;
+    }
+    .badge-style {
       padding: 0.5em 1em;
       color: white;
       border-radius: 1em;
       cursor: pointer;
-      position: relative;
-      font-size: x-small;
       transform: translateY(-0.25em);
       box-shadow: var(--box-shadow-light);
+      background-color: "#007bff";
     }
   
     .tooltip {
@@ -35,7 +38,7 @@
       border-radius: 0.25em;
       padding: 0.5em;
       position: absolute;
-      z-index: 1;
+      z-index: 100;
       top: 125%; /* Position the tooltip above the badge */
       left: 50%;
       margin-left: -50px;
@@ -51,8 +54,7 @@
   </style>
   
   <div 
-    class="badge" 
-    style={'background-color: '+backgroundColor}
+    class={"badge " + (htmlClass ?? "badge-style")}
     on:mouseenter={toggleTooltip} 
     on:mouseleave={toggleTooltip}
     on:click={toggleTooltip}
