@@ -27,7 +27,7 @@
       cursor: pointer;
       transform: translateY(-0.25em);
       box-shadow: var(--box-shadow-light);
-      background-color: "#007bff";
+      background-color: #007bff;
     }
   
     .tooltip {
