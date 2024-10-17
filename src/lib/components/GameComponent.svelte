@@ -11,6 +11,7 @@
 	import type TtsComponent from './TtsComponent.svelte';
 	import PowersComponent from './PowersComponent.svelte';
 	import BadgeComponent from './BadgeComponent.svelte';
+	import TooltipComponent from './TooltipComponent.svelte';
 
     const TOAST_REDIRECTED_SAVED_TASK = "Your selected text has been queued cause you have a saved game level."
     const TEXT_REJECT_SAVED_TASK = "Discard saved"
@@ -253,7 +254,12 @@
                 ▶
             </button>
         {:else}
-            <BadgeComponent text="🔒" tooltip={`There is a hidden outcome here that you can unlock by chatting with ${$currentTask.character}`} htmlClass="gameNavBtn"/>
+            <div style="display: inline-block;">
+                <TooltipComponent>
+                    <button class="gameNavBtn" slot="anchor">🔒</button>
+                    <span slot="tooltip">There is a hidden outcome here that you can unlock by chatting with {$currentTask.character}</span>
+                </TooltipComponent>
+            </div>
         {/if}
     {/each}
 </div>
