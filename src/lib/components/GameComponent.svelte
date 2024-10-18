@@ -211,9 +211,7 @@
             let new_forms = new Set(Object.values(doc?.title?.tokens).concat(Object.values(doc?.text?.tokens).concat(Object.values(doc?.question?.tokens)))
                             .filter(tok => TRACKED_POS.has(tok.pos))
                             .map(tok => tok.lemma_))
-            new_forms = new_forms.difference(prev_seen_words)
-            console.log(new_forms);
-            
+            new_forms = new_forms.difference(prev_seen_words)            
             nNewForms = new_forms.size
         }).catch(_offline => {
             nNewForms = undefined
@@ -263,7 +261,7 @@
         {/if}
     {/each}
 </div>
-<ChatComponent readerComponent={readerComponent} inline={false} chatBoxTitle="Ask me ✨"/>
+<ChatComponent readerComponent={readerComponent} inline={false} chatBoxTitle="AI tutor - ask me anything ✨"/>
 <Toast message={toast} textReject={textRejectToast} onReject={() => {
     $currentGameId = undefined;
     $failedWords = new Set();
