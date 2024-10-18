@@ -27,7 +27,7 @@
         top: 125%; /* Position the tooltip above the badge */
         left: 50%;
         margin-left: -50px;
-        width: 200px;
+        width: 150px;
     }
   
 </style>
