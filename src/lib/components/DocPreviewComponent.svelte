@@ -13,11 +13,11 @@
     let hidden = false
 
     async function onOffline() {
-        hidden = ! await isTaskCached($targetLang, docId.toString())
+        hidden = ! await isTaskCached($targetLang.shortcode, docId.toString())
     }
 
     onMount(async ()=>{
-        hidden = !navigator.onLine && ! await isTaskCached($targetLang, docId.toString());
+        hidden = !navigator.onLine && ! await isTaskCached($targetLang.shortcode, docId.toString());
     })
 
 </script>

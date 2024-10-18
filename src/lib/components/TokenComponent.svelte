@@ -19,7 +19,7 @@
             window.open((event.currentTarget as HTMLAnchorElement).href);
         } else {
             // If not on Android, directly go to Google Translate
-            window.open(`https://translate.google.com/?sl=${$targetLang}&tl=${$nativeLang}&text=${word}`);
+            window.open(`https://translate.google.com/?sl=${$targetLang.shortcode}&tl=${$nativeLang}&text=${word}`);
         }
     }
 </script>

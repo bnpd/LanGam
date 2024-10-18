@@ -15,7 +15,7 @@
       payload[key] = value as string;
     }
     
-    let json = await backendPost('/new_document/'+$targetLang, payload, true)
+    let json = await backendPost('/new_document/'+$targetLang.shortcode, payload, true)
     var link = document.createElement('a');
     link.setAttribute('href', 'data:text/csv;charset=utf-8,' + encodeURIComponent(json.csv));
     link.setAttribute('download', "new_document");

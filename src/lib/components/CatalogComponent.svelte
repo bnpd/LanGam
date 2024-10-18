@@ -39,7 +39,7 @@
 </TitleWithBackgroundImageComponent>
 {#if $username}
     {#if !offline}
-        {#await getTask($targetLang) then doc}
+        {#await getTask($targetLang.shortcode) then doc}
             <h2>
                 <BadgeComponent text='AI' tooltip='This text optimizes the amount of words that are due for spaced repetition to help you keep your vocabulary fresh.'/>
                 Recommended: 

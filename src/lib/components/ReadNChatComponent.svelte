@@ -33,7 +33,7 @@
         let urlparams = new URLSearchParams(window.location.search)
 
         if (!$username) {
-            $targetLang = 'pl'
+            $targetLang = {shortcode: 'pl'} //TODO: getLangByShortcode('pl') from pocketbase
             $nativeLang = 'en'
             $isSoundOn = false
         }
@@ -146,7 +146,7 @@
         const times = $reviewDocIds.length
         for (let i = 0; i < times; i++) {
             try {
-                await sendReview($targetLang, $reviewDocIds[0], Array.from($reviews[0]))            
+                await sendReview($targetLang.shortcode, $reviewDocIds[0], Array.from($reviews[0]))            
             } catch (offlineError) {
                 return Promise.reject(offlineError)
             }
@@ -165,7 +165,7 @@
         if (!$username) { //anonymous mode
             doc = DocumentC.getSampleDoc()
         } else {
-            doc = await getTask($targetLang, docId).catch(_offline => {
+            doc = await getTask($targetLang.shortcode, docId).catch(_offline => {
                 toast = "Text has not been downloaded offline. Going to catalog."
                 setTimeout(() => {
                     goto('/catalog')   
@@ -186,7 +186,7 @@
         }
 
         try {         
-            const [srWords_l, newForms_l] = $username ? await getUserTaskStats($targetLang, (String)(doc?.docId)) : [["ornage"], Object.values(doc?.title?.tokens).map(tok => tok.word).concat(Object.values(doc?.title?.tokens).map(tok => tok.word))]
+            const [srWords_l, newForms_l] = $username ? await getUserTaskStats($targetLang.shortcode, (String)(doc?.docId)) : [["ornage"], Object.values(doc?.title?.tokens).map(tok => tok.word).concat(Object.values(doc?.title?.tokens).map(tok => tok.word))]
             srWords = new Set(srWords_l)
             nNewForms = newForms_l.length
         } catch (_offline) {

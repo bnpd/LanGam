@@ -14,10 +14,11 @@
   let games: any[]
 
   onMount(async () => {
-    if (!$username || !$targetLang) {
+    if (!$username || !$targetLang?.shortcode || !$targetLang?.id) {
         goto('/signup')
+        return
     }
-    games = await getGames($targetLang)
+    games = await getGames($targetLang.id)
   
     if (!games) throw error(405);
   })

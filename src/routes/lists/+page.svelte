@@ -27,7 +27,7 @@ function reloadLists() {
   seenTokens = {}
 
   // load lists
-  getUserLang($username, $targetLang).then(user_lang => {
+  getUserLang($username, $targetLang.id).then(user_lang => {
       scheduledTokens = user_lang.sr_words
       usedTokens = user_lang.used_words
       seenTokens = user_lang.seen_words

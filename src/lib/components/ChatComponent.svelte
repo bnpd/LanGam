@@ -71,7 +71,7 @@
      */
     async function submitChat(partialContext: boolean) {
         loading = true
-        const newMessage = {role: 'user', content: DocumentC.partialDocument(chatPrompt, $targetLang, undefined, undefined)}
+        const newMessage = {role: 'user', content: DocumentC.partialDocument(chatPrompt, $targetLang.shortcode, undefined, undefined)}
         let new_history = $chatHistory
         try {
             let responseMsg
@@ -89,7 +89,7 @@
                 } else {
                     ({correction, response} = 
                         partialContext ? await sendChat(messageHistoryForChatGpt($chatHistory.concat([newMessage])), inline, undefined, undefined, readerComponent.getVisibleParagraphs())
-                                       : await sendChat(messageHistoryForChatGpt($chatHistory.concat([newMessage])), inline, $targetLang, $currentTask.docId, undefined));
+                                       : await sendChat(messageHistoryForChatGpt($chatHistory.concat([newMessage])), inline, $targetLang.shortcode, $currentTask.docId, undefined));
                 }
                 if (correction) {
                     newMessage.content = correction // replace user's message with corrected message

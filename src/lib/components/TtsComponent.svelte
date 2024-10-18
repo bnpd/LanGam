@@ -42,7 +42,7 @@
 
     function setVoice() {
         const separator = speechSynthesis.getVoices()[0].lang.includes('-') ? '-' : '_'
-        let voices_in_lang = speechSynthesis.getVoices().filter(voice=>{return voice.lang.split(separator)[0].toUpperCase()===$targetLang.toUpperCase()})
+        let voices_in_lang = speechSynthesis.getVoices().filter(voice=>{return voice.lang.split(separator)[0].toUpperCase()===$targetLang.shortcode.toUpperCase()})
         if (voices_in_lang.length!==0) {
             voice = voices_in_lang[0]
         }

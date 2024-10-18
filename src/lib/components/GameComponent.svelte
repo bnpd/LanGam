@@ -166,7 +166,7 @@
     //     const times = $reviewDocIds.length
     //     for (let i = 0; i < times; i++) {
     //         try {
-    //             await sendReview($targetLang, $reviewDocIds[0], Array.from($reviews[0]))            
+    //             await sendReview($targetLang.shortcode, $reviewDocIds[0], Array.from($reviews[0]))            
     //         } catch (offlineError) {
     //             return Promise.reject(offlineError)
     //         }
@@ -206,7 +206,7 @@
         showGameChatSuggestions = false
 
         // the following calculation of new word count runs async in the background
-        getUserLang($username, $targetLang).then(user_lang => {
+        getUserLang($username, $targetLang.id).then(user_lang => {
             const prev_seen_words = new Set(Object.keys(user_lang.seen_words))
             let new_forms = new Set(Object.values(doc?.title?.tokens).concat(Object.values(doc?.text?.tokens).concat(Object.values(doc?.question?.tokens)))
                             .filter(tok => TRACKED_POS.has(tok.pos))

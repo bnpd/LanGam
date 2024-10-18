@@ -110,10 +110,14 @@ export async function signup(email, password, native_lang) {
 
 
 /**
- * @param {string} targetLang
+ * @param {string} targetLangShortcode
+ * @returns Promise<{targetLang: any, lang: any}>
  */
-export async function newUserLang(targetLang) {
-	return backendPost(ENDPOINT_NEW_USER_LANG, {target_lang: targetLang}, true)
+export async function newUserLang(targetLangShortcode) {
+	return pb.send(`/new_user_lang`, {method: 'POST', body: {
+            'langShortcode': targetLangShortcode
+        }})
+	//return backendPost(ENDPOINT_NEW_USER_LANG, {target_lang: targetLang}, true)
 }
 
 
@@ -131,10 +135,17 @@ export async function sendReview(targetLang, docId, failedTokens) {
 
 /**
  * @param {string} user
- * @param {string} targetLang
+ * @param {string} targetLangId
  */
-export async function getUserLang(user, targetLang){
-	return pb.collection('user_langs').getFirstListItem(`user = "${user}" && target_lang.shortcode = "${targetLang.toUpperCase()}"`)
+export async function getUserLang(user, targetLangId){
+	return pb.collection('user_langs').getFirstListItem(`user = "${user}" && target_lang = "${targetLangId}"`)
+}
+
+/**
+ * @param {string} shortcode
+ */
+export async function getLang(shortcode){
+	return pb.collection('langs').getFirstListItem(`shortcode = "${shortcode.toUpperCase()}"`)
 }
 
 /**
@@ -257,11 +268,11 @@ export async function completeLevel(playerId, seqId, outcome) {
 
 /**
  * List all available games
- * @param {string} lang
+ * @param {string} langId
  * @returns {Promise<any[]>}
  */
-export async function getGames(lang) {
-	return pb.collection('games').getFullList({filter: `lang.shortcode = "${lang.toUpperCase()}"`})
+export async function getGames(langId) {
+	return pb.collection('games').getFullList({filter: `lang = "${langId}"`})
 }
 
 /**

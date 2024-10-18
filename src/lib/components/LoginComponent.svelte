@@ -1,5 +1,5 @@
 <script lang="ts" defer>
-    import { login, newUserLang, signup } from '$lib/components/backend';
+    import { getLang, login, newUserLang, signup } from '$lib/components/backend';
     import { goto } from '$app/navigation';
 	import { failedWords, inlineChatHistory, nativeLang, reviews, targetLang, username } from '$lib/stores';
 	import { ClientResponseError } from 'pocketbase';
@@ -30,10 +30,7 @@
                 $username = user_obj.id
             }
             $nativeLang = 'en'/*(await getLangById(user_obj.native_lang)).shortcode.toLowerCase()*/
-            $targetLang = 'pl'
-            if (isSignup) {
-                await newUserLang('pl')
-            }
+            $targetLang = isSignup ? (await newUserLang('pl')).lang : await getLang('pl') // temporary solution until we figure out multilang
 
             goto('/catalog')
         } catch (e) {
