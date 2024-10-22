@@ -12,6 +12,7 @@
 	import PowersComponent from './PowersComponent.svelte';
 	import BadgeComponent from './BadgeComponent.svelte';
 	import TooltipComponent from './TooltipComponent.svelte';
+	import DictionaryComponent from './DictionaryComponent.svelte';
 
     const TOAST_REDIRECTED_SAVED_TASK = "Your selected text has been queued cause you have a saved game level."
     const TEXT_REJECT_SAVED_TASK = "Discard saved"
@@ -269,3 +270,4 @@
     goto('/read?doc='+redirectedDoc);
 }}/>
 <SuccessPopup title={congratsTitle} message={congratsMessage} footnote={nNewForms ? `You just encountered ${nNewForms} new words!\n` : ''} onClose={()=>{congratsMessage = undefined; congratsTitle = undefined; statsClosedPromiseResolve()}}/>
+<DictionaryComponent/>

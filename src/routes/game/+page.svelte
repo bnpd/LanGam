@@ -1,7 +1,7 @@
 <script lang="ts" defer>
 	import '../global.css';
 	import config from '../../config';
-	import { username } from '$lib/stores';
+	import { username, targetLang } from '$lib/stores';
 	import { goto } from '$app/navigation';
 	import { onMount } from 'svelte';
 	import FeedbackComponent from '$lib/components/FeedbackComponent.svelte';
@@ -10,11 +10,17 @@
 	import NavbarComponent from '$lib/components/NavbarComponent.svelte';
 	import TitleWithBackgroundImageComponent from '$lib/components/TitleWithBackgroundImageComponent.svelte';
 	import TtsComponent from '$lib/components/TtsComponent.svelte';
-	import WebPushSubscription from '$lib/components/WebPushSubscription.svelte';
+	import BadgeComponent from '$lib/components/BadgeComponent.svelte';
+	import { getDue } from '$lib/components/backend';
 
 	let tts: TtsComponent;
+	let dueWords: any[];
 
 	onMount(() => {
+		// after 1 second, check for SR words
+		setTimeout(async () => {
+			dueWords = await getDue($targetLang.id)
+		}, 1000);
 		// after 10 seconds, cache assets
 		setTimeout(() => {
 			if ('serviceWorker' in navigator) {
@@ -40,7 +46,12 @@
 	<Install />
 	<FeedbackComponent />
 	{#if $username}
-		<button on:click={() => goto('/lists')}>My vocab</button>
+		<button on:click={() => goto('/lists')}>
+			My vocab
+			{#if dueWords}
+				<BadgeComponent text={dueWords.length} backgroundColor="orangered"/>
+			{/if}
+		</button>
 		<!--<WebPushSubscription />-->
 	{:else}
 		<button on:click={() => goto('/signup')}><b>Sign up 👤</b></button>

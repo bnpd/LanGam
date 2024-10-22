@@ -23,6 +23,10 @@ export const inlineChatHistory: Writable<{role: string, content: DocumentC}[]> =
 export const gameChatHistory: Writable<{role: string, content: DocumentC}[]> = createPersistentStore('gameChatHistory', []);
 export const chatOutcome = createPersistentStore('chatOutcome', null);
 
+/* Dictionary Component Stores */
+export const dictionaryWord: Writable<string | undefined> = writable()
+export const freqList = createPersistentStore('freqList', null);
+
 /* Store Creation Functions */
 
 function createPersistentStore(key: string, initialValue: any): Writable<any> {

@@ -36,6 +36,13 @@
 		text-align: center;
 		animation: slideIn 0.5s;
 		z-index: 101;
+		
+		box-sizing: border-box;
+		display: flex;
+		flex-direction: column;
+		width: 95vw;
+
+		max-height: 90vh;
 	}
 
 	@keyframes fadeIn {

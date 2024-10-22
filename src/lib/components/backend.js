@@ -267,6 +267,28 @@ export async function completeLevel(playerId, seqId, outcome) {
 }
 
 /**
+ * @param {string} langId
+ * @param {{[x: string]: string | undefined}} cardJson
+ * @param {boolean} reversed
+ * @returns {Promise<any>} The new card
+ */
+export async function addSrWord(langId, cardJson, reversed) {
+	return pb.send(`/add_sr_word`, {method: 'POST', body: {
+		langId,
+		cardJson: JSON.stringify(cardJson),
+		reversed
+	}}).then(res => res.card)
+}
+
+/**
+ * @param {string} langId
+ * @returns {Promise<{[x: string]: string | undefined}[]>} The due cards
+ */
+export async function getDue(langId) {
+	return pb.send(`/get_due?langId=${langId}`, {}).then(res => res.due)
+}
+
+/**
  * List all available games
  * @param {string} langId
  * @returns {Promise<any[]>}
