@@ -7,14 +7,17 @@
 	import { addSrWord } from "./backend";
 	import WiktionaryFrame from "./WiktionaryFrame.svelte";
 
-    function getSrFormFields(whichExtraction) {return [
+    function getSrFormFields(whichExtraction: number) {return [
         {name: 'Word', id: 'word', value: $dictionaryWord},
-        {name: 'Meaning', id: 'meaning', value: extractedCards?.[whichExtraction]?.meaning},
-        {name: 'Notes', id: 'notes', value: JSON.stringify(extractedCards?.[whichExtraction])}
+        {name: 'Meaning', id: 'meaning', value: extractedCards?.[whichExtraction]?.meaning?.slice(0, 50) + (extractedCards?.[whichExtraction]?.meaning?.length > 50 && '...')},
+        {name: 'Notes', id: 'notes'},
+        {name: 'Pronunciation', id: 'pronunciation', value: extractedCards?.[whichExtraction]?.pronunciation, hidden: true}
         // {name: 'Sentence' extracted from text}
-    ]}
+    ].concat(extractedCards?.[whichExtraction]?.genus?.length ? [
+        {name: 'Gender', id: 'genus', value: extractedCards?.[whichExtraction]?.genus, hidden: true}
+    ] : [])}
 
-    let extractedCards: any[]
+    let extractedCards: any[] | undefined
     let currentShownExtraction: number = 0
     let formVisible: boolean = false
     let formError: string | undefined = undefined
@@ -22,8 +25,13 @@
     let freq: string
     let tooltip: string
     let badgeBgColor: string
-    $: if ($dictionaryWord) {
+    $: if ($dictionaryWord) onWordChanged()
+    function onWordChanged(){ // this might cause problems 
         lemma = $freqList?.[$dictionaryWord.toLowerCase()]?.lemma
+        extractedCards = undefined
+        currentShownExtraction = 0
+        formVisible = false
+        formError = undefined
         const freqIndex = $freqList?.[$dictionaryWord.toLowerCase()]?.freq
         freq = freqIndex < 2000 ? 'vital' : 
                 freqIndex < 5000 ? 'basic' :
@@ -57,6 +65,8 @@
     })
 
     function addToSpacedRepetition(formdata: { [x: string]: string | undefined; }) {
+        console.log(formdata);
+        
         addSrWord($targetLang.id, formdata, false)
         .then(()=>formError = undefined)
         .catch(validationError => formError = 'Word<-Meaning combination already exists');
@@ -102,7 +112,10 @@
             <p hidden={!formError} class="validationError">{formError}</p>
             {#if extractedCards?.length > 1}
                 <span>
-                    Definition <button style:display="inline-block" on:click={()=>currentShownExtraction = (currentShownExtraction+1) % extractedCards.length}>{currentShownExtraction+1}</button> of {extractedCards.length}
+                    Definition 
+                    <button style:display="inline-block" on:click={()=>currentShownExtraction = (currentShownExtraction+1) % extractedCards.length}>{currentShownExtraction+1}</button> 
+                    of {extractedCards.length} 
+                    ({extractedCards?.[currentShownExtraction]?.pos})
                 </span>
             {/if}
         {:else}
