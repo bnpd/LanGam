@@ -8,6 +8,7 @@ import './lists.css';
 	import VocabListItem from "$lib/components/VocabListItem.svelte";
 	import NavbarComponent from "$lib/components/NavbarComponent.svelte";
 	import config from '../../config';
+	import SrComponent from "$lib/components/SrComponent.svelte";
 
 let scheduledTokens: {[key: string]: any} = {}
 let usedTokens: {[key: string]: string[]} = {}
@@ -58,6 +59,7 @@ function reloadLists() {
 </svelte:head>
 
 <TitleWithBackgroundImageComponent>Your vocab</TitleWithBackgroundImageComponent>
+<SrComponent />
 <div class="flex-row">
   <!-- {#if Object.keys(scheduledTokens)?.length}    
     <div class="vocab-column">
