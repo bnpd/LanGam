@@ -103,15 +103,13 @@ function extractCards() {
                 json.flexion=json.flexion.substr(0, json.flexion.length-1) // remove last 4 chars, = trailing newline char
             }
             // add all IPA tags in the whole section to every meaning
-            json.pronunciation=''
+            let pronunciations = []
             for (const ipa of section.getElementsByClassName('IPA')) {
                 if (ipa?.parentElement?.firstChild?.innerText == 'IPA') {
-                    json.pronunciation+=ipa?.innerText?.replaceAll('/', '')+'\\n'
+                    pronunciations.push(ipa?.innerText?.replaceAll('/', ''))
                 }
             }
-            if (json.pronunciation.length >= 1) {
-                json.pronunciation=json.pronunciation.substr(0, json.pronunciation.length-1) // remove last 4 chars, = trailing newline char
-            }
+            json.pronunciation=pronunciations.join('\n')
             meanings.push(json)
         }
         for (const child of section.children) {
