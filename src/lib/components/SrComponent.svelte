@@ -19,6 +19,9 @@
         dueWords.shift()
         showSolution = false
         dueWords = dueWords
+        if (!dueWords?.length) { // we are done, check once again whether we really are
+            dueWords = await getDue($targetLang?.id)
+        }
     }
 </script>
 

@@ -20,6 +20,9 @@
 		// after 1 second, check for SR words
 		setTimeout(async () => {
 			dueWords = await getDue($targetLang.id)
+			setInterval(async () => {
+				dueWords = await getDue($targetLang.id)				
+			}, 300000); // refresh every 5 minutes
 		}, 1000);
 		// after 10 seconds, cache assets
 		setTimeout(() => {
@@ -48,7 +51,7 @@
 	{#if $username}
 		<button on:click={() => goto('/lists')}>
 			My vocab
-			{#if dueWords}
+			{#if dueWords?.length}
 				<BadgeComponent text={dueWords.length} backgroundColor="orangered"/>
 			{/if}
 		</button>
