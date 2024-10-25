@@ -61,7 +61,7 @@
     function handleIframeMessage(event: MessageEvent): void {
         const { term, extractedCards } = event.data;
         if (term) {
-            injectContentIntoIframe(term);
+            $dictionaryWord = term
         }    
         if (extractedCards) {
             dispatch('extractedCards', {cards: extractedCards})

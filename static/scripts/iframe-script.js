@@ -20,18 +20,6 @@ const FOOTER_HTML = `
 </div>
 `
 
-// adapt links to send a message to WiktionaryFrame instead of going to the link target
-document.querySelectorAll('a').forEach(link => {
-    link.addEventListener('click', function(event) {
-    event.preventDefault();
-    const newTerm = link.getAttribute('title');
-    if (newTerm) {
-        parent.postMessage({ term: newTerm }, '*');
-    }
-    });
-});
-parent.postMessage({ extractedCards: extractCards() }, '*');
-
 
 // remove everything that's not the section for the targetLang
 const section = findNextSectionAfter(document.getElementById(language)) // id = h2-text = NameENOfLang
@@ -54,6 +42,18 @@ function findNextSectionAfter(element) {
     // If no <section> is found, return null
     return null;
 }
+
+// adapt links to send a message to WiktionaryFrame instead of going to the link target
+document.querySelectorAll('a').forEach(link => {
+    link.addEventListener('click', function(event) {
+        event.preventDefault();
+        const newTerm = link.getAttribute('title');
+        if (newTerm) {
+            parent.postMessage({ term: newTerm }, '*');
+        }
+    });
+});
+parent.postMessage({ extractedCards: extractCards() }, '*');
 
 
 // extract cards and send them up to WiktionaryFrame
