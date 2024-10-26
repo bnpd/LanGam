@@ -20,7 +20,6 @@ const FOOTER_HTML = `
 </div>
 `
 
-
 // remove everything that's not the section for the targetLang
 const section = findNextSectionAfter(document.getElementById(language)) // id = h2-text = NameENOfLang
 document.getElementById('content').setHTMLUnsafe(section.outerHTML)
@@ -53,6 +52,8 @@ document.querySelectorAll('a').forEach(link => {
         }
     });
 });
+
+// extract SrCards and send to WiktionaryFrame by message
 parent.postMessage({ extractedCards: extractCards() }, '*');
 
 
@@ -60,64 +61,58 @@ parent.postMessage({ extractedCards: extractCards() }, '*');
 function extractCards() {
     var meanings = []
 
-    for (const section of document.getElementsByTagName('section')) {
-        // find section for the target language
-        if (!section?.previousElementSibling?.innerText?.startsWith(language)) { // only look at the correct language section
+    for (const ol of document.getElementsByTagName('ol')) {
+        // find translation, which is the ol which is next sibling of next sibling of part of speach (POS)
+        if (!ol?.previousElementSibling?.previousElementSibling?.firstElementChild)
             continue
+        let json = {}
+        json.pos = ol.previousElementSibling.previousElementSibling.firstElementChild.innerText
+        json.meaning = ol.innerText
+        json.flexion = 
+            ol.nextElementSibling?.nextElementSibling?.nextElementSibling?.classList.contains('inflection-table') // verbs: third sibiling is the table. nouns/adjectives: second sibling has table as child
+            ? ol.nextElementSibling.nextElementSibling.nextElementSibling?.outerHTML
+            : ol.nextElementSibling?.nextElementSibling?.querySelector('.inflection-table')?.outerHTML
+            ?? '';
+        // find element with the gender and plural, which is the ol's previous sibling
+        json.genus = ol.previousElementSibling.querySelector('.gender')?.innerText
+        json.word = ol.previousElementSibling.querySelector('.headword')?.innerText
+        for (const child of ol.previousElementSibling.children) { // alternatively just add the whole previousElementSibling as flexion. No more problems with language specific entries
+            // find child with the current word (because user might have navigated to a word other than the popup's currentMatch)
+            // find child with plural
+            if (child.innerText.includes("plural") && child.nextElementSibling && child.nextElementSibling.innerText) {
+                json.flexion+="pl: "+child.nextElementSibling.innerText+"\\n"
+            }
+            // find child with feminine
+            if (child.innerText=="feminine" && child.nextElementSibling && child.nextElementSibling.innerText) {
+                json.flexion+="fem: "+child.nextElementSibling.innerText
+            }
+            // find child with comparative
+            if (child.innerText.includes("comparative") && child.nextElementSibling && child.nextElementSibling.innerText) {
+                json.flexion+="comp: "+child.nextElementSibling.innerText+"\\n"
+            }
+            // find child with superlative
+            if (child.innerText.includes("superlative") && child.nextElementSibling && child.nextElementSibling.innerText) {
+                json.flexion+="sup: "+child.nextElementSibling.innerText+"\\n"
+            }
         }
-        for (const ol of section.getElementsByTagName('ol')) {
-            // find translation, which is the ol which is next sibling of next sibling of part of speach (POS)
-            if (!ol?.previousElementSibling?.previousElementSibling?.firstElementChild)
-                continue
-            let json = {}
-            json.pos = ol.previousElementSibling.previousElementSibling.firstElementChild.innerText
-            json.meaning = ol.innerText
-            json.flexion = 
-                ol.nextElementSibling?.nextElementSibling?.nextElementSibling?.classList.contains('inflection-table') // verbs: third sibiling is the table. nouns/adjectives: second sibling has table as child
-                ? ol.nextElementSibling.nextElementSibling.nextElementSibling?.outerHTML
-                : ol.nextElementSibling?.nextElementSibling?.querySelector('.inflection-table')?.outerHTML
-                ?? '';
-            // find element with the gender and plural, which is the ol's previous sibling
-            json.genus = ol.previousElementSibling.querySelector('.gender')?.innerText
-            json.word = ol.previousElementSibling.querySelector('.headword')?.innerText
-            for (const child of ol.previousElementSibling.children) { // alternatively just add the whole previousElementSibling as flexion. No more problems with language specific entries
-                // find child with the current word (because user might have navigated to a word other than the popup's currentMatch)
-                // find child with plural
-                if (child.innerText.includes("plural") && child.nextElementSibling && child.nextElementSibling.innerText) {
-                    json.flexion+="pl: "+child.nextElementSibling.innerText+"\\n"
-                }
-                // find child with feminine
-                if (child.innerText=="feminine" && child.nextElementSibling && child.nextElementSibling.innerText) {
-                    json.flexion+="fem: "+child.nextElementSibling.innerText
-                }
-                // find child with comparative
-                if (child.innerText.includes("comparative") && child.nextElementSibling && child.nextElementSibling.innerText) {
-                    json.flexion+="comp: "+child.nextElementSibling.innerText+"\\n"
-                }
-                // find child with superlative
-                if (child.innerText.includes("superlative") && child.nextElementSibling && child.nextElementSibling.innerText) {
-                    json.flexion+="sup: "+child.nextElementSibling.innerText+"\\n"
-                }
-            }
-            if (json.flexion.length >= 1) {
-                json.flexion=json.flexion.substr(0, json.flexion.length-1) // remove last 4 chars, = trailing newline char
-            }
-            // add all IPA tags in the whole section to every meaning
-            let pronunciations = []
-            for (const ipa of section.getElementsByClassName('IPA')) {
-                if (ipa?.parentElement?.firstChild?.innerText == 'IPA') {
-                    pronunciations.push(ipa?.innerText?.replaceAll('/', ''))
-                }
-            }
-            json.pronunciation=pronunciations.join('\n')
-            meanings.push(json)
+        if (json.flexion.length >= 1) {
+            json.flexion=json.flexion.substr(0, json.flexion.length-1) // remove last 4 chars, = trailing newline char
         }
-        for (const child of section.children) {
-            if (child?.previousElementSibling?.innerText?.includes('Etymology')) {
-                meanings.forEach(json => {
-                    json['Etymology']=child.innerText
-                })
+        // add all IPA tags in the whole section to every meaning
+        let pronunciations = []
+        for (const ipa of document.getElementsByClassName('IPA')) {
+            if (ipa?.parentElement?.firstChild?.innerText == 'IPA') {
+                pronunciations.push(ipa?.innerText?.replaceAll('/', ''))
             }
+        }
+        json.pronunciation=pronunciations.join('\n')
+        meanings.push(json)
+    }
+    for (const child of document.children) {
+        if (child?.previousElementSibling?.innerText?.includes('Etymology')) {
+            meanings.forEach(json => {
+                json['Etymology']=child.innerText
+            })
         }
     }
     return meanings
