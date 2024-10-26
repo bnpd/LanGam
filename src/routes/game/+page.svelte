@@ -50,9 +50,9 @@
 	<FeedbackComponent />
 	{#if $username}
 		<button on:click={() => goto('/lists')}>
-			My vocab
+			Review vocab
 			{#if dueWords?.length}
-				<BadgeComponent text={dueWords.length} backgroundColor="orangered"/>
+				<BadgeComponent text={dueWords.length} backgroundColor="darkblue"/>
 			{/if}
 		</button>
 		<!--<WebPushSubscription />-->

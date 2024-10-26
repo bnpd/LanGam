@@ -4,6 +4,7 @@
 	import { getDue, updateCard } from "./backend";
 	import type { VocabCard } from "$lib/fsrs";
 	import { onMount } from "svelte";
+	import BadgeComponent from "./BadgeComponent.svelte";
 
     let showSolution = false
     let dueWords: VocabCard[]
@@ -25,26 +26,28 @@
     }
 </script>
 
+<h3>Spaced Repetition</h3>
 {#if dueWords?.length}
     {@const card = dueWords[0]}
     <div class="card" style="line-height: 2em;">
-        {(card.reversed ? $targetLang.shortcode : $nativeLang).toUpperCase()}: {card.reversed ? card.word : card.meaning} {#if showSolution && card.reversed && card.genus}&nbsp;&nbsp;<em>{card.genus}</em>{/if} <br>
+        <BadgeComponent text={(card.reversed ? $targetLang.shortcode : $nativeLang).toUpperCase()}/>&nbsp;{card.reversed ? card.word : card.meaning} {#if showSolution && card.reversed && card.genus}&nbsp;&nbsp;<em>{card.genus}</em>{/if} <br>
         <hr>
-        {(card.reversed ? $nativeLang : $targetLang.shortcode).toUpperCase()}: 
-        {#if showSolution}
+        <BadgeComponent text={(card.reversed ? $nativeLang : $targetLang.shortcode).toUpperCase()}/>&nbsp;
+        <span class:hidden={!showSolution}>
             {card.reversed ? card.meaning : card.word} {#if !card.reversed && card.genus}&nbsp;&nbsp;<em>{card.genus}</em>{/if} <br>
             {#if card.notes}
-                {card.notes} <br>
+                🗒 {card.notes} <br>
             {/if}
             {#if card.pronunciation}
-                Pronounciation: {card.pronunciation} <br>
+                🗣 {card.pronunciation} <br>
             {/if}
+        </span>
+        {#if showSolution}
             <button on:click={()=>onSubmitRating(card, Rating.Again)}>{'Again'}</button>
             <button on:click={()=>onSubmitRating(card, Rating.Hard)}>{'Hard'}</button>
             <button on:click={()=>onSubmitRating(card, Rating.Good)}>{'Good'}</button>
             <button on:click={()=>onSubmitRating(card, Rating.Easy)}>{'Easy'}</button>
         {:else}
-            <br>
             <button on:click={()=>showSolution=true}>Solution</button>
         {/if}
     </div>
