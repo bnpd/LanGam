@@ -13,26 +13,24 @@ import './lists.css';
 let scheduledTokens: {[key: string]: any} = {}
 let usedTokens: {[key: string]: string[]} = {}
 let seenTokens: {[key: string]: string[]} = {}
-onMount(() => {
-  reloadLists()
-})
+let showAllWords = false
 
 // /// Functions ///
 
 /**
  * Reload (or load initially) both lists
  */
-function reloadLists() {
+async function loadVocabLists() {
   // remove previous content
   scheduledTokens = {}
   seenTokens = {}
 
   // load lists
-  getUserLang($username, $targetLang.id).then(user_lang => {
-      scheduledTokens = user_lang.sr_words
-      usedTokens = user_lang.used_words
-      seenTokens = user_lang.seen_words
-  })
+  const user_lang = await getUserLang($username, $targetLang.id)
+  scheduledTokens = user_lang.sr_words
+  usedTokens = user_lang.used_words
+  seenTokens = user_lang.seen_words
+  showAllWords = true
 }
 
 /**
@@ -60,51 +58,56 @@ function reloadLists() {
 
 <TitleWithBackgroundImageComponent>Your vocab</TitleWithBackgroundImageComponent>
 <SrComponent />
-<div class="flex-row">
-  <!-- {#if Object.keys(scheduledTokens)?.length}    
+{#if showAllWords}
+  <div class="flex-row">
+    <!-- {#if Object.keys(scheduledTokens)?.length}    
+      <div class="vocab-column">
+        <h3>
+          Spaced Repetition
+          <span>{Object.keys(scheduledTokens).length ? "("+Object.keys(scheduledTokens).length+" words)" : ""}</span>
+        </h3>
+        <div>
+          {#each Object.keys(scheduledTokens) as key}
+            <VocabListItem title={scheduledTokens[key].word} >
+              <BadgeComponent text='AI' tooltip="Estimate when you are likely to forget it, according to Spaced Repetition science. We'll try to show it before that day."/>
+              Due: {Math.min(9999, scheduledTokens[key]?.interval)}&nbsp;d
+            </VocabListItem>
+          {/each}  
+        </div>
+      </div>
+    {/if} -->
     <div class="vocab-column">
-      <h1>
-        Spaced Repetition
-        <span>{Object.keys(scheduledTokens).length ? "("+Object.keys(scheduledTokens).length+" words)" : ""}</span>
-      </h1>
+      <h3>
+        Used in chat
+        <span>{Object.keys(usedTokens).length ? "("+Object.keys(usedTokens).length+" words)" : ""}</span>
+      </h3>
       <div>
-        {#each Object.keys(scheduledTokens) as key}
-          <VocabListItem title={scheduledTokens[key].word} >
-            <BadgeComponent text='AI' tooltip="Estimate when you are likely to forget it, according to Spaced Repetition science. We'll try to show it before that day."/>
-            Due: {Math.min(9999, scheduledTokens[key]?.interval)}&nbsp;d
+        {#each Object.keys(usedTokens) as key}
+          <VocabListItem>
+            {usedTokens[key].join(', ')}
+          </VocabListItem>
+        {/each}
+      </div>
+    </div>
+    <div class="vocab-column">
+      <h3>
+        Seen
+        <span>{Object.keys(seenTokens).length ? "("+Object.keys(seenTokens).length+" families)" : ""}</span>
+      </h3>
+      <div>
+        {#each Object.keys(seenTokens) as key}
+          <VocabListItem>
+            {seenTokens[key].join(', ')}
           </VocabListItem>
         {/each}  
       </div>
     </div>
-  {/if} -->
-  <div class="vocab-column">
-    <h1>
-      Used in chat
-      <span>{Object.keys(usedTokens).length ? "("+Object.keys(usedTokens).length+" words)" : ""}</span>
-    </h1>
-    <div>
-      {#each Object.keys(usedTokens) as key}
-        <VocabListItem>
-          {usedTokens[key].join(', ')}
-        </VocabListItem>
-      {/each}
-    </div>
   </div>
-  <div class="vocab-column">
-    <h1>
-      Seen
-      <span>{Object.keys(seenTokens).length ? "("+Object.keys(seenTokens).length+" families)" : ""}</span>
-    </h1>
-    <div>
-      {#each Object.keys(seenTokens) as key}
-        <VocabListItem>
-          {seenTokens[key].join(', ')}
-        </VocabListItem>
-      {/each}  
-    </div>
-  </div>
-</div>
-<br><br>
+  <br><br>
+{:else}
+  <button on:click={loadVocabLists}>List all seen words</button>
+{/if}
+  
 <NavbarComponent>
   <button on:click={()=>{history.back()}}>◄ Back</button>
 </NavbarComponent>
