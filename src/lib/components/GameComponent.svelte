@@ -2,7 +2,7 @@
     import { onMount } from 'svelte';
     import ReaderComponent from './ReaderComponent.svelte';
     import { completeLevel, getPlayer, getPlayerLevel, getUserLang, getUserTaskStats, refreshPlayer, updatePlayer } from './backend';
-    import { username, nativeLang, targetLang, isSoundOn, currentTask, reviews, failedWords, reviewDocIds, currentlyScrolledParagraphIndex, loadingTask, gameChatHistory, player, chatOutcome, currentGameId, inlineChatHistory } from '$lib/stores';
+    import { username, nativeLang, targetLang, isSoundOn, currentTask, reviews, failedWords, reviewDocIds, currentlyScrolledParagraphIndex, loadingTask, gameChatHistory, player, chatOutcome, currentGameId, inlineChatHistory, morphMarkFilter } from '$lib/stores';
 	import { goto } from '$app/navigation';
 	import Toast from './Toast.svelte';
 	import ChatComponent from './ChatComponent.svelte';
@@ -242,7 +242,8 @@
     <span slot="afterTask" hidden={!$currentTask}>{#if $gameChatHistory?.length}<ChatComponent readerComponent={readerComponent} inline={true} chatBoxTitle="Twoja odpowiedź 🤙" chatHistory={gameChatHistory} srWords={new Set()} trySpeak={tts?.trySpeak} isGame={true} showGameChatSuggestions={showGameChatSuggestions}/>{/if}</span>
     <span slot="afterSolution">{#if $gameChatHistory?.length}<ChatComponent readerComponent={readerComponent} inline={true} chatBoxTitle={undefined} chatHistory={gameChatHistory} translationLang='en' isGame={true}/>{/if}</span>
 </ReaderComponent>
-<div style="margin: auto">
+<div style="margin: auto; display: flex; flex-direction: row; width: 95vw;">
+    <input type="text" placeholder="Case/Aspect/Voice/Tense=/Number=" bind:value={$morphMarkFilter} style="flex-grow: 1; width: 1px;">&nbsp;
     <button class="gameNavBtn" class:loading={$loadingTask} on:click={onLevelBackbtnClick} hidden={!$player?.level_history?.order?.length}>
         ◀
     </button>

@@ -3,7 +3,6 @@
 	import { failedWords } from "$lib/stores";
 	import type Token from "$lib/Token";
 	import TokenComponent from "./TokenComponent.svelte";
-    const NON_CLICKABLE_POS_IDS = new Set([-1, 97, 99, 101]) // added -1 for whitespace
 
 
     export let task: DocumentC
@@ -84,10 +83,8 @@
 <svelte:element this={taskParagraph.htmlTag}>
   {#each taskParagraph.words as token}
     <TokenComponent 
-      word={token?.word} 
-      isFailed={$failedWords?.has(token?.word)}
+      token={token}
       isSrWord={srWords?.has(token?.lemma_)}
-      isClickable={!NON_CLICKABLE_POS_IDS.has(token?.pos)}
       on:click={() => {onWordClick(token)}} />
   {/each}          
 </svelte:element>

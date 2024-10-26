@@ -122,8 +122,12 @@ div[contenteditable]:focus {
   color: red;
 }
 
-.srWord {
+.grammar-marked {
   color: goldenrod;
+}
+
+.srWord {
+  color: darkslategray;
 }
 
 .two-columns {

@@ -1,37 +1,35 @@
 <!-- svelte-ignore a11y-no-static-element-interactions -->
 <!-- svelte-ignore a11y-click-events-have-key-events -->
 <script lang="ts" defer>
-	import { dictionaryWord } from "$lib/stores";
+	import { dictionaryWord, failedWords, morphMarkFilter } from "$lib/stores";
+    const NON_CLICKABLE_POS_IDS = new Set([-1, 97, 99, 101]) // added -1 for whitespace
 
-    export let word: string;
-    export let isFailed: boolean;
+    export let token: {word: string, pos: number, lemma_: string, morph?: string};
+    $: isFailed = $failedWords?.has(token?.word);
     export let isSrWord: boolean = false;
-    export let isClickable: boolean;
+    $: isClickable = !NON_CLICKABLE_POS_IDS.has(token?.pos);
 
     function onDictClick(event: Event) {
-        $dictionaryWord = word
-        
-
-        // // DO NOT MERGE THIS INTO MASTER BRANCH
-    
-        // const isAndroid = /Android/i.test(navigator.userAgent); // chech whether user agent matches /Android/ regex
-
-        // if (isAndroid) {
-        //     window.open((event.currentTarget as HTMLAnchorElement).href);
-        // } else {
-        //     // If not on Android, directly go to Google Translate
-        //     window.open(`https://translate.google.com/?sl=${$targetLang.shortcode}&tl=${$nativeLang}&text=${word}`);
-        // }
+        $dictionaryWord = token?.word
     }
 </script>
 
 {#if isClickable}
-<span style:display="inline-block" class={'pointer span-'+word + (isFailed ? ' clicked' : isSrWord ? ' srWord' : '')} on:click>
+<span 
+    style:display="inline-block" 
+    class={
+        'pointer span-'
+        +token?.word 
+        + (isFailed ? ' clicked' : 
+            isSrWord ? ' srWord' : 
+            $morphMarkFilter?.length && $morphMarkFilter.split('&&').every(filter => token?.morph?.includes(filter.trim())) ? ' grammar-marked' : 
+            '')} 
+    on:click>
     {#if isFailed}
-    <a href={'langki://word/?w='+word} on:click|stopPropagation|preventDefault={onDictClick}>📕</a>
+    <a href={'langki://word/?w='+token?.word} on:click|stopPropagation|preventDefault={onDictClick}>📕</a>
     {/if}
-    {word}
+    {token?.word}
 </span>
 {:else}
-{word}
+{token?.word}
 {/if}
