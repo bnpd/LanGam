@@ -3,6 +3,14 @@
     export let submitOptions: {text: string, handler: (formdata: { [x: string]: string | undefined; }) => void}
 
     let divFieldsById: {[id: string]: HTMLDivElement} = {}
+
+    function onFocusNodeSelectContent(e: Event) {
+      const range = document.createRange();
+      range.selectNodeContents(e.currentTarget);
+      const selection = window.getSelection();
+      selection?.removeAllRanges();
+      selection?.addRange(range);
+    }
 </script>
 
 <style>
@@ -39,7 +47,7 @@ div[contenteditable] {
         {#each fields as field}
         <div class="input-container">
             <label for={field.id} hidden={field.hidden}>{field.name}</label>
-            <div contenteditable id={field.id} hidden={field.hidden} bind:this={divFieldsById[field.id]}>{field?.value ?? ''}</div>
+            <div contenteditable id={field.id} hidden={field.hidden} bind:this={divFieldsById[field.id]} on:focus={onFocusNodeSelectContent}>{field?.value ?? ''}</div>
         </div>
         {/each}
         {#each submitOptions as submitOption}
