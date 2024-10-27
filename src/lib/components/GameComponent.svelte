@@ -2,7 +2,7 @@
     import { onMount } from 'svelte';
     import ReaderComponent from './ReaderComponent.svelte';
     import { completeLevel, getPlayer, getPlayerLevel, getUserLang, updatePlayer } from './backend';
-    import { username, nativeLang, targetLang, isSoundOn, currentTask, failedWords, currentlyScrolledParagraphIndex, loadingTask, gameChatHistory, player, chatOutcome, currentGameId, inlineChatHistory, morphHighlightFilter } from '$lib/stores';
+    import { username, nativeLang, targetLang, isSoundOn, currentTask, failedWords, currentlyScrolledParagraphIndex, loadingTask, gameChatHistory, player, chatOutcome, currentGameId, inlineChatHistory, morphHighlightFilter, currentTaskNParagraphs } from '$lib/stores';
 	import { goto } from '$app/navigation';
 	import Toast from './Toast.svelte';
 	import ChatComponent from './ChatComponent.svelte';
@@ -212,8 +212,8 @@
     </button>
     <PowersComponent on:use_power={e => usePower(e.detail.power)}/>
     {#each (Object.entries($currentTask?.outcomes ?? {})) as [outcome, obj]}
-        {#if $player?.level_history?.[obj.goto] || $chatOutcome == outcome}
-            <button class="gameNavBtn" class:loading={$loadingTask} on:click={()=>onAnswbtnClick(outcome)}>
+        {#if $player?.level_history?.[obj.goto] || $chatOutcome == outcome} <!--TODO: fix if there are two outcomes with same seq_id -->
+            <button class="gameNavBtn" class:highlighted={$currentlyScrolledParagraphIndex >= $currentTaskNParagraphs-1} class:loading={$loadingTask} on:click={()=>onAnswbtnClick(outcome)}>
                 ▶
             </button>
         {:else}

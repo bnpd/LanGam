@@ -1,6 +1,6 @@
 <script lang="ts" defer>
 	import type DocumentC from "$lib/DocumentC";
-	import { failedWords } from "$lib/stores";
+	import { failedWords, currentTaskNParagraphs } from "$lib/stores";
 	import type Token from "$lib/Token";
 	import TokenComponent from "./TokenComponent.svelte";
 
@@ -47,6 +47,10 @@
             }
             isTitle = false // done with title
         }
+        
+        if (task.title) { // if it is an acutal level, not just a chat bubble which doesn't have title, set task length
+            $currentTaskNParagraphs = resParas.length
+        }        
         return resParas
     }
 
