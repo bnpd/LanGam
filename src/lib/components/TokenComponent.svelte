@@ -1,7 +1,7 @@
 <!-- svelte-ignore a11y-no-static-element-interactions -->
 <!-- svelte-ignore a11y-click-events-have-key-events -->
 <script lang="ts" defer>
-	import { dictionaryWord, failedWords, morphMarkFilter } from "$lib/stores";
+	import { dictionaryWord, failedWords, morphHighlightFilter } from "$lib/stores";
     const NON_CLICKABLE_POS_IDS = new Set([-1, 97, 99, 101]) // added -1 for whitespace
 
     export let token: {word: string, pos: number, lemma_: string, morph?: string};
@@ -22,7 +22,7 @@
         +token?.word 
         + (isFailed ? ' clicked' : 
             isSrWord ? ' srWord' : 
-            $morphMarkFilter?.length && $morphMarkFilter.split('&&').every(filter => token?.morph?.includes(filter.trim())) ? ' grammar-marked' : 
+            $morphHighlightFilter?.length && $morphHighlightFilter.split('&&').every(filter => token?.morph?.includes(filter.trim())) ? ' grammar-marked' : 
             '')} 
     on:click>
     {#if isFailed}

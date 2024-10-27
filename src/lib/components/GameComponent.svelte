@@ -1,8 +1,8 @@
 <script lang="ts" defer>
     import { onMount } from 'svelte';
     import ReaderComponent from './ReaderComponent.svelte';
-    import { completeLevel, getPlayer, getPlayerLevel, getUserLang, getUserTaskStats, refreshPlayer, updatePlayer } from './backend';
-    import { username, nativeLang, targetLang, isSoundOn, currentTask, reviews, failedWords, reviewDocIds, currentlyScrolledParagraphIndex, loadingTask, gameChatHistory, player, chatOutcome, currentGameId, inlineChatHistory, morphMarkFilter } from '$lib/stores';
+    import { completeLevel, getPlayer, getPlayerLevel, getUserLang, updatePlayer } from './backend';
+    import { username, nativeLang, targetLang, isSoundOn, currentTask, failedWords, currentlyScrolledParagraphIndex, loadingTask, gameChatHistory, player, chatOutcome, currentGameId, inlineChatHistory, morphHighlightFilter } from '$lib/stores';
 	import { goto } from '$app/navigation';
 	import Toast from './Toast.svelte';
 	import ChatComponent from './ChatComponent.svelte';
@@ -10,9 +10,9 @@
 	import DocumentC from '$lib/DocumentC';
 	import type TtsComponent from './TtsComponent.svelte';
 	import PowersComponent from './PowersComponent.svelte';
-	import BadgeComponent from './BadgeComponent.svelte';
 	import TooltipComponent from './TooltipComponent.svelte';
 	import DictionaryComponent from './DictionaryComponent.svelte';
+	import GrammarBookComponent from './GrammarBookComponent.svelte';
 
     const TOAST_REDIRECTED_SAVED_TASK = "Your selected text has been queued cause you have a saved game level."
     const TEXT_REJECT_SAVED_TASK = "Discard saved"
@@ -34,9 +34,9 @@
     let congratsMessage: string | undefined;
     let statsClosedPromise: Promise<boolean>;
     let statsClosedPromiseResolve: Function;
-    let reviewsSentPromise: Promise<undefined>;
     let redirectedDoc: string | null
-    let showGameChatSuggestions: boolean = false; // 
+    let showGameChatSuggestions: boolean = false;
+    let grammarChapter: string | undefined
 
     onMount(async () => {
         if (!$username) {
@@ -94,16 +94,6 @@
     async function onAnswbtnClick(outcome: string) {
         speechSynthesis.cancel()
 
-        if ($currentTask) {
-            $reviews.push(structuredClone($failedWords))
-            $reviews = $reviews
-            $reviewDocIds.push($currentTask.docId)
-            $reviewDocIds = $reviewDocIds
-            $failedWords.clear()
-            $failedWords = $failedWords
-        }
-
-        // reviewsSentPromise = sendPendingReviews()
         let completeLevelPromise = completeLevel($player.id, $currentTask.docId, outcome)
 
         statsClosedPromise = new Promise<boolean>((resolve, reject) => {
@@ -120,19 +110,7 @@
         solutionText = ''
         $loadingTask = true
 
-        // try {
-        //     await reviewsSentPromise
-        // } catch (rejection) {
-        //     toast = "Offline. Your data was saved."
-        //     setTimeout(() => {
-        //         goto('/catalog')
-        //     }, 1500);
-        //     return
-        // }
-
         try {
-            console.log(player);
-            
             $player = await completeLevelPromise
         } catch (rejection) {
             console.error(rejection);
@@ -159,28 +137,6 @@
         initChatHistory()
     }
 
-    // /**
-    //  * Send queued reviews to backend
-    //  * @returns {Promise<unknown>} Promise that is resolved when send was successful or rejected if offline
-    //  */
-    // async function sendPendingReviews(){
-    //     const times = $reviewDocIds.length
-    //     for (let i = 0; i < times; i++) {
-    //         try {
-    //             await sendReview($targetLang.shortcode, $reviewDocIds[0], Array.from($reviews[0]))            
-    //         } catch (offlineError) {
-    //             return Promise.reject(offlineError)
-    //         }
-            
-    //         $reviews.shift()
-    //         $reviews = $reviews
-    //         $reviewDocIds.shift()
-    //         $reviewDocIds = $reviewDocIds 
-    //     }
-    //     return 
-    // }
-
-
     async function nextTask(restoreScrollPosition: boolean = false){
         const level = (await getPlayerLevel($player.id).catch(_offline => {
             toast = "Text has not been downloaded offline. Going to catalog."
@@ -197,7 +153,6 @@
         if (doc) $loadingTask = false;
         $currentTask = doc
         
-        
         solutionText = doc?.title?.translations[$nativeLang] + '\n\n' + doc?.text?.translations[$nativeLang]
 
 
@@ -205,6 +160,11 @@
             $currentlyScrolledParagraphIndex = 0
         }
         showGameChatSuggestions = false
+
+        grammarChapter = level.expand?.grammar
+        $morphHighlightFilter = level.expand?.grammar?.morphHighlightFilter
+        console.log(grammarChapter);
+        
 
         // the following calculation of new word count runs async in the background
         getUserLang($username, $targetLang.id).then(user_lang => {
@@ -243,7 +203,10 @@
     <span slot="afterSolution">{#if $gameChatHistory?.length}<ChatComponent readerComponent={readerComponent} inline={true} chatBoxTitle={undefined} chatHistory={gameChatHistory} translationLang='en' isGame={true}/>{/if}</span>
 </ReaderComponent>
 <div style="margin: auto; display: flex; flex-direction: row; width: 100%;">
-    <input type="text" placeholder="Case/Aspect/Voice/Tense=/Number=" bind:value={$morphMarkFilter} style="flex-grow: 1; width: 1px;">&nbsp;
+    <input type="text" placeholder="Case/Aspect/Voice/Tense=/Number=" bind:value={$morphHighlightFilter} style="flex-grow: 1; width: 1px;">&nbsp;
+    {#if grammarChapter}
+        <GrammarBookComponent content={grammarChapter}/>
+    {/if}
     <button class="gameNavBtn" class:loading={$loadingTask} on:click={onLevelBackbtnClick} hidden={!$player?.level_history?.order?.length}>
         ◀
     </button>

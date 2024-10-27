@@ -17,7 +17,7 @@ export const failedWords = createPersistentStore('failedWords', new Set());
 export const currentTask = createPersistentStore('currentTask', null);
 export const currentlyScrolledParagraphIndex = createPersistentStore('currentScrolledParagraphIndex', 0);
 export const currentGameId = createPersistentStore('currentGameId', null);
-export const morphMarkFilter = createPersistentStore('morphMarkFilter', "Case=Ins");
+export const morphHighlightFilter = createPersistentStore('morphHighlightFilter', "Case=Ins");
 
 /* Chat Component Stores */
 export const inlineChatHistory: Writable<{role: string, content: DocumentC}[]> = createPersistentStore('inlineChatHistory', []);
