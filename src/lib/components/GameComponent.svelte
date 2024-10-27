@@ -242,7 +242,7 @@
     <span slot="afterTask" hidden={!$currentTask}>{#if $gameChatHistory?.length}<ChatComponent readerComponent={readerComponent} inline={true} chatBoxTitle="Twoja odpowiedź 🤙" chatHistory={gameChatHistory} srWords={new Set()} trySpeak={tts?.trySpeak} isGame={true} showGameChatSuggestions={showGameChatSuggestions}/>{/if}</span>
     <span slot="afterSolution">{#if $gameChatHistory?.length}<ChatComponent readerComponent={readerComponent} inline={true} chatBoxTitle={undefined} chatHistory={gameChatHistory} translationLang='en' isGame={true}/>{/if}</span>
 </ReaderComponent>
-<div style="margin: auto; display: flex; flex-direction: row; width: 95vw;">
+<div style="margin: auto; display: flex; flex-direction: row; width: 100%;">
     <input type="text" placeholder="Case/Aspect/Voice/Tense=/Number=" bind:value={$morphMarkFilter} style="flex-grow: 1; width: 1px;">&nbsp;
     <button class="gameNavBtn" class:loading={$loadingTask} on:click={onLevelBackbtnClick} hidden={!$player?.level_history?.order?.length}>
         ◀
