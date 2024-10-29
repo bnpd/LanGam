@@ -48,6 +48,10 @@ button, input[type="submit"] {
   box-shadow: var(--box-shadow-strong); /* Downwards shadow and on left and right side*/
 }
 
+button:disabled, input[type="submit"]:disabled {
+  opacity: 60%;
+}
+
 textarea {
   width: 95%;
   margin-bottom: 10px;

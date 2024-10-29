@@ -1,10 +1,16 @@
 <script lang="ts">
     export let fields: {id: string, name: string, value?: string, hidden?: string}[]
-    export let submitOptions: {text: string, handler: (formdata: { [x: string]: string | undefined; }) => void}
+    export let submitOptions: {text: string, handler: (formdata: { [x: string]: string | undefined; }, disableOnSubmit?: boolean, disabled?: boolean) => void}
 
     let divFieldsById: {[id: string]: HTMLDivElement} = {}
 
-    function onFocusNodeSelectContent(e: Event) {
+    function onFocusNode(e: Event) {
+      // re-activate all submit buttons
+      for (const i in submitOptions) {
+        submitOptions[i].disabled = false
+      }
+
+      // select the content
       const range = document.createRange();
       range.selectNodeContents(e.currentTarget);
       const selection = window.getSelection();
@@ -47,11 +53,19 @@ div[contenteditable] {
         {#each fields as field}
         <div class="input-container">
             <label for={field.id} hidden={field.hidden}>{field.name}</label>
-            <div contenteditable id={field.id} hidden={field.hidden} bind:this={divFieldsById[field.id]} on:focus={onFocusNodeSelectContent}>{field?.value ?? ''}</div>
+            <div contenteditable id={field.id} hidden={field.hidden} bind:this={divFieldsById[field.id]} on:focus={onFocusNode}>{field?.value ?? ''}</div>
         </div>
         {/each}
         {#each submitOptions as submitOption}
-            <input type="submit" value={submitOption.text} on:click|preventDefault={()=>{submitOption.handler(fields.reduce((acc, field) => {acc[field.id] = divFieldsById[field.id]?.innerText; return acc}, {}))}}>
+            <input 
+            type="submit" 
+            value={submitOption.text} 
+            on:click|preventDefault={()=>{
+              submitOption.handler(fields.reduce((acc, field) => {acc[field.id] = divFieldsById[field.id]?.innerText; return acc}, {}))
+              if (submitOption.disableOnSubmit) submitOption.disabled = true
+            }}
+            disabled={submitOption.disabled}
+            >
         {/each}
     </form>
 {/if}

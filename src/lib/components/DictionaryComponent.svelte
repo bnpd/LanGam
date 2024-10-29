@@ -21,6 +21,7 @@
     let extractedCards: any[] | undefined
     let currentShownExtraction: number = 0
     let formVisible: boolean = false
+    let successMessage: string | undefined = undefined
     let formError: string | undefined = undefined
     let lemma: string | undefined
     let freq: string
@@ -34,6 +35,7 @@
         extractedCards = undefined
         currentShownExtraction = 0
         formVisible = false
+        successMessage = undefined
         formError = undefined
         const freqIndex = $freqList?.[$dictionaryWord.toLowerCase()]?.freq
         freq = freqIndex < 2000 ? 'vital' : 
@@ -68,17 +70,27 @@
     })
 
     function addToSpacedRepetition(formdata: { [x: string]: string | undefined; }) {
-        console.log(formdata);
-        
+        successMessage = undefined
+        formError = undefined
         addSrWord($targetLang.id, formdata, false)
-        .then(()=>formError = undefined)
-        .catch(_validationError => formError = 'Word<-Meaning combination already exists');
+        .then(()=>{
+            successMessage = 'Saved!'
+        })
+        .catch(_validationError => {
+            formError = 'Word<-Meaning combination already exists'
+        });
     }
 
     function addToSpacedRepetitionReversed(formdata: { [x: string]: string | undefined; }) {
+        successMessage = undefined
+        formError = undefined
         addSrWord($targetLang.id, formdata, true)
-        .then(()=>formError = undefined)
-        .catch(_validationError => formError = 'Word->Meaning combination already exists');
+        .then(()=>{
+            successMessage = 'Saved!'
+        })
+        .catch(_validationError => {
+            formError = 'Word->Meaning combination already exists'
+        });
     }
 
     function onPopstate() {
@@ -117,12 +129,16 @@
         bind:this={wiktionaryFrame}
     />
     {#if formVisible}
-        {#each extractedCards ?? [] as _, i}
+        {#each extractedCards ?? [undefined] as _, i}
             <div hidden={currentShownExtraction!==i}>
-                <FormComponent fields={formVisible ? getSrFormFields(i) : undefined} submitOptions={[{text:'Add', handler: addToSpacedRepetition}, {text:'Reversed', handler: addToSpacedRepetitionReversed}]}/>
+                <FormComponent 
+                fields={formVisible ? getSrFormFields(i) : undefined} 
+                submitOptions={[
+                    {text:'Add', handler: addToSpacedRepetition, disableOnSubmit: true}, 
+                    {text:'Reversed', handler: addToSpacedRepetitionReversed, disableOnSubmit: true}]}
+                />
             </div>
         {/each}
-        <p hidden={!formError} class="validationError">{formError}</p>
         {#if extractedCards?.length > 1}
             <span>
                 Definition 
@@ -136,12 +152,11 @@
     {/if}
 </Popup>
 <Toast message={toastDicardFormInput} textReject="Discard" onReject={()=> $dictionaryWord = undefined}/>
+<Toast message={successMessage}/>
+<Toast message={formError}/>
 
 <style>
     h2 {
         margin-top: -2%;
-    }
-    .validationError {
-        color: orangered;
     }
 </style>
