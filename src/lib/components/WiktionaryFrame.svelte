@@ -21,14 +21,19 @@
 
     // Function to fetch content from Wiktionary API
     async function fetchWiktionaryPage(term: string): Promise<string> {
-        const response = await fetch(`https://en.m.wiktionary.org/w/api.php?action=parse&page=${term}&mobileformat=true&format=json&origin=*`);
-        const data = await response.json();
+        const data = await (await fetch(`https://en.m.wiktionary.org/w/api.php?action=parse&page=${term}&mobileformat=true&format=json&origin=*`)).json();
         if (data?.parse?.text?.['*']) {
             return data.parse.text['*']; // Get the HTML content
-        } else {
-            dispatch('wordNotFound');
-            return 'No dictionary entry availabe, sorry.'
+        } else if (data?.error?.code == "missingtitle" && term.charAt(0).toUpperCase() == term.charAt(0)) {
+            // page not found and term is capitalized. Try non-capitalized instead.
+            const data2 = await (await fetch(`https://en.m.wiktionary.org/w/api.php?action=parse&page=${term.toLowerCase()}&mobileformat=true&format=json&origin=*`)).json();
+            if (data2?.parse?.text?.['*']) {
+                return data2.parse.text['*'];
+            }
         }
+
+        dispatch('wordNotFound');
+        return 'No dictionary entry availabe, sorry.'
     }
 
     // Function to inject content into iframe via srcdoc
