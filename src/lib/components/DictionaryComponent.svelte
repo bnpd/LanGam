@@ -6,6 +6,7 @@
 	import FormComponent from "./FormComponent.svelte";
 	import { addSrWord } from "./backend";
 	import WiktionaryFrame from "./WiktionaryFrame.svelte";
+	import Toast from "./Toast.svelte";
 
     function getSrFormFields(whichExtraction: number) {return [
         {name: 'Word', id: 'word', value: $dictionaryWord},
@@ -26,6 +27,7 @@
     let tooltip: string
     let badgeBgColor: string
     let wiktionaryFrame: WiktionaryFrame
+    let toastDicardFormInput: string
     $: if ($dictionaryWord) onWordChanged()
     function onWordChanged(){ // this might cause problems 
         lemma = $freqList?.[$dictionaryWord.toLowerCase()]?.lemma
@@ -70,18 +72,22 @@
         
         addSrWord($targetLang.id, formdata, false)
         .then(()=>formError = undefined)
-        .catch(validationError => formError = 'Word<-Meaning combination already exists');
+        .catch(_validationError => formError = 'Word<-Meaning combination already exists');
     }
 
     function addToSpacedRepetitionReversed(formdata: { [x: string]: string | undefined; }) {
         addSrWord($targetLang.id, formdata, true)
         .then(()=>formError = undefined)
-        .catch(validationError => formError = 'Word->Meaning combination already exists');
+        .catch(_validationError => formError = 'Word->Meaning combination already exists');
     }
 
     function onPopstate() {
         if (!wiktionaryFrame.goBack()) {
-            $dictionaryWord = undefined
+            if (formVisible) {
+                toastDicardFormInput = "Discard input?"
+            } else {
+                $dictionaryWord = undefined
+            }
         }
     }
 </script>
@@ -129,6 +135,7 @@
         <button on:click={() => formVisible = true}>Add to Spaced Repetition</button>
     {/if}
 </Popup>
+<Toast message={toastDicardFormInput} textReject="Discard" onReject={()=> $dictionaryWord = undefined}/>
 
 <style>
     h2 {
