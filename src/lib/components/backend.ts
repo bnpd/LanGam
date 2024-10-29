@@ -295,7 +295,27 @@ export async function getDue(langId: string): Promise<VocabCard[]> {
  * @param {VocabCard} card
  * @returns {Promise<any>} Promise when done
  */
-export function updateCard(card: VocabCard): Promise<{ [x: string]: string | undefined; }[]> {
+export function updateSrCard(card: VocabCard): Promise<{ [x: string]: string | undefined; }[]> {
+	if (!card.id) {
+		throw new Error('Card must have id for update in pb')
+	}
+	let jsonCard: any = structuredClone(card)
+	for (const [property, value] of Object.entries(jsonCard.card)) {
+		jsonCard[property] = value
+	}
+	delete jsonCard.card
+	console.log(JSON.stringify(card));
+	
+	return pb.collection('sr_cards').update(jsonCard.id, jsonCard);
+}
+
+
+
+/**
+ * @param {VocabCard} card
+ * @returns {Promise<boolean>} Promise when done
+ */
+export function deleteSrCard(card: VocabCard): Promise<boolean> {
 	if (!card.id) {
 		throw new Error('Card must have id for update in pb')
 	}
@@ -306,7 +326,7 @@ export function updateCard(card: VocabCard): Promise<{ [x: string]: string | und
 	delete jsonCard.card
 	console.log(JSON.stringify(card));
 	
-	return pb.collection('sr_cards').update(jsonCard.id, jsonCard);
+	return pb.collection('sr_cards').delete(jsonCard.id);
 }
 
 /**

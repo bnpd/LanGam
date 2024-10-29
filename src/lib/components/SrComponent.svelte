@@ -1,28 +1,64 @@
 <script lang="ts">
 	import { nativeLang, targetLang } from "$lib/stores";
 	import { Rating, type Grade } from "ts-fsrs";
-	import { getDue, updateCard } from "./backend";
+	import { deleteSrCard, getDue, updateSrCard } from "./backend";
 	import type { VocabCard } from "$lib/fsrs";
 	import { onMount } from "svelte";
 	import BadgeComponent from "./BadgeComponent.svelte";
+	import Toast from "./Toast.svelte";
+	import Popup from "./Popup.svelte";
+	import FormComponent from "./FormComponent.svelte";
 
     let showSolution = false
     let dueWords: VocabCard[]
+    let confirmDeleteToast: string | undefined
+    let showEditForm = false
+    let successMessage: string | undefined
+    let formError: string | undefined
+
+    function getSrFormFields() {return [
+        {name: 'Word', id: 'word', value: dueWords[0]?.word},
+        {name: 'Meaning', id: 'meaning', value: dueWords[0]?.meaning},
+        {name: 'Notes', id: 'notes', value: dueWords[0]?.notes},
+        {name: 'Pronunciation', id: 'pronunciation', value: dueWords[0]?.pronunciation}
+        // {name: 'Sentence' extracted from text}
+    ].concat(dueWords[0]?.genus?.length ? [
+        {name: 'Gender', id: 'genus', value: dueWords[0]?.genus}
+    ] : [])}
+
     onMount(async ()=>{
         dueWords = await getDue($targetLang?.id)
     })
 
     async function onSubmitRating(card: VocabCard, rating: Grade) {
-        console.log('reivew '+rating);
+        console.log(card);
+        console.log(card.review);
+        
         
         card.review(rating)
-        updateCard(card)
+        updateSrCard(card)
         dueWords.shift()
         showSolution = false
         dueWords = dueWords
         if (!dueWords?.length) { // we are done, check once again whether we really are
             dueWords = await getDue($targetLang?.id)
         }
+    }
+
+    function onSubmitEditForm(formdata: { [x: string]: string | undefined; }) {
+        successMessage = undefined
+        formError = undefined
+        for (const key in formdata) {
+            dueWords[0][key] = formdata[key];
+        }
+        updateSrCard(dueWords[0]).then(() => {successMessage = 'Updated.'; showEditForm = false}).catch(() => formError = 'Failed to update, sorry.')
+        dueWords = dueWords
+    }
+
+    function onDeleteConfirmed(){
+        deleteSrCard(dueWords[0]).then(()=>successMessage='Deleted.').catch(()=>formError='Failure.'); 
+        dueWords = dueWords.slice(1)
+        dueWords = dueWords
     }
 </script>
 
@@ -49,6 +85,17 @@
             <button on:click={()=>onSubmitRating(card, Rating.Easy)}>{'Easy'}</button>
         {:else}
             <button on:click={()=>showSolution=true}>Solution</button>
+            <button on:click={()=>showEditForm=true}>Edit</button>
+            <button on:click={()=>confirmDeleteToast='Are you sure?'}>Delete</button>
         {/if}
     </div>
+    <Popup isOpen={showEditForm} closeButtonText="Discard changes"}>
+        <FormComponent fields={getSrFormFields()} submitOptions={[
+            {text:'Done', handler: onSubmitEditForm, disableOnSubmit: true}
+        ]}/>
+    </Popup>
+
+    <Toast message={confirmDeleteToast} textReject="Delete" onReject={onDeleteConfirmed}/>
+    <Toast message={successMessage}/>
+    <Toast message={formError}/>
 {/if}

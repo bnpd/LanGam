@@ -135,8 +135,8 @@
                 fields={formVisible ? getSrFormFields(i) : undefined} 
                 submitOptions={[
                     {text:'Add', handler: addToSpacedRepetition, disableOnSubmit: true}, 
-                    {text:'Reversed', handler: addToSpacedRepetitionReversed, disableOnSubmit: true}]}
-                />
+                    {text:'Reversed', handler: addToSpacedRepetitionReversed, disableOnSubmit: true}
+                ]} />
             </div>
         {/each}
         {#if extractedCards?.length > 1}
