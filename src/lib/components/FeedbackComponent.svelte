@@ -26,7 +26,7 @@
     }
 </script>
 
-<Popup on:closed={onPopupClosed} closeButtonText={feedbackText ? 'Submit' : 'Close'} bind:isOpen={isOpen}>
+<Popup on:closed={onPopupClosed} closeButtonText={feedbackText ? 'Submit' : 'Close'} bind:isOpen={isOpen} outsideclose={false}>
     <h1>The future of this app is in your hands. Thanks!</h1>
     <div contenteditable id="iFeedback" data-placeholder="Best app ever, but here are 99 things I hate: ...." bind:innerText={feedbackText}/>
     <input name="iContactConsent" bind:checked={contactConsent} type="checkbox"> <label for="iContactConsent">I would like to get a response to my feedback.</label>
