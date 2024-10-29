@@ -1,18 +1,34 @@
 <script lang="ts" defer>
+	import { pushState } from '$app/navigation';
     import { createEventDispatcher } from 'svelte';
+	import { page } from '$app/stores';
 
     const dispatch = createEventDispatcher();
 	export let closeButtonText = 'Close';
+	export let isOpen: boolean = false;
+	export let onPopstate = closeSelf;
+	export let outsideclose = true
+
+	$: if (isOpen) pushState('', {popup: true})
+
+	function closeSelf() {
+		isOpen = false
+		dispatch('closed')
+	}
 </script>
 <!-- svelte-ignore a11y-no-static-element-interactions -->
 <!-- svelte-ignore a11y-click-events-have-key-events -->
 
-<div class="popup-container" on:click|self={()=>{dispatch('closed')}}>
-    <div class="popup">
-        <slot></slot>
-		<button class="close-button" on:click={() => dispatch('closed')}>{closeButtonText}</button>
-    </div>
-</div>
+{#if isOpen}
+	<div class="popup-container" on:click|self={()=> {if (outsideclose) closeSelf()}}>
+		<div class="popup">
+			<slot></slot>
+			<button class="close-button" on:click={closeSelf}>{closeButtonText}</button>
+		</div>
+	</div>
+{/if}
+
+<svelte:window on:popstate={()=> {if (isOpen) onPopstate()}}/>
 
 <style>
 	.popup-container {

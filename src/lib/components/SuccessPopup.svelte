@@ -17,12 +17,10 @@
 <!-- svelte-ignore a11y-no-static-element-interactions -->
 <!-- svelte-ignore a11y-click-events-have-key-events -->
 
-{#if message && title}
-	<Popup on:closed={() => closeSelf()}>
-		<h1>{title}</h1>
-		<p style="white-space: pre-line">{message}</p>
-		{#if footnote}
-			<div><small>{footnote}</small></div>
-		{/if}
-	</Popup>
-{/if}
+<Popup on:closed={() => closeSelf()} isOpen={message != undefined && title != undefined}>
+	<h1>{title}</h1>
+	<p style="white-space: pre-line">{message}</p>
+	{#if footnote}
+		<div><small>{footnote}</small></div>
+	{/if}
+</Popup>

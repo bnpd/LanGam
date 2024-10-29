@@ -5,10 +5,6 @@
     $: if (content && contentDiv) contentDiv.innerHTML = content.text_en
     let isOpen = false
     let contentDiv: HTMLDivElement
-
-    function toggleIsOpen() {
-        isOpen = !isOpen
-    }
 </script>
 
 <style>
@@ -19,15 +15,14 @@
     }
 </style>
 
-{#if isOpen}
-    <Popup on:closed={toggleIsOpen} closeButtonText="Done">
-        <div class="grammar-container">
-            <h1>{content.title_en}</h1>
-            <div bind:this={contentDiv}></div>
-        </div>
-    </Popup>
-{:else}
-    <button id="btnPowers" on:click={toggleIsOpen}>
+<Popup closeButtonText="Done" bind:isOpen={isOpen}>
+    <div class="grammar-container">
+        <h1>{content.title_en}</h1>
+        <div bind:this={contentDiv}></div>
+    </div>
+</Popup>
+{#if !isOpen}
+    <button id="btnPowers" on:click={() => isOpen = true}>
         📖
     </button>
 {/if}

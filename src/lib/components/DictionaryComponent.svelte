@@ -25,6 +25,7 @@
     let freq: string
     let tooltip: string
     let badgeBgColor: string
+    let wiktionaryFrame: WiktionaryFrame
     $: if ($dictionaryWord) onWordChanged()
     function onWordChanged(){ // this might cause problems 
         lemma = $freqList?.[$dictionaryWord.toLowerCase()]?.lemma
@@ -77,52 +78,57 @@
         .then(()=>formError = undefined)
         .catch(validationError => formError = 'Word->Meaning combination already exists');
     }
+
+    function onPopstate() {
+        if (!wiktionaryFrame.goBack()) {
+            $dictionaryWord = undefined
+        }
+    }
 </script>
 
-{#if $dictionaryWord}
-    <Popup on:closed={onClose}>
-        <h2>
-            {$dictionaryWord}
-            {#if lemma && lemma.toLowerCase() != $dictionaryWord.toLowerCase()}
-                &nbsp;
-                <a on:click={()=>{$dictionaryWord = lemma}}>->&nbsp;{lemma}</a>
-            {/if}
-            {#if freq}
-                &nbsp;
-                <BadgeComponent text={freq} tooltip={tooltip} backgroundColor={badgeBgColor}></BadgeComponent>
-            {/if}
-        </h2>
-        <WiktionaryFrame 
-            on:wordNotFound={()=>{if (lemma && lemma?.toLowerCase() != $dictionaryWord?.toLowerCase()) $dictionaryWord = lemma}}
-            on:extractedCards={e=>{
-                extractedCards = e.detail?.cards
-                console.log(extractedCards);
-                if (extractedCards?.[0]?.word && extractedCards[0].word !== $dictionaryWord) {
-                    $dictionaryWord = extractedCards[0].word
-                    lemma = undefined
-                }
-            }}
-        />
-        {#if formVisible}
-            {#each extractedCards ?? [] as _, i}
-                <div hidden={currentShownExtraction!==i}>
-                    <FormComponent fields={formVisible ? getSrFormFields(i) : undefined} submitOptions={[{text:'Add', handler: addToSpacedRepetition}, {text:'Reversed', handler: addToSpacedRepetitionReversed}]}/>
-                </div>
-            {/each}
-            <p hidden={!formError} class="validationError">{formError}</p>
-            {#if extractedCards?.length > 1}
-                <span>
-                    Definition 
-                    <button style:display="inline-block" on:click={()=>currentShownExtraction = (currentShownExtraction+1) % extractedCards.length}>{currentShownExtraction+1}</button> 
-                    of {extractedCards.length} 
-                    ({extractedCards?.[currentShownExtraction]?.pos})
-                </span>
-            {/if}
-        {:else}
-            <button on:click={() => formVisible = true}>Add to Spaced Repetition</button>
+<Popup on:closed={onClose} isOpen={$dictionaryWord !== undefined} onPopstate={onPopstate} outsideclose={false}>
+    <h2>
+        {$dictionaryWord}
+        {#if lemma && lemma.toLowerCase() != $dictionaryWord?.toLowerCase()}
+            &nbsp;
+            <a on:click={()=>{$dictionaryWord = lemma}}>->&nbsp;{lemma}</a>
         {/if}
-    </Popup>
-{/if}
+        {#if freq}
+            &nbsp;
+            <BadgeComponent text={freq} tooltip={tooltip} backgroundColor={badgeBgColor}></BadgeComponent>
+        {/if}
+    </h2>
+    <WiktionaryFrame 
+        on:wordNotFound={()=>{if (lemma && lemma?.toLowerCase() != $dictionaryWord?.toLowerCase()) $dictionaryWord = lemma}}
+        on:extractedCards={e=>{
+            extractedCards = e.detail?.cards
+            console.log(extractedCards);
+            if (extractedCards?.[0]?.word && extractedCards[0].word !== $dictionaryWord) {
+                $dictionaryWord = extractedCards[0].word
+                lemma = undefined
+            }
+        }}
+        bind:this={wiktionaryFrame}
+    />
+    {#if formVisible}
+        {#each extractedCards ?? [] as _, i}
+            <div hidden={currentShownExtraction!==i}>
+                <FormComponent fields={formVisible ? getSrFormFields(i) : undefined} submitOptions={[{text:'Add', handler: addToSpacedRepetition}, {text:'Reversed', handler: addToSpacedRepetitionReversed}]}/>
+            </div>
+        {/each}
+        <p hidden={!formError} class="validationError">{formError}</p>
+        {#if extractedCards?.length > 1}
+            <span>
+                Definition 
+                <button style:display="inline-block" on:click={()=>currentShownExtraction = (currentShownExtraction+1) % extractedCards.length}>{currentShownExtraction+1}</button> 
+                of {extractedCards.length} 
+                ({extractedCards?.[currentShownExtraction]?.pos})
+            </span>
+        {/if}
+    {:else}
+        <button on:click={() => formVisible = true}>Add to Spaced Repetition</button>
+    {/if}
+</Popup>
 
 <style>
     h2 {
