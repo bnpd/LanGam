@@ -46,8 +46,6 @@
     }
 
     function onSubmitEditForm(formdata: { [x: string]: string | undefined; }) {
-        successMessage = undefined
-        formError = undefined
         for (const key in formdata) {
             dueWords[0][key] = formdata[key];
         }
@@ -56,6 +54,7 @@
     }
 
     function onDeleteConfirmed(){
+        showEditForm = false
         deleteSrCard(dueWords[0]).then(()=>successMessage='Deleted.').catch(()=>formError='Failure.'); 
         dueWords = dueWords.slice(1)
         dueWords = dueWords
@@ -78,24 +77,26 @@
                 🗣 {card.pronunciation} <br>
             {/if}
         </span>
-        {#if showSolution}
-            <button on:click={()=>onSubmitRating(card, Rating.Again)}>{'Again'}</button>
-            <button on:click={()=>onSubmitRating(card, Rating.Hard)}>{'Hard'}</button>
-            <button on:click={()=>onSubmitRating(card, Rating.Good)}>{'Good'}</button>
-            <button on:click={()=>onSubmitRating(card, Rating.Easy)}>{'Easy'}</button>
-        {:else}
-            <button on:click={()=>showSolution=true}>Solution</button>
-            <button on:click={()=>showEditForm=true}>Edit</button>
-            <button on:click={()=>confirmDeleteToast='Are you sure?'}>Delete</button>
-        {/if}
+        <div style="text-align: center;">
+            {#if showSolution}
+                <button on:click={()=>onSubmitRating(card, Rating.Again)}>{'Again'}</button>
+                <button on:click={()=>onSubmitRating(card, Rating.Hard)}>{'Hard'}</button>
+                <button on:click={()=>onSubmitRating(card, Rating.Good)}>{'Good'}</button>
+                <button on:click={()=>onSubmitRating(card, Rating.Easy)}>{'Easy'}</button>
+            {:else}
+                <button on:click={()=>showEditForm=true}>Edit</button>
+                <button on:click={()=>showSolution=true} class='highlighted'>Solution</button>
+            {/if}
+        </div>
     </div>
-    <Popup isOpen={showEditForm} closeButtonText="Discard changes"}>
+    <Popup bind:isOpen={showEditForm} closeButtonText="Discard changes">
         <FormComponent fields={getSrFormFields()} submitOptions={[
-            {text:'Done', handler: onSubmitEditForm, disableOnSubmit: true}
+            {text:'Delete', handler: ()=>{confirmDeleteToast='Are you sure?'}, disableOnSubmit: true},
+            {text:'Save', handler: onSubmitEditForm, disableOnSubmit: true}
         ]}/>
     </Popup>
 
-    <Toast message={confirmDeleteToast} textReject="Delete" onReject={onDeleteConfirmed}/>
-    <Toast message={successMessage}/>
-    <Toast message={formError}/>
+    <Toast bind:message={confirmDeleteToast} textReject="Delete" onReject={onDeleteConfirmed}/>
+    <Toast bind:message={successMessage}/>
+    <Toast bind:message={formError}/>
 {/if}
