@@ -267,18 +267,18 @@ button.highlighted, input[type="submit"].highlighted {
     display: flex;
 }
 
-#navbar button {
+#navbar > button {
   width: 100px;
   border-radius: 5px;
   flex-grow: 1;
 }
 
-#navbar button:first-child {
+#navbar > button:first-child {
   border-top-left-radius: 20px;
   border-bottom-left-radius: 20px;
 }
 
-#navbar button:last-child {
+#navbar > button:last-child {
   border-top-right-radius: 20px;
   border-bottom-right-radius: 20px;
 }

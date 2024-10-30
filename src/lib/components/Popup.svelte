@@ -57,7 +57,7 @@
 		display: flex;
 		flex-direction: column;
 		width: 95vw;
-		height: 90vh;
+		max-height: 90vh;
 	}
 
 	@keyframes fadeIn {

@@ -105,7 +105,7 @@
 </script>
 
 <Popup on:closed={onClose} isOpen={$dictionaryWord !== undefined} onPopstate={onPopstate} outsideclose={false}>
-    <div style="overflow: auto; display: flex; flex-direction: column; padding: 8px 0; height: 100%;">
+    <div id="dictionary-container">
         <h2>
             {$dictionaryWord}
             {#if lemma && lemma.toLowerCase() != $dictionaryWord?.toLowerCase()}
@@ -159,6 +159,13 @@
 
 <style>
     h2 {
-        margin-top: -2%;
+        margin-top: 0;
+    }
+
+    #dictionary-container {
+        overflow: auto; 
+        display: flex; 
+        flex-direction: column; 
+        height: 100vh;
     }
 </style>
