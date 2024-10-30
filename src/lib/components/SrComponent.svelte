@@ -101,4 +101,6 @@
     <Toast bind:message={confirmDeleteToast} textReject="Delete" onReject={onDeleteConfirmed}/>
     <Toast bind:message={successMessage}/>
     <Toast bind:message={formError}/>
+{:else}
+    <div class="card"><em>All cought up ✨</em></div>
 {/if}
