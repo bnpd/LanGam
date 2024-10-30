@@ -1,6 +1,6 @@
 <script lang="ts" defer>
 	import { chatOutcome, currentTask, failedWords, nativeLang, player, targetLang, username } from "$lib/stores";
-	import { tick } from "svelte";
+	import { onMount, tick } from "svelte";
 	import BadgeComponent from "./BadgeComponent.svelte";
 	import type ReaderComponent from "./ReaderComponent.svelte";
 	import { sendChat, sendGameChat, sendTutorChat } from "./backend";
@@ -23,6 +23,9 @@
                 mainContent.style.opacity = ($chatHistory.length && (chatFocussed || loading)) ? "0.2" : "1"
             }
         }
+    $: if (chatFocussed) {
+            iChat?.focus()
+        }
     
     export let readerComponent: ReaderComponent;
     export let inline: boolean;
@@ -33,11 +36,12 @@
     export let trySpeak: Function | undefined = undefined
     export let isGame: boolean = false
     export let showGameChatSuggestions: boolean = true
-    let chatFocussed: boolean = false;
+    export let chatFocussed: boolean = false;
     let chatPrompt: string = ''
     let iChat: HTMLDivElement
     let loading: boolean = false
     let messageHistoryContainer: HTMLDivElement
+    let chatComponent: HTMLDivElement
 
     /**
      * Finds the first occurrence of word in the text and returns the corresponding lemma (thus not necessarily the lemma for that ocurrence that the user clicked)
@@ -55,11 +59,15 @@
     function onClickChatSuggestion(e: Event) {
         chatPrompt = (e.currentTarget as HTMLButtonElement).innerText
         submitChat(true)
+        iChat?.focus()
     }
 
     function onSubmitChatField(e: Event) {
+        console.log('sub');
+        
         if (chatPrompt.length) {
             submitChat(false)
+            iChat?.focus()
         } else {
             iChat?.focus()
         }
@@ -136,6 +144,16 @@
         return correction.text.text.replaceAll(/\W+/g, '') !== chatPrompt.replaceAll(/\W+/g, '') // remove everything that is not a word, then compare
     }
 
+    function handleFocus() {
+        setTimeout(async () => {
+            await tick()
+            console.log(document.activeElement);
+            
+            chatFocussed = chatComponent?.contains(document.activeElement) ?? false
+            console.log(chatFocussed);
+        }, 10); // wait a moment in case we re-focussed (e.g. in onSubmitChatField)
+    }
+
 </script>
 
 <style>
@@ -182,14 +200,6 @@
     #chatInputContainer {
         position: relative;
     }
-    
-    #submitChat, #closeChat {
-        position: absolute;
-        bottom: 1px;
-        height: calc(100% - 2px);
-        border-radius: 20px;
-        width: var(--button-height);
-    }
         
     #submitChat {
         right: 1px;
@@ -233,7 +243,7 @@
     }
 </style>
 
-<div id="chatComponent" on:focus|capture={()=>{chatFocussed = true}} on:focusout|capture={()=>{chatFocussed = false}}>
+<div id="chatComponent" bind:this={chatComponent} on:focus|capture={handleFocus} on:focusout|capture={handleFocus}>
     <div id="messageHistoryContainer" bind:this={messageHistoryContainer} class:chatHistoryHidden={!chatFocussed && !loading && !inline} class:floatAboveParent={!inline} class:inline={inline}>
         {#each $chatHistory as msg, i}
                 {#if msg.role === 'assistant' || msg.role === 'user' || msg.role === 'correction'}
@@ -292,10 +302,10 @@
         {/if}
         <div id="chatInputContainer">
             <div contenteditable id="iChat" data-placeholder={chatBoxTitle} bind:innerText={chatPrompt} bind:this={iChat}/>
-            {#if chatFocussed && $chatHistory.length }
-                <button id="closeChat" on:click={() => {document?.activeElement?.blur()}}>x</button>       
+            {#if chatFocussed }
+                <button id="closeChat" on:click={() => {document?.activeElement?.blur()}} class="chat-circle-btn">x</button>       
             {/if}    
-            <button id="submitChat" on:click={onSubmitChatField} disabled={loading}><b><em>
+            <button id="submitChat" on:click={onSubmitChatField} disabled={loading} class="chat-circle-btn"><b><em>
                 {#if chatPrompt}
                 ➥
                 {:else}

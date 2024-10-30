@@ -37,6 +37,7 @@
     let redirectedDoc: string | null
     let showGameChatSuggestions: boolean = false;
     let grammarChapter: string | undefined
+    let showTutorChat: boolean = false
 
     onMount(async () => {
         if (!$username) {
@@ -225,8 +226,15 @@
             </div>
         {/if}
     {/each}
+    {#if !showTutorChat}
+        &nbsp;
+        <button class="chat-circle-btn" on:click={()=>{showTutorChat = true}}><b>
+            🗨</b></button>
+    {/if}
 </div>
-<ChatComponent readerComponent={readerComponent} inline={false} chatBoxTitle="AI tutor - ask me anything ✨"/>
+<div hidden={!showTutorChat}>
+    <ChatComponent bind:chatFocussed={showTutorChat} readerComponent={readerComponent} inline={false} chatBoxTitle="AI tutor - ask me anything ✨"/>
+</div>
 <Toast message={toast} textReject={textRejectToast} onReject={() => {
     $currentGameId = undefined;
     $failedWords = new Set();

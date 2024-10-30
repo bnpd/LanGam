@@ -160,6 +160,17 @@ ul {
   text-align: center; /* Center text */
 }
 
+.chat-circle-btn {
+    border-radius: 20px;
+    width: var(--button-height);
+}
+   
+#chatInputContainer .chat-circle-btn {
+    position: absolute;
+    bottom: 1px;
+    height: calc(100% - 2px);
+}
+
 .image-card img {
 margin-top: calc(-1 * var(--padding-card));
 margin-left: calc(-1 * var(--padding-card));
