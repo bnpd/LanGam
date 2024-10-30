@@ -90,10 +90,12 @@
         </div>
     </div>
     <Popup bind:isOpen={showEditForm} closeButtonText="Discard changes">
-        <FormComponent fields={getSrFormFields()} submitOptions={[
-            {text:'Delete', handler: ()=>{confirmDeleteToast='Are you sure?'}, disableOnSubmit: true},
-            {text:'Save', handler: onSubmitEditForm, disableOnSubmit: true}
-        ]}/>
+        <div style="overflow: auto;">
+            <FormComponent fields={getSrFormFields()} submitOptions={[
+                {text:'Delete', handler: ()=>{confirmDeleteToast='Are you sure?'}, disableOnSubmit: true},
+                {text:'Save', handler: onSubmitEditForm, disableOnSubmit: true, cssClass: 'highlighted'}
+            ]}/>
+        </div>
     </Popup>
 
     <Toast bind:message={confirmDeleteToast} textReject="Delete" onReject={onDeleteConfirmed}/>

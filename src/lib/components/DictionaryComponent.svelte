@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { targetLang, dictionaryWord, freqList } from "$lib/stores";
+	import { targetLang, dictionaryWord, freqList, nativeLang } from "$lib/stores";
 	import { onMount } from "svelte";
 	import Popup from "./Popup.svelte";
 	import BadgeComponent from "./BadgeComponent.svelte";
@@ -105,51 +105,53 @@
 </script>
 
 <Popup on:closed={onClose} isOpen={$dictionaryWord !== undefined} onPopstate={onPopstate} outsideclose={false}>
-    <h2>
-        {$dictionaryWord}
-        {#if lemma && lemma.toLowerCase() != $dictionaryWord?.toLowerCase()}
-            &nbsp;
-            <a on:click={()=>{$dictionaryWord = lemma}}>->&nbsp;{lemma}</a>
+    <div style="overflow: auto; display: flex; flex-direction: column; padding: 8px 0; height: 100%;">
+        <h2>
+            {$dictionaryWord}
+            {#if lemma && lemma.toLowerCase() != $dictionaryWord?.toLowerCase()}
+                &nbsp;
+                <a on:click={()=>{$dictionaryWord = lemma}}>->&nbsp;{lemma}</a>
+            {/if}
+            {#if freq}
+                &nbsp;
+                <BadgeComponent text={freq} tooltip={tooltip} backgroundColor={badgeBgColor}></BadgeComponent>
+            {/if}
+        </h2>
+        <WiktionaryFrame 
+            on:wordNotFound={()=>{if (lemma && lemma?.toLowerCase() != $dictionaryWord?.toLowerCase()) $dictionaryWord = lemma}}
+            on:extractedCards={e=>{
+                extractedCards = e.detail?.cards
+                console.log(extractedCards);
+                if (extractedCards?.[0]?.word && extractedCards[0].word !== $dictionaryWord) {
+                    $dictionaryWord = extractedCards[0].word
+                    lemma = undefined
+                }
+            }}
+            bind:this={wiktionaryFrame}
+        />
+        {#if formVisible}
+            {#each extractedCards ?? [undefined] as _, i}
+                <div hidden={currentShownExtraction!==i}>
+                    <FormComponent 
+                    fields={formVisible ? getSrFormFields(i) : undefined} 
+                    submitOptions={[
+                        {text:'Reversed', handler: addToSpacedRepetitionReversed, disableOnSubmit: true},
+                        {text:`Meaning ➛ Word`, handler: addToSpacedRepetition, disableOnSubmit: true, cssClass: 'highlighted'}
+                    ]} />
+                </div>
+            {/each}
+            {#if extractedCards?.length > 1}
+                <span>
+                    Definition 
+                    <button style:display="inline-block" on:click={()=>currentShownExtraction = (currentShownExtraction+1) % extractedCards.length}>{currentShownExtraction+1}</button> 
+                    of {extractedCards.length} 
+                    ({extractedCards?.[currentShownExtraction]?.pos})
+                </span>
+            {/if}
+        {:else}
+            <button on:click={() => formVisible = true}>Add to Spaced Repetition</button>
         {/if}
-        {#if freq}
-            &nbsp;
-            <BadgeComponent text={freq} tooltip={tooltip} backgroundColor={badgeBgColor}></BadgeComponent>
-        {/if}
-    </h2>
-    <WiktionaryFrame 
-        on:wordNotFound={()=>{if (lemma && lemma?.toLowerCase() != $dictionaryWord?.toLowerCase()) $dictionaryWord = lemma}}
-        on:extractedCards={e=>{
-            extractedCards = e.detail?.cards
-            console.log(extractedCards);
-            if (extractedCards?.[0]?.word && extractedCards[0].word !== $dictionaryWord) {
-                $dictionaryWord = extractedCards[0].word
-                lemma = undefined
-            }
-        }}
-        bind:this={wiktionaryFrame}
-    />
-    {#if formVisible}
-        {#each extractedCards ?? [undefined] as _, i}
-            <div hidden={currentShownExtraction!==i}>
-                <FormComponent 
-                fields={formVisible ? getSrFormFields(i) : undefined} 
-                submitOptions={[
-                    {text:'Add', handler: addToSpacedRepetition, disableOnSubmit: true}, 
-                    {text:'Reversed', handler: addToSpacedRepetitionReversed, disableOnSubmit: true}
-                ]} />
-            </div>
-        {/each}
-        {#if extractedCards?.length > 1}
-            <span>
-                Definition 
-                <button style:display="inline-block" on:click={()=>currentShownExtraction = (currentShownExtraction+1) % extractedCards.length}>{currentShownExtraction+1}</button> 
-                of {extractedCards.length} 
-                ({extractedCards?.[currentShownExtraction]?.pos})
-            </span>
-        {/if}
-    {:else}
-        <button on:click={() => formVisible = true}>Add to Spaced Repetition</button>
-    {/if}
+    </div>
 </Popup>
 <Toast message={toastDicardFormInput} textReject="Discard" onReject={()=> $dictionaryWord = undefined}/>
 <Toast message={successMessage}/>

@@ -9,7 +9,7 @@
 
 <style>
     .grammar-container {
-        overflow-x: scroll;
+        overflow-y: auto;
         text-align: justify;
         line-height: 1.6em;
     }
@@ -18,7 +18,7 @@
 <Popup closeButtonText="Done" bind:isOpen={isOpen}>
     <div class="grammar-container">
         <h1>{content.title_en}</h1>
-        <div bind:this={contentDiv}></div>
+        <div bind:this={contentDiv} style:width="99%"></div>
     </div>
 </Popup>
 {#if !isOpen}

@@ -163,7 +163,7 @@
     .chatMessage {
         white-space: pre-wrap;
         /* max-height: 18dvh; 
-        overflow-y: scroll; */
+        overflow-y: auto; */
     }
 
     .chatHistoryHidden {

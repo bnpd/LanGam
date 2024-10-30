@@ -47,7 +47,7 @@
 
 	.popup {
 		background-color: white;
-		padding: 2rem;
+		padding: var(--padding-card);
 		border-radius: 10px;
 		text-align: center;
 		animation: slideIn 0.5s;
@@ -57,8 +57,7 @@
 		display: flex;
 		flex-direction: column;
 		width: 95vw;
-
-		max-height: 90vh;
+		height: 90vh;
 	}
 
 	@keyframes fadeIn {

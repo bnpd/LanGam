@@ -1,6 +1,6 @@
 <script lang="ts">
     export let fields: {id: string, name: string, value?: string, hidden?: string}[]
-    export let submitOptions: {text: string, handler: (formdata: { [x: string]: string | undefined; }, disableOnSubmit?: boolean, disabled?: boolean) => void}
+    export let submitOptions: {text: string, handler: (formdata: { [x: string]: string | undefined; }, disableOnSubmit?: boolean, disabled?: boolean, cssClass?: string) => void}
 
     let divFieldsById: {[id: string]: HTMLDivElement} = {}
 
@@ -65,6 +65,7 @@ div[contenteditable] {
               if (submitOption.disableOnSubmit) submitOption.disabled = true
             }}
             disabled={submitOption.disabled}
+            class={submitOption.cssClass}
             >
         {/each}
     </form>

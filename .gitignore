@@ -11,3 +11,4 @@ vite.config.ts.timestamp-*
 .vscode/launch.json
 static/freqLists/PL.txt
 static/freqLists/freqListToJson.py
+/src/config.js
