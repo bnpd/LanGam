@@ -36,11 +36,12 @@
         
         
         card.review(rating)
-        updateSrCard(card)
+        const updatedPromise = updateSrCard(card)
         dueWords.shift()
         showSolution = false
         dueWords = dueWords
         if (!dueWords?.length) { // we are done, check once again whether we really are
+            await updatedPromise
             dueWords = await getDue($targetLang?.id)
         }
     }
