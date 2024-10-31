@@ -1,7 +1,7 @@
 <script lang="ts" defer>
     import { onMount } from 'svelte';
     import ReaderComponent from './ReaderComponent.svelte';
-    import { completeLevel, getPlayer, getPlayerLevel, getUserLang, updatePlayer } from './backend';
+    import { completeLevel, getLevel, getPlayer, getPlayerLevel, getUserLang, updatePlayer } from './backend';
     import { username, nativeLang, targetLang, isSoundOn, currentTask, failedWords, currentlyScrolledParagraphIndex, loadingTask, gameChatHistory, player, chatOutcome, currentGameId, inlineChatHistory, morphHighlightFilter, currentTaskNParagraphs } from '$lib/stores';
 	import { goto } from '$app/navigation';
 	import Toast from './Toast.svelte';
@@ -133,19 +133,32 @@
         $player.level = prevLevelSeqId
         $player.stats = $player.level_history[prevLevelSeqId].stats
         $player.powers = $player.level_history[prevLevelSeqId].powers
-        await updatePlayer($player)
-        await nextTask()
+        updatePlayer($player) // this can just happen async (if it fails it would give room for cheating/frustration though)
+        await prevTask(prevLevelSeqId)
         initChatHistory()
     }
 
+    async function prevTask(seqId: number) { // like next task but only with the things necessary when moving back to previous level where we already know seqId
+        const level = await getLevel($currentGameId, seqId)
+        let doc = level?.['level']
+        doc.docId = level.seq_id
+        if (doc) $loadingTask = false;
+        $currentTask = doc
+        solutionText = doc?.title?.translations[$nativeLang] + '\n\n' + doc?.text?.translations[$nativeLang]
+        $currentlyScrolledParagraphIndex = 0
+        showGameChatSuggestions = false
+        grammarChapter = level.expand?.grammar
+        $morphHighlightFilter = level.expand?.grammar?.morphHighlightFilter
+    }
+
     async function nextTask(restoreScrollPosition: boolean = false){
-        const level = (await getPlayerLevel($player.id).catch(_offline => {
+        const level = await getPlayerLevel($player.id)/*.catch(_offline => {
             toast = "Text has not been downloaded offline. Going to catalog."
             setTimeout(() => {
                 goto('/catalog')
             }, 2000);
             return undefined
-        }))
+        })*/
         $player.level = level.seq_id
 
         let doc = level?.['level']
@@ -164,8 +177,6 @@
 
         grammarChapter = level.expand?.grammar
         $morphHighlightFilter = level.expand?.grammar?.morphHighlightFilter
-        console.log(grammarChapter);
-        
 
         // the following calculation of new word count runs async in the background if the player stays for more than 5 seconds on the level
         const docIdBeforeMaybeNavigateToDifferentLevel = $currentTask?.docId

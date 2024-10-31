@@ -3,7 +3,7 @@ import { goto } from '$app/navigation';
 import { VocabCard } from '$lib/fsrs.js';
 import config from '../../config.js';
 import DocumentC from '../DocumentC.js'
-import PocketBase from 'pocketbase';
+import PocketBase, { type RecordModel } from 'pocketbase';
 
 // PocketBase
 const pb = new PocketBase(config.pocketbase)
@@ -238,13 +238,9 @@ export async function sendTutorChat(chatHistory: { role: string; content: string
 	return DocumentC.fromJson(response)
 }
 
-// /**
-//  * @param {string} gameId
-//  * @param {string} seqId
-//  */
-// export async function getLevel(gameId, seqId) {
-// 	return pb.collection('levels').getFirstListItem(`game="${gameId}" && seq_id=${seqId}`)
-// }
+export async function getLevel(gameId: string, seqId: number): Promise<RecordModel> {
+	return pb.collection('levels').getFirstListItem(`game="${gameId}" && seq_id=${seqId}`, {expand: ['grammar']})
+}
 
 /**
  * @param {string} playerId
