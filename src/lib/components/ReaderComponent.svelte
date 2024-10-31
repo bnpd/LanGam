@@ -1,5 +1,5 @@
 <script lang="ts" defer>
-  import { currentTask, currentlyScrolledParagraphIndex } from '../stores';
+  import { currentTask, currentlyScrolledParagraphIndex, loadingTask } from '../stores';
 	import { afterUpdate, tick } from "svelte";
 	import TaskComponent from './TaskComponent.svelte';
 	import type TtsComponent from './TtsComponent.svelte';
@@ -19,7 +19,6 @@
   let solutionShown: boolean = false
   export let tts: TtsComponent
   export let solutionText: string
-  export let taskVisible: boolean
   export let srWords: Set<String> | undefined
 
   $: if($currentTask) onTaskReset()
@@ -185,7 +184,7 @@
     </div>
   {/if}
   <hr>
-  <div id="divTask" class:hidden={!taskVisible} bind:this={divTask} on:scroll={onScroll}>
+  <div id="divTask" class:loading={$loadingTask} bind:this={divTask} on:scroll={onScroll}>
     <TaskComponent task={$currentTask} srWords={srWords} trySpeak={tts?.trySpeak} />
     <div>
       <slot name="afterTask" />

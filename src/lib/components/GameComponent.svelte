@@ -38,6 +38,7 @@
     let showGameChatSuggestions: boolean = false;
     let grammarChapter: string | undefined
     let showTutorChat: boolean = false
+    let lockedLevelToast: string | undefined
 
     onMount(async () => {
         if (!$username) {
@@ -215,7 +216,7 @@
 	}
 </script>
 
-<ReaderComponent tts={tts} solutionText={solutionText} taskVisible={!$loadingTask} srWords={new Set()} bind:this={readerComponent}>
+<ReaderComponent tts={tts} solutionText={solutionText} srWords={new Set()} bind:this={readerComponent}>
     <span slot="afterTask" hidden={!$currentTask}>{#if $gameChatHistory?.length}<ChatComponent readerComponent={readerComponent} inline={true} chatBoxTitle="Twoja odpowiedź 🤙" chatHistory={gameChatHistory} srWords={new Set()} trySpeak={tts?.trySpeak} isGame={true} showGameChatSuggestions={showGameChatSuggestions}/>{/if}</span>
     <span slot="afterSolution">{#if $gameChatHistory?.length}<ChatComponent readerComponent={readerComponent} inline={true} chatBoxTitle={undefined} chatHistory={gameChatHistory} translationLang='en' isGame={true}/>{/if}</span>
 </ReaderComponent>
@@ -224,21 +225,18 @@
     {#if grammarChapter}
         <GrammarBookComponent content={grammarChapter}/>
     {/if}
-    <button class="gameNavBtn" class:loading={$loadingTask} on:click={onLevelBackbtnClick} hidden={!$player?.level_history?.order?.length}>
+    <button class="gameNavBtn" disabled={$loadingTask} on:click={onLevelBackbtnClick} hidden={!$player?.level_history?.order?.length}>
         ◀
     </button>
     <PowersComponent on:use_power={e => usePower(e.detail.power)}/>
     {#each (Object.entries($currentTask?.outcomes ?? {})) as [outcome, obj]}
         {#if $player?.level_history?.[obj.goto] || $chatOutcome == outcome} <!--TODO: fix if there are two outcomes with same seq_id -->
-            <button class="gameNavBtn" class:highlighted={$currentlyScrolledParagraphIndex >= $currentTaskNParagraphs-1} class:loading={$loadingTask} on:click={()=>onAnswbtnClick(outcome)}>
+            <button class="gameNavBtn" class:highlighted={$currentlyScrolledParagraphIndex >= $currentTaskNParagraphs-1} disabled={$loadingTask} on:click={()=>onAnswbtnClick(outcome)}>
                 ▶
             </button>
         {:else}
             <div style="display: inline-block;">
-                <TooltipComponent>
-                    <button class="gameNavBtn" slot="anchor">🔒</button>
-                    <span slot="tooltip">There is a hidden outcome here that you can unlock by chatting with {$currentTask.character}</span>
-                </TooltipComponent>
+                <button class="gameNavBtn" on:click={()=>lockedLevelToast=`There is a hidden outcome here that you can unlock by chatting with ${$currentTask.character}`}>🔒</button>
             </div>
         {/if}
     {/each}
@@ -257,5 +255,6 @@
     $gameChatHistory = [];
     goto('/read?doc='+redirectedDoc);
 }}/>
+<Toast bind:message={lockedLevelToast}/>
 <SuccessPopup title={congratsTitle} message={congratsMessage} footnote={nNewForms ? `You just encountered ${nNewForms} new words!\n` : ''} onClose={()=>{congratsMessage = undefined; congratsTitle = undefined; statsClosedPromiseResolve()}}/>
 <DictionaryComponent/>
