@@ -167,17 +167,22 @@
         console.log(grammarChapter);
         
 
-        // the following calculation of new word count runs async in the background
-        getUserLang($username, $targetLang.id).then(user_lang => {
-            const prev_seen_words = new Set(Object.keys(user_lang.seen_words))
-            let new_forms = new Set(Object.values(doc?.title?.tokens).concat(Object.values(doc?.text?.tokens).concat(Object.values(doc?.question?.tokens)))
-                            .filter(tok => TRACKED_POS.has(tok.pos))
-                            .map(tok => tok.lemma_))
-            new_forms = new_forms.difference(prev_seen_words)            
-            nNewForms = new_forms.size
-        }).catch(_offline => {
-            nNewForms = undefined
-        })
+        // the following calculation of new word count runs async in the background if the player stays for more than 5 seconds on the level
+        const docIdBeforeMaybeNavigateToDifferentLevel = $currentTask?.docId
+        setTimeout(() => {
+            if ($currentTask?.docId === docIdBeforeMaybeNavigateToDifferentLevel) {
+                getUserLang($username, $targetLang.id).then(user_lang => {
+                    const prev_seen_words = new Set(Object.keys(user_lang.seen_words))
+                    let new_forms = new Set(Object.values(doc?.title?.tokens).concat(Object.values(doc?.text?.tokens).concat(Object.values(doc?.question?.tokens)))
+                                    .filter(tok => TRACKED_POS.has(tok.pos))
+                                    .map(tok => tok.lemma_))
+                    new_forms = new_forms.difference(prev_seen_words)            
+                    nNewForms = new_forms.size
+                }).catch(_offline => {
+                    nNewForms = undefined
+                })
+            }
+        }, 5000);
     }
 
     function initChatHistory() {
