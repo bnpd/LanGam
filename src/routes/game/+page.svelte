@@ -38,13 +38,14 @@
 <svelte:head>
 	<title>LanGam CYOA - language learning "choose you own adventure" game</title>
 	<meta name="description" content="Learn languages like play." />
-	<link rel="preconnect" href={config.backend} />
+	<link rel="preconnect" href={config.pocketbase} />
 </svelte:head>
 
 <TitleWithBackgroundImageComponent>LanGam CYOA Game</TitleWithBackgroundImageComponent>
 <GameComponent></GameComponent>
 <NavbarComponent>
 	<!--<button on:click={() => goto('/catalog')}>Texts</button>-->
+	<button on:click={() => goto('/options')}>Options</button>
 	<Install />
 	<FeedbackComponent />
 	{#if $username}

@@ -29,7 +29,6 @@
 <svelte:head>
 	<title>LanGam CYOA - language learning "choose you own adventure" game</title>
 	<meta name="description" content="Learn languages like play." />
-	<link rel="preconnect" href={config.backend} />
 </svelte:head>
 
 <TitleWithBackgroundImageComponent>LanGam CYOA - language learning "choose you own adventure" game</TitleWithBackgroundImageComponent>

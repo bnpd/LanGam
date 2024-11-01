@@ -1,7 +1,6 @@
 <script lang="ts" defer>
 import { getUserLang } from "$lib/components/backend.js"
 import { targetLang, username } from '$lib/stores';
-	import { onMount } from "svelte";
 import '../global.css';
 import './lists.css';
 	import TitleWithBackgroundImageComponent from "$lib/components/TitleWithBackgroundImageComponent.svelte";
@@ -53,7 +52,7 @@ async function loadVocabLists() {
 <svelte:head>
 	<title>Your Vocabulary - LanGam CYOA - language learning "choose you own adventure" game</title>
   <meta name="description" content='Overview of your learned words - LanGam CYOA - language learning "choose you own adventure" game.'>
-  <link rel="preconnect" href={config.backend}>
+  <link rel="preconnect" href={config.pocketbase}>
 </svelte:head>
 
 <TitleWithBackgroundImageComponent>Your vocab</TitleWithBackgroundImageComponent>
