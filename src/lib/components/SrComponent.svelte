@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { nativeLang, targetLang } from "$lib/stores";
+	import { nativeLang, srShowGenus, srShowIPA, targetLang } from "$lib/stores";
 	import { Rating, type Grade } from "ts-fsrs";
 	import { deleteSrCard, getDue, updateSrCard } from "./backend";
 	import type { VocabCard } from "$lib/fsrs";
@@ -66,15 +66,15 @@
 {#if dueWords?.length}
     {@const card = dueWords[0]}
     <div class="card" style="line-height: 2em;">
-        <BadgeComponent text={(card.reversed ? $targetLang.shortcode : $nativeLang).toUpperCase()}/>&nbsp;{card.reversed ? card.word : card.meaning} {#if showSolution && card.reversed && card.genus}&nbsp;&nbsp;<em>{card.genus}</em>{/if} <br>
+        <BadgeComponent text={(card.reversed ? $targetLang.shortcode : $nativeLang).toUpperCase()}/>&nbsp;{card.reversed ? card.word : card.meaning} {#if showSolution && card.reversed && card.genus && $srShowGenus}&nbsp;&nbsp;<em>{card.genus}</em>{/if} <br>
         <hr>
         <BadgeComponent text={(card.reversed ? $nativeLang : $targetLang.shortcode).toUpperCase()}/>&nbsp;
         <span class:hidden={!showSolution}>
-            {card.reversed ? card.meaning : card.word} {#if !card.reversed && card.genus}&nbsp;&nbsp;<em>{card.genus}</em>{/if} <br>
+            {card.reversed ? card.meaning : card.word} {#if !card.reversed && card.genus && $srShowGenus}&nbsp;&nbsp;<em>{card.genus}</em>{/if} <br>
             {#if card.notes}
                 🗒 {card.notes} <br>
             {/if}
-            {#if card.pronunciation}
+            {#if card.pronunciation && $srShowIPA}
                 🗣 {card.pronunciation} <br>
             {/if}
         </span>

@@ -305,8 +305,6 @@ export function updateSrCard(card: VocabCard): Promise<{ [x: string]: string | u
 	return pb.collection('sr_cards').update(jsonCard.id, jsonCard);
 }
 
-
-
 /**
  * @param {VocabCard} card
  * @returns {Promise<boolean>} Promise when done
@@ -323,6 +321,10 @@ export function deleteSrCard(card: VocabCard): Promise<boolean> {
 	console.log(JSON.stringify(card));
 	
 	return pb.collection('sr_cards').delete(jsonCard.id);
+}
+
+export function deleteAccount(username: string): Promise<boolean> {
+	return pb.collection('users').delete(username);
 }
 
 /**
