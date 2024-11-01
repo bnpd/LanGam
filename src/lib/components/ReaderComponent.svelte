@@ -17,7 +17,6 @@
   let scrollRestored = false
 
   let solutionShown: boolean = false
-  export let tts: TtsComponent
   export let solutionText: string
   export let srWords: Set<String> | undefined
 
@@ -160,7 +159,6 @@
 
 	async function onShowSolution(event: MouseEvent & { currentTarget: EventTarget & HTMLButtonElement; }) {
     solutionShown = true
-    tts.trySpeakCurrentTask()
     await tick()
     setTimeout(() => { // without this timeout, UI hasn't finished adding all the solution paragraphs, which are needed for scrolling
       onScroll()
@@ -185,7 +183,7 @@
   {/if}
   <hr>
   <div id="divTask" class:loading={$loadingTask} bind:this={divTask} on:scroll={onScroll}>
-    <TaskComponent task={$currentTask} srWords={srWords} trySpeak={tts?.trySpeak} />
+    <TaskComponent task={$currentTask} srWords={srWords}/>
     <div>
       <slot name="afterTask" />
     </div>

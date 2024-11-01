@@ -10,7 +10,6 @@
 	import DocumentC from '$lib/DocumentC';
 	import type TtsComponent from './TtsComponent.svelte';
 	import PowersComponent from './PowersComponent.svelte';
-	import TooltipComponent from './TooltipComponent.svelte';
 	import DictionaryComponent from './DictionaryComponent.svelte';
 	import GrammarBookComponent from './GrammarBookComponent.svelte';
 
@@ -22,8 +21,6 @@
     const UNKNOWN_POS = 0
     const STUDIED_POS = new Set([UNKNOWN_POS, 84, 86, 92, 93, 100])
     const TRACKED_POS = new Set([...STUDIED_POS, 85, 87, 89, 90, 91, 94, 95, 98])
-
-    export let tts: TtsComponent;
 
     let solutionText = ''
     let toast: string | undefined;
@@ -216,8 +213,8 @@
 	}
 </script>
 
-<ReaderComponent tts={tts} solutionText={solutionText} srWords={new Set()} bind:this={readerComponent}>
-    <span slot="afterTask" hidden={!$currentTask}>{#if $gameChatHistory?.length}<ChatComponent readerComponent={readerComponent} inline={true} chatBoxTitle="Twoja odpowiedź 🤙" chatHistory={gameChatHistory} srWords={new Set()} trySpeak={tts?.trySpeak} isGame={true} showGameChatSuggestions={showGameChatSuggestions}/>{/if}</span>
+<ReaderComponent solutionText={solutionText} srWords={new Set()} bind:this={readerComponent}>
+    <span slot="afterTask" hidden={!$currentTask}>{#if $gameChatHistory?.length}<ChatComponent readerComponent={readerComponent} inline={true} chatBoxTitle="Twoja odpowiedź 🤙" chatHistory={gameChatHistory} srWords={new Set()} isGame={true} showGameChatSuggestions={showGameChatSuggestions}/>{/if}</span>
     <span slot="afterSolution">{#if $gameChatHistory?.length}<ChatComponent readerComponent={readerComponent} inline={true} chatBoxTitle={undefined} chatHistory={gameChatHistory} translationLang='en' isGame={true}/>{/if}</span>
 </ReaderComponent>
 <div style="margin: auto; display: flex; flex-direction: row; width: 100%;">

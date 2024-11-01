@@ -33,7 +33,6 @@
     export let chatHistory: Writable<{role: string, content: DocumentC}[]> = new writable([]);
     export let translationLang: string = 'original'
     export let srWords: Set<string> | undefined = undefined
-    export let trySpeak: Function | undefined = undefined
     export let isGame: boolean = false
     export let showGameChatSuggestions: boolean = true
     export let chatFocussed: boolean = false;
@@ -255,7 +254,7 @@
                         </strong></em>&nbsp;
                         {#if translationLang === 'original'}
                             {#if msg.content.text?.tokens}
-                                <TaskComponent task={msg.content} srWords={srWords} trySpeak={trySpeak}/>
+                                <TaskComponent task={msg.content} srWords={srWords}/>
                             {:else}
                                 <p class="chatMessage">{msg.content.text.text.trim()}</p>
                             {/if}

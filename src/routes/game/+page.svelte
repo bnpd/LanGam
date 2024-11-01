@@ -42,10 +42,9 @@
 </svelte:head>
 
 <TitleWithBackgroundImageComponent>LanGam CYOA Game</TitleWithBackgroundImageComponent>
-<GameComponent {tts}></GameComponent>
+<GameComponent></GameComponent>
 <NavbarComponent>
 	<!--<button on:click={() => goto('/catalog')}>Texts</button>-->
-	<TtsComponent bind:this={tts} />
 	<Install />
 	<FeedbackComponent />
 	{#if $username}

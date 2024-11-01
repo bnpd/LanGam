@@ -3,11 +3,12 @@
 	import { failedWords, currentTaskNParagraphs } from "$lib/stores";
 	import type Token from "$lib/Token";
 	import TokenComponent from "./TokenComponent.svelte";
+	import TtsComponent from "./TtsComponent.svelte";
 
 
     export let task: DocumentC
     export let srWords: Set<String> | undefined
-    export let trySpeak: Function | undefined
+    let trySpeak: ((str: string) => void) | undefined
     let taskParagraphs: Array<{htmlTag: string, words: Array<any>}> = []
     $: if(task) taskParagraphs = makeTask(task)
 
@@ -83,7 +84,7 @@
 </script>
 
 
-{#each taskParagraphs as taskParagraph (taskParagraph.words)} <!-- The "key" specified in parentheses is important cause svelte will otherwise use the array index and try to only insert new indexes or do nothing if the array length doesn't change -->
+{#each taskParagraphs as taskParagraph, i (taskParagraph.words)} <!-- The "key" specified in parentheses is important cause svelte will otherwise use the array index and try to only insert new indexes or do nothing if the array length doesn't change -->
 <svelte:element this={taskParagraph.htmlTag}>
   {#each taskParagraph.words as token}
     <TokenComponent 
@@ -91,5 +92,8 @@
       isSrWord={srWords?.has(token?.lemma_)}
       on:click={() => {onWordClick(token)}} />
   {/each}          
+  {#if i==0}
+    <TtsComponent text={task} bind:trySpeak={trySpeak}/>
+  {/if}
 </svelte:element>
 {/each}
