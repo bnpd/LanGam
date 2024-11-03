@@ -19,10 +19,12 @@
 	onMount(() => {
 		// after 1 second, check for SR words
 		setTimeout(async () => {
-			dueWords = await getDue($targetLang.id)
-			setInterval(async () => {
-				dueWords = await getDue($targetLang.id)				
-			}, 300000); // refresh every 5 minutes
+			if ($username) {
+				dueWords = await getDue($targetLang.id)
+				setInterval(async () => {
+					dueWords = await getDue($targetLang.id)				
+				}, 300000); // refresh every 5 minutes
+			}
 		}, 1000);
 		// after 10 seconds, cache assets
 		setTimeout(() => {
@@ -44,8 +46,10 @@
 <TitleWithBackgroundImageComponent>LanGam CYOA Game</TitleWithBackgroundImageComponent>
 <GameComponent></GameComponent>
 <NavbarComponent>
+	{#if $username}
 	<!--<button on:click={() => goto('/catalog')}>Texts</button>-->
 	<button on:click={() => goto('/options')}>Options</button>
+	{/if}
 	<Install />
 	<FeedbackComponent />
 	{#if $username}

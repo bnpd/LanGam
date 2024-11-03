@@ -17,7 +17,7 @@ export const failedWords = createPersistentStore('failedWords', new Set());
 export const currentTask = createPersistentStore('currentTask', null);
 export const currentlyScrolledParagraphIndex = createPersistentStore('currentScrolledParagraphIndex', 0);
 export const currentTaskNParagraphs: Writable<number> = writable();
-export const currentGameId = createPersistentStore('currentGameId', null);
+export const currentGameId = createPersistentStore('currentGameId', null); // Duplicate from $player.game but this one is used for keeping track of whether saved state belongs to a game or a text. Should be undefined if saved state belongs to a text.
 export const morphHighlightFilter = createPersistentStore('morphHighlightFilter', "Case=Ins");
 
 /* Chat Component Stores */

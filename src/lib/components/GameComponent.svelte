@@ -17,10 +17,32 @@
     const TEXT_REJECT_SAVED_TASK = "Discard saved"
     const DEFAULT_CONGRATS_MESSAGE = 'Well done, keep up the pace!'
     const DEFAULT_CONGRATS_TITLE = 'Level complete 🙌'
+    const ANON_CONGRATS_MESSAGE = 'Please create a free account to continue with the next one.'
+    const ANON_CONGRATS_TITLE = 'Thanks for trying the first chapter'
 
     const UNKNOWN_POS = 0
     const STUDIED_POS = new Set([UNKNOWN_POS, 84, 86, 92, 93, 100])
     const TRACKED_POS = new Set([...STUDIED_POS, 85, 87, 89, 90, 91, 94, 95, 98])
+    const FALLBACK_GAME_ID = '4sdspc36rwuf05e'
+    const ANON_LANG = {
+        id: 'mmgox8wdjtvp7uw',
+        shortcode: 'PL',
+        name: 'Polish',
+        learnable: true
+    }
+    function GET_ANON_PLAYER(gameId: string){return {
+        "collectionId": "ckikccyphcv508t",
+        "collectionName": "players",
+        "created": "1970-01-01 00:00:00.000Z",
+        "game": gameId,
+        "id": null,
+        "level": 1,
+        "level_history": {},
+        "powers": {},
+        "stats": {},
+        "updated": "1970-01-01 00:00:00.000Z",
+        "user_lang": null
+    }}
 
     let solutionText = ''
     let toast: string | undefined;
@@ -38,11 +60,18 @@
     let lockedLevelToast: string | undefined
 
     onMount(async () => {
-        if (!$username) {
-            goto('/signup')
-        }
-        if (!$player?.id) {
-            
+        if (!$username) { // new user, not logged in -> trial mode
+            //goto('/signup')
+            $player = GET_ANON_PLAYER($currentGameId ?? new URLSearchParams(window.location.search).get('gameId') ?? FALLBACK_GAME_ID)
+            $targetLang = ANON_LANG
+            $nativeLang = 'en'
+            await prevTask($player.level); 
+            initChatHistory();
+            return
+        } 
+        
+        // user is logged in
+        if (!$player?.id) { // but does not have a player for this game yet
             $currentGameId = $currentGameId ?? new URLSearchParams(window.location.search).get('gameId')
             if (!$currentGameId) {
                 goto('/games')
@@ -92,14 +121,20 @@
 
     async function onAnswbtnClick(outcome: string) {
         speechSynthesis.cancel()
-
-        let completeLevelPromise = completeLevel($player.id, $currentTask.docId, outcome)
-
         statsClosedPromise = new Promise<boolean>((resolve, reject) => {
             statsClosedPromiseResolve = resolve
         })
-        console.log(outcome);   
-        console.log($currentTask?.outcomes);        
+
+        if (!$username) {
+            congratsMessage = ANON_CONGRATS_MESSAGE
+            congratsTitle = ANON_CONGRATS_TITLE
+            await statsClosedPromise
+            goto('/signup')
+            return
+        }
+
+        let completeLevelPromise = completeLevel($player.id, $currentTask.docId, outcome)
+        
         congratsMessage = $currentTask?.outcomes?.[outcome]?.text ?? DEFAULT_CONGRATS_MESSAGE
         congratsTitle = $currentTask?.outcomes?.[outcome]?.title ?? DEFAULT_CONGRATS_TITLE
 
@@ -137,7 +172,7 @@
     }
 
     async function prevTask(seqId: number) { // like next task but only with the things necessary when moving back to previous level where we already know seqId
-        const level = await getLevel($currentGameId, seqId)
+        const level = await getLevel($player.game, seqId)
         let doc = level?.['level']
         doc.docId = level.seq_id
         if (doc) $loadingTask = false;
@@ -253,5 +288,5 @@
     goto('/read?doc='+redirectedDoc);
 }}/>
 <Toast bind:message={lockedLevelToast}/>
-<SuccessPopup title={congratsTitle} message={congratsMessage} footnote={nNewForms ? `You just encountered ${nNewForms} new words!\n` : ''} onClose={()=>{congratsMessage = undefined; congratsTitle = undefined; statsClosedPromiseResolve()}}/>
+<SuccessPopup bind:title={congratsTitle} bind:message={congratsMessage} footnote={nNewForms ? `You just encountered ${nNewForms} new words!\n` : ''} onClose={statsClosedPromiseResolve}/>
 <DictionaryComponent/>
