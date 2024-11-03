@@ -8,7 +8,7 @@
 	import TaskComponent from "./TaskComponent.svelte";
 	import DocumentC from "$lib/DocumentC";
 
-    const ANON_RESPONSE = 'AI cannot help with the Drnuk language yet - but sign up to get help with Polish.'
+    const ANON_RESPONSE = 'Sign in to gain access to AI tutoring' //'AI cannot help with the Drnuk language yet - but sign up to get help with Polish.'
     const MAX_LENGTH_RESPONSE = "This chat has reached it's maximum length. Try chatting about another text."
     const OTHER_ERROR_RESPONSE = 'Cannot connect, please try again'
     
@@ -249,7 +249,7 @@
                     <div class={"card "+msg.role}>
                         <em><strong>
                             <BadgeComponent 
-                                text={msg.role === 'user' ? 'You' : msg.role === 'assistant' ? ($currentTask?.character ?? 'AI') : (translationLang === 'original' ? 'You+AI' : 'You')} 
+                                text={msg.role === 'user' ? 'You' : msg.role === 'assistant' ? (inline && $currentTask?.character ? $currentTask?.character : 'AI') : (translationLang === 'original' ? 'You+AI' : 'You')} 
                                 tooltip={msg.role === 'user' ? "Your response" : msg.role === 'assistant' ? "AI character" : (translationLang === 'original' ? 'Your response, corrected by AI. Feel free to ask, why AI wrote it like this.' : 'Your original response.')}/>
                         </strong></em>&nbsp;
                         {#if translationLang === 'original'}
