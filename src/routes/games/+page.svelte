@@ -56,7 +56,7 @@
     {/each}
   </div>
 {/if}
-<br><br>
+<!--<br><br>
 <NavbarComponent>
   <button on:click={()=>goto("/catalog")}>◄ Back</button>
-</NavbarComponent>
+</NavbarComponent>-->
