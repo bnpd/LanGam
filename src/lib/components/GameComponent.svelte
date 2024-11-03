@@ -115,9 +115,9 @@
             console.error(rejection);
             
             toast = "Offline. Your data was saved."
-            setTimeout(() => {
-                goto('/catalog')
-            }, 1500);
+            // setTimeout(() => {
+            //     goto('/catalog')
+            // }, 1500);
             return
         }
         
@@ -150,13 +150,13 @@
     }
 
     async function nextTask(restoreScrollPosition: boolean = false){
-        const level = await getPlayerLevel($player.id)/*.catch(_offline => {
-            toast = "Text has not been downloaded offline. Going to catalog."
-            setTimeout(() => {
-                goto('/catalog')
-            }, 2000);
+        const level = await getPlayerLevel($player.id).catch(_offline => {
+            toast = "Cannot connect to the internet."
+            // setTimeout(() => {
+            //     goto('/catalog')
+            // }, 2000);
             return undefined
-        })*/
+        })
         $player.level = level.seq_id
 
         let doc = level?.['level']
