@@ -47,6 +47,14 @@
     <div class="setting">
         <AccountDeletionComponent />
     </div>
+    <hr>
+    <h4>About</h4>
+    <div>
+        ©2024 Benjamin Paddags <br>
+        Contact: ben@langam.app
+    </div>
+    <a href="/terms">Terms</a><br>
+    <a href="/privacy">Privacy Policy</a>
 
 </div>
 <NavbarComponent>
