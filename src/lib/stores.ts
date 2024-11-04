@@ -31,6 +31,11 @@ export const freqList = createPersistentStore('freqList', null);
 export const srShowIPA = createPersistentStore('srShowIPA', true);
 export const srShowGenus = createPersistentStore('srShowGenus', true);
 
+/* One time flags */
+export const grammarBookOpened = createPersistentStore('grammarBookOpened', false);
+export const tutorOpened = createPersistentStore('tutorOpened', false);
+//export const powersOpened = createPersistentStore('powersOpened', false);
+
 /* Store Creation Functions */
 
 function createPersistentStore(key: string, initialValue: any): Writable<any> {

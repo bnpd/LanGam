@@ -124,7 +124,6 @@
     const newSolutionParagraphs: { htmlTag: string; string: string; }[] = []
     await tick();
     solution = solution.replace('\r', '').replace('\n\n', '\n')
-    let row = 1
     solution.split('\n').map(paragraph => {
       if (!paragraph.trim()) return // if it was only some kind of whitespace, don't bother
       const headingLevel = getHeadingLevelForSolution(paragraph)

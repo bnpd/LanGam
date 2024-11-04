@@ -61,7 +61,7 @@
     <br>
 </Popup>
 {#if !isOpen}
-    <button id="btnPowers" on:click={toggleIsOpen}>
+    <button class="gameNavBtn" on:click={toggleIsOpen}>
         🪄
     </button>
 {/if}

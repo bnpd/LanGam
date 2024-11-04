@@ -252,8 +252,7 @@
     <span slot="afterTask" hidden={!$currentTask}>{#if $gameChatHistory?.length}<ChatComponent readerComponent={readerComponent} inline={true} chatBoxTitle="Twoja odpowiedź 🤙" chatHistory={gameChatHistory} srWords={new Set()} isGame={true} showGameChatSuggestions={showGameChatSuggestions}/>{/if}</span>
     <span slot="afterSolution">{#if $gameChatHistory?.length}<ChatComponent readerComponent={readerComponent} inline={true} chatBoxTitle={undefined} chatHistory={gameChatHistory} translationLang='en' isGame={true}/>{/if}</span>
 </ReaderComponent>
-<div style="margin: auto; display: flex; flex-direction: row; width: 100%;">
-    <input type="text" placeholder="Case/Aspect/Voice/Tense=/Number=" bind:value={$morphHighlightFilter} style="flex-grow: 1; width: 1px;">&nbsp;
+<div style="text-align: center;">
     {#if grammarChapter}
         <GrammarBookComponent content={grammarChapter}/>
     {/if}
@@ -263,7 +262,7 @@
     <PowersComponent on:use_power={e => usePower(e.detail.power)}/>
     {#each (Object.entries($currentTask?.outcomes ?? {})) as [outcome, obj]}
         {#if $player?.level_history?.[obj.goto] || $chatOutcome == outcome} <!--TODO: fix if there are two outcomes with same seq_id -->
-            <button class="gameNavBtn" class:highlighted={$currentlyScrolledParagraphIndex >= $currentTaskNParagraphs-1} disabled={$loadingTask} on:click={()=>onAnswbtnClick(outcome)}>
+            <button class="gameNavBtn" class:flash={$currentlyScrolledParagraphIndex >= $currentTaskNParagraphs-1} disabled={$loadingTask} on:click={()=>onAnswbtnClick(outcome)}>
                 ▶
             </button>
         {:else}
@@ -273,8 +272,7 @@
         {/if}
     {/each}
     {#if !showTutorChat}
-        &nbsp;
-        <button class="chat-circle-btn" on:click={()=>{showTutorChat = true}}><b>
+        <button style="position: absolute; right: var(--padding-x-body)" class="chat-circle-btn" on:click={()=>{showTutorChat = true}}><b>
             🗨</b></button>
     {/if}
 </div>

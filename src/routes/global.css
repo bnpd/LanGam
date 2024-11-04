@@ -6,12 +6,14 @@
   --box-shadow-light: 0 5px 4px rgba(100, 100, 100, 0.1);
   --box-shadow-strong: 0 5px 4px rgba(100, 100, 100, 0.3);
   --padding-card: 22px;
+  --padding-x-body: 3vw;
+  --padding-y-body: min(1dvh, 20px);
 }
 
 body {
   background-color: var(--body-background-color);
   font-family: system-ui, Arial, Helvetica, sans-serif;
-  padding: min(1dvh, 20px) 3vw;
+  padding: var(--padding-y-body) var(--padding-x-body);
   height: calc(100dvh - var(--button-height));
   display: flex; 
   flex-direction: column; 
@@ -185,6 +187,14 @@ border-radius: var(--card-border-radius) var(--card-border-radius) 0 0;
     z-index: 1;
 }
 
+.flash {
+  animation: glowing 1300ms;
+}
+
+.flash.delayed {
+  animation: glowing-delayed 5000ms;
+}
+
 .background-orange {background-color: orange;}
 .background-lightgreen {background-color: lightgreen;}
 .background-lightblue {background-color: lightblue;}
@@ -198,7 +208,7 @@ border-radius: var(--card-border-radius) var(--card-border-radius) 0 0;
   overflow-x: hidden;
 }
 
-button.highlighted, input[type="submit"].highlighted {
+button.highlighted, input[type="submit"].highlighted, button.flash, input[type="submit"].flash {
   background-color: darkblue;
   color: aliceblue;
 }
@@ -212,7 +222,7 @@ button.highlighted, input[type="submit"].highlighted {
   flex-grow: 1;
 }
 
-#answbtn, .gameNavBtn, #btnPowers, input[type="submit"] {
+#answbtn, .gameNavBtn, input[type="submit"] {
   margin: 5px auto;
   padding: 0 1em;
   outline: none;
@@ -342,10 +352,43 @@ button.highlighted, input[type="submit"].highlighted {
   }
 }
 
+@keyframes glowing {
+  0% {
+    background-color: darkblue;
+    box-shadow: 0 0 3px darkblue;
+  }
+  20% {
+    background-color: darkblue;
+    box-shadow: 0 0 20px darkblue;
+  }
+  100% {
+    background-color: darkblue;
+    box-shadow: 0 0 3px darkblue;
+  }
+}
+@keyframes glowing-delayed {
+  0% {
+    background-color: darkblue;
+    box-shadow: 0 0 3px darkblue;
+  }
+  50% {
+    background-color: darkblue;
+    box-shadow: 0 0 3px darkblue;
+  }
+  60% {
+    background-color: darkblue;
+    box-shadow: 0 0 20px darkblue;
+  }
+  100% {
+    background-color: darkblue;
+    box-shadow: 0 0 3px darkblue;
+  }
+}
+
 
 /* Changes for Tiny mobile (Iphone SE) */
 @media only screen and (max-width: 400px) {
-  #answbtn, .gameNavBtn, #btnPowers, input[type="submit"] {
+  #answbtn, .gameNavBtn, input[type="submit"] {
     font-size: medium;
   }
 
