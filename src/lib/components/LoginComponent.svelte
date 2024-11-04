@@ -32,7 +32,7 @@
             $nativeLang = 'en'/*(await getLangById(user_obj.native_lang)).shortcode.toLowerCase()*/
             $targetLang = isSignup ? (await newUserLang('pl')).lang : await getLang('pl') // temporary solution until we figure out multilang
 
-            goto('/catalog')
+            goto('/game') //goto('/catalog')
         } catch (e) {
             if (!isSignup && e instanceof ClientResponseError) { // login was rejected
                 showValidationError('password', 'Email or password are wrong.')
