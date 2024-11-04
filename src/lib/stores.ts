@@ -10,6 +10,7 @@ export const loadingTask: Writable<boolean> = writable()
 
 /* Study Component Stores */
 export const isSoundOn = createPersistentStore('isSoundOn', true);
+export const isGrammarHighlightingOn = createPersistentStore('isGrammarHighlightingOn', true);
 export const ttsSpeed = createPersistentStore('ttsSpeed', 0.8);
 export const reviews = createPersistentStore('reviews', []);
 export const reviewDocIds = createPersistentStore('reviewOrder', []);

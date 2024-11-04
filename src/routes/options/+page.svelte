@@ -3,7 +3,7 @@
 	import config from '../../config';
 	import TitleWithBackgroundImageComponent from '$lib/components/TitleWithBackgroundImageComponent.svelte';
 	import NavbarComponent from '$lib/components/NavbarComponent.svelte';
-	import { srShowGenus, srShowIPA, ttsSpeed } from '$lib/stores';
+	import { isGrammarHighlightingOn, srShowGenus, srShowIPA, ttsSpeed } from '$lib/stores';
 	import AccountDeletionComponent from '$lib/components/AccountDeletionComponent.svelte';
 	import { getUserData } from '$lib/components/backend';
 
@@ -27,6 +27,12 @@
             <label for="ttsSpeed">{$ttsSpeed}</label>
             <input type="range" name="ttsSpeed" id="ttsSpeed" min=0.25 max=1.5 step=0.125 list="ttsSpeedValues" bind:value={$ttsSpeed} on:input={e=>{onInput(e.currentTarget)}}>
         </span>
+    </div>
+    <hr>
+    <h4>Grammar</h4>
+    <div class="setting">
+        <input type="checkbox" name="isGrammarHighlightingOn" id="isGrammarHighlightingOn" bind:checked={$isGrammarHighlightingOn}>&nbsp;
+        <label for="isGrammarHighlightingOn">Highlight current grammar concept in the text</label>
     </div>
     <hr>
     <h4>Spaced Repetition</h4>
