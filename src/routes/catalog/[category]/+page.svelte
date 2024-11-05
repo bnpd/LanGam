@@ -32,8 +32,8 @@
 </script>
 
 <svelte:head>
-	<title>{category_name} - Automated Language Learning AI</title>
-  <meta name="description" content="Texts in the {category_name} category - learn languages the fun way: talk about texts with AI.">
+	<title>{category_name} - LanGam CYOA - language learning "choose you own adventure" game</title>
+  <meta name="description" content='Texts in the {category_name} category - LanGam CYOA - language learning "choose you own adventure" game.'>
   <link rel="preconnect" href={config.backend}>
 </svelte:head>
 
@@ -49,5 +49,5 @@
 {/if}
 <br><br>
 <NavbarComponent>
-  <button on:click={()=>goto("/catalog")}>◄ Back</button>
+  <button on:click={()=>history.back()}>◄ Back</button>
 </NavbarComponent>

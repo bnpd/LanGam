@@ -1,7 +1,7 @@
 <script lang="ts" defer>
 	import '../global.css';
 	import config from '../../config';
-	import { user } from '$lib/stores';
+	import { username } from '$lib/stores';
 	import { goto } from '$app/navigation';
 	import FeedbackComponent from '$lib/components/FeedbackComponent.svelte';
 	import Install from '$lib/components/Install.svelte';
@@ -27,19 +27,18 @@
 </script>
 
 <svelte:head>
-	<title>Automated Language Learning AI</title>
-	<meta name="description" content="Learn languages the fun way: talk about texts with AI." />
-	<link rel="preconnect" href={config.backend} />
+	<title>LanGam CYOA - language learning "choose you own adventure" game</title>
+	<meta name="description" content="Learn languages like play." />
 </svelte:head>
 
-<TitleWithBackgroundImageComponent>Automated Language Learning AI</TitleWithBackgroundImageComponent>
+<TitleWithBackgroundImageComponent>LanGam CYOA - language learning "choose you own adventure" game</TitleWithBackgroundImageComponent>
 <ReadNChatComponent {tts}></ReadNChatComponent>
 <NavbarComponent>
 	<button on:click={() => goto('/catalog')}>Texts</button>
 	<TtsComponent bind:this={tts} />
 	<Install />
 	<FeedbackComponent />
-	{#if $user}
+	{#if $username}
 		<button on:click={() => goto('/lists')}>My vocab</button>
 		<WebPushSubscription />
 	{:else}

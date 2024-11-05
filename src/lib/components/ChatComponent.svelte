@@ -1,14 +1,14 @@
 <script lang="ts" defer>
-	import { chatOutcome, currentTask, failedWords, nativeLang, player, targetLang, user } from "$lib/stores";
-	import { tick } from "svelte";
+	import { chatOutcome, currentTask, failedWords, nativeLang, player, targetLang, username } from "$lib/stores";
+	import { onMount, tick } from "svelte";
 	import BadgeComponent from "./BadgeComponent.svelte";
 	import type ReaderComponent from "./ReaderComponent.svelte";
-	import { sendChat, sendGameChat } from "./backend";
+	import { sendChat, sendGameChat, sendTutorChat } from "./backend";
 	import { writable, type Writable } from "svelte/store";
 	import TaskComponent from "./TaskComponent.svelte";
 	import DocumentC from "$lib/DocumentC";
 
-    const ANON_RESPONSE = 'AI cannot help with the Drnuk language yet - but sign up to get help with Polish.'
+    const ANON_RESPONSE = 'Sign in to gain access to AI tutoring' //'AI cannot help with the Drnuk language yet - but sign up to get help with Polish.'
     const MAX_LENGTH_RESPONSE = "This chat has reached it's maximum length. Try chatting about another text."
     const OTHER_ERROR_RESPONSE = 'Cannot connect, please try again'
     
@@ -23,6 +23,9 @@
                 mainContent.style.opacity = ($chatHistory.length && (chatFocussed || loading)) ? "0.2" : "1"
             }
         }
+    $: if (chatFocussed) {
+            iChat?.focus()
+        }
     
     export let readerComponent: ReaderComponent;
     export let inline: boolean;
@@ -30,13 +33,14 @@
     export let chatHistory: Writable<{role: string, content: DocumentC}[]> = new writable([]);
     export let translationLang: string = 'original'
     export let srWords: Set<string> | undefined = undefined
-    export let trySpeak: Function | undefined = undefined
     export let isGame: boolean = false
-    let chatFocussed: boolean = false;
+    export let showGameChatSuggestions: boolean = true
+    export let chatFocussed: boolean = false;
     let chatPrompt: string = ''
     let iChat: HTMLDivElement
     let loading: boolean = false
     let messageHistoryContainer: HTMLDivElement
+    let chatComponent: HTMLDivElement
 
     /**
      * Finds the first occurrence of word in the text and returns the corresponding lemma (thus not necessarily the lemma for that ocurrence that the user clicked)
@@ -54,11 +58,15 @@
     function onClickChatSuggestion(e: Event) {
         chatPrompt = (e.currentTarget as HTMLButtonElement).innerText
         submitChat(true)
+        iChat?.focus()
     }
 
     function onSubmitChatField(e: Event) {
+        console.log('sub');
+        
         if (chatPrompt.length) {
             submitChat(false)
+            iChat?.focus()
         } else {
             iChat?.focus()
         }
@@ -70,21 +78,25 @@
      */
     async function submitChat(partialContext: boolean) {
         loading = true
-        const newMessage = {role: 'user', content: DocumentC.partialDocument(chatPrompt, $targetLang, undefined, undefined)}
+        const newMessage = {role: 'user', content: DocumentC.partialDocument(chatPrompt, $targetLang.shortcode, undefined, undefined)}
         let new_history = $chatHistory
         try {
             let responseMsg
-            if ($user) {
+            if ($username) {
                 let correction
                 let response
                 if (isGame) {
                     let end_conversation, outcome
                     ({end_conversation, outcome, correction, response} = await sendGameChat(messageHistoryForChatGpt($chatHistory.concat([newMessage])), $player.id, $player.level));
                     $chatOutcome = end_conversation ? outcome : null
+                } else if (!inline) {
+                    response = await sendTutorChat(messageHistoryForChatGpt($chatHistory.concat([newMessage])), readerComponent.getVisibleParagraphs())
+                    console.log(response);
+                    
                 } else {
                     ({correction, response} = 
                         partialContext ? await sendChat(messageHistoryForChatGpt($chatHistory.concat([newMessage])), inline, undefined, undefined, readerComponent.getVisibleParagraphs())
-                                       : await sendChat(messageHistoryForChatGpt($chatHistory.concat([newMessage])), inline, $targetLang, $currentTask.docId, undefined));
+                                       : await sendChat(messageHistoryForChatGpt($chatHistory.concat([newMessage])), inline, $targetLang.shortcode, $currentTask.docId, undefined));
                 }
                 if (correction) {
                     newMessage.content = correction // replace user's message with corrected message
@@ -123,12 +135,22 @@
 
     function scrollToLatestChatMessage() {
         const elementsToScroll = (inline ? [readerComponent.getDivTask(), readerComponent.getSolutionField()] : [messageHistoryContainer])
-        elementsToScroll.forEach(el => el.scroll({top: el.scrollHeight, behavior: 'smooth'}))
+        elementsToScroll.forEach(el => el?.scroll({top: el.scrollHeight, behavior: 'smooth'}))
         // FIXME: solutionField automatically gets scrolled when divTask does, which means it will snap back afterwards. For now it's fine
     }
 
     function isEdited(correction: DocumentC) {
         return correction.text.text.replaceAll(/\W+/g, '') !== chatPrompt.replaceAll(/\W+/g, '') // remove everything that is not a word, then compare
+    }
+
+    function handleFocus() {
+        setTimeout(async () => {
+            await tick()
+            console.log(document.activeElement);
+            
+            chatFocussed = chatComponent?.contains(document.activeElement) ?? false
+            console.log(chatFocussed);
+        }, 10); // wait a moment in case we re-focussed (e.g. in onSubmitChatField)
     }
 
 </script>
@@ -158,7 +180,7 @@
     .chatMessage {
         white-space: pre-wrap;
         /* max-height: 18dvh; 
-        overflow-y: scroll; */
+        overflow-y: auto; */
     }
 
     .chatHistoryHidden {
@@ -176,14 +198,6 @@
 
     #chatInputContainer {
         position: relative;
-    }
-    
-    #submitChat, #closeChat {
-        position: absolute;
-        bottom: 1px;
-        height: calc(100% - 2px);
-        border-radius: 20px;
-        width: var(--button-height);
     }
         
     #submitChat {
@@ -228,19 +242,19 @@
     }
 </style>
 
-<div id="chatComponent" on:focus|capture={()=>{chatFocussed = true}} on:focusout|capture={()=>{chatFocussed = false}}>
+<div id="chatComponent" bind:this={chatComponent} on:focus|capture={handleFocus} on:focusout|capture={handleFocus}>
     <div id="messageHistoryContainer" bind:this={messageHistoryContainer} class:chatHistoryHidden={!chatFocussed && !loading && !inline} class:floatAboveParent={!inline} class:inline={inline}>
         {#each $chatHistory as msg, i}
                 {#if msg.role === 'assistant' || msg.role === 'user' || msg.role === 'correction'}
                     <div class={"card "+msg.role}>
                         <em><strong>
                             <BadgeComponent 
-                                text={msg.role === 'user' ? 'You' : msg.role === 'assistant' ? 'AI' : (translationLang === 'original' ? 'You+AI' : 'You')} 
-                                tooltip={msg.role === 'user' ? "Your response" : msg.role === 'assistant' ? "AI's response" : (translationLang === 'original' ? 'Your response, corrected by AI. Feel free to ask, why AI wrote it like this.' : 'Your original response.')}/>
+                                text={msg.role === 'user' ? 'You' : msg.role === 'assistant' ? (inline && $currentTask?.character ? $currentTask?.character : 'AI') : (translationLang === 'original' ? 'You+AI' : 'You')} 
+                                tooltip={msg.role === 'user' ? "Your response" : msg.role === 'assistant' ? "AI character" : (translationLang === 'original' ? 'Your response, corrected by AI. Feel free to ask, why AI wrote it like this.' : 'Your original response.')}/>
                         </strong></em>&nbsp;
                         {#if translationLang === 'original'}
                             {#if msg.content.text?.tokens}
-                                <TaskComponent task={msg.content} srWords={srWords} trySpeak={trySpeak}/>
+                                <TaskComponent task={msg.content} srWords={srWords}/>
                             {:else}
                                 <p class="chatMessage">{msg.content.text.text.trim()}</p>
                             {/if}
@@ -276,7 +290,7 @@
                     </button>
                 {/if}
             </div>
-        {:else if isGame && $currentTask?.suggested_replies?.length}
+        {:else if isGame && $currentTask?.suggested_replies?.length && showGameChatSuggestions}
             <div class="promptSuggestions">
                 {#each $currentTask?.suggested_replies as suggestion}
                     <button class="promptSuggestion" on:click={onClickChatSuggestion} disabled={loading}>
@@ -287,10 +301,10 @@
         {/if}
         <div id="chatInputContainer">
             <div contenteditable id="iChat" data-placeholder={chatBoxTitle} bind:innerText={chatPrompt} bind:this={iChat}/>
-            {#if chatFocussed && $chatHistory.length }
-                <button id="closeChat" on:click={() => {document?.activeElement?.blur()}}>x</button>       
+            {#if chatFocussed }
+                <button id="closeChat" on:click={() => {document?.activeElement?.blur()}} class="chat-circle-btn">x</button>       
             {/if}    
-            <button id="submitChat" on:click={onSubmitChatField} disabled={loading}><b><em>
+            <button id="submitChat" on:click={onSubmitChatField} disabled={loading} class="chat-circle-btn"><b><em>
                 {#if chatPrompt}
                 ➥
                 {:else}

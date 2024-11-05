@@ -2,7 +2,7 @@
     import { onMount } from 'svelte';
     import ReaderComponent from './ReaderComponent.svelte';
     import { getTask, getUserTaskStats, sendReview } from './backend';
-    import { user, nativeLang, targetLang, isSoundOn, currentTask, reviews, failedWords, reviewDocIds, currentlyScrolledParagraphIndex, loadingTask, inlineChatHistory, currentGameId, gameChatHistory } from '$lib/stores';
+    import { username, nativeLang, targetLang, isSoundOn, currentTask, reviews, failedWords, reviewDocIds, currentlyScrolledParagraphIndex, loadingTask, inlineChatHistory, currentGameId, gameChatHistory } from '$lib/stores';
 	import { goto } from '$app/navigation';
 	import Toast from './Toast.svelte';
 	import ChatComponent from './ChatComponent.svelte';
@@ -32,8 +32,8 @@
     onMount(async () => {
         let urlparams = new URLSearchParams(window.location.search)
 
-        if (!$user) {
-            $targetLang = 'pl'
+        if (!$username) {
+            $targetLang = {shortcode: 'pl'} //TODO: getLangByShortcode('pl') from pocketbase
             $nativeLang = 'en'
             $isSoundOn = false
         }
@@ -88,7 +88,7 @@
 
         const correctedWords = (srWords?.difference($failedWords))?.size // this is kinda cheating cause srWords are lemmas and failedWords are forms, but it's not easily fixable without saving the whole Token object somewhere
 
-        if ($currentTask && $user) {
+        if ($currentTask && $username) {
             $reviews.push(structuredClone($failedWords))
             $reviews = $reviews
             $reviewDocIds.push($currentTask.docId)
@@ -124,7 +124,7 @@
             return
         }
         
-        if ($user) {
+        if ($username) {
             await nextTask(getUrlDoc()) // IMPROVEMENT: we could even pre-fetch the next task while stats popup is shown
             initChatHistory()
             goto('/read', {replaceState: true})
@@ -146,7 +146,7 @@
         const times = $reviewDocIds.length
         for (let i = 0; i < times; i++) {
             try {
-                await sendReview($targetLang, $reviewDocIds[0], Array.from($reviews[0]))            
+                await sendReview($targetLang.shortcode, $reviewDocIds[0], Array.from($reviews[0]))            
             } catch (offlineError) {
                 return Promise.reject(offlineError)
             }
@@ -162,10 +162,10 @@
 
     async function nextTask(docId: string | null, restoreScrollPosition: boolean = false){
         let doc        
-        if (!$user) { //anonymous mode
+        if (!$username) { //anonymous mode
             doc = DocumentC.getSampleDoc()
         } else {
-            doc = await getTask($targetLang, docId).catch(_offline => {
+            doc = await getTask($targetLang.shortcode, docId).catch(_offline => {
                 toast = "Text has not been downloaded offline. Going to catalog."
                 setTimeout(() => {
                     goto('/catalog')   
@@ -186,7 +186,7 @@
         }
 
         try {         
-            const [srWords_l, newForms_l] = $user ? await getUserTaskStats($targetLang, (String)(doc?.docId)) : [["ornage"], Object.values(doc?.title?.tokens).map(tok => tok.word).concat(Object.values(doc?.title?.tokens).map(tok => tok.word))]
+            const [srWords_l, newForms_l] = $username ? await getUserTaskStats($targetLang.shortcode, (String)(doc?.docId)) : [["ornage"], Object.values(doc?.title?.tokens).map(tok => tok.word).concat(Object.values(doc?.title?.tokens).map(tok => tok.word))]
             srWords = new Set(srWords_l)
             nNewForms = newForms_l.length
         } catch (_offline) {
@@ -201,10 +201,10 @@
 
 </script>
 
-{#if !$user}
+{#if !$username}
     <strong>In this demo text, you learn the fabulous <em>Drnuk</em> language (and how this app works).</strong> <!-- If you want to dive right in with Polish, create an account at the bottom.-->
 {/if}
-<ReaderComponent tts={tts} solutionText={solutionText} taskVisible={!$loadingTask} srWords={srWords} bind:this={readerComponent}>
+<ReaderComponent tts={tts} solutionText={solutionText} srWords={srWords} bind:this={readerComponent}>
     <span slot="afterTask" hidden={!$currentTask}><ChatComponent readerComponent={readerComponent} inline={true} chatBoxTitle="Twoja odpowiedź 🤙" chatHistory={inlineChatHistory} srWords={srWords} trySpeak={tts?.trySpeak}/></span>
     <span slot="afterSolution"><ChatComponent readerComponent={readerComponent} inline={true} chatBoxTitle={undefined} chatHistory={inlineChatHistory} translationLang='en'/></span>
 </ReaderComponent>

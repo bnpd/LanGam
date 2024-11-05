@@ -5,8 +5,8 @@
 </script>
 
 <svelte:head>
-	<title>Catalog - Automated Language Learning AI</title>
-  <meta name="description" content="Catalog of all our texts - learn languages the fun way: talk about texts with AI.">
+	<title>Catalog - LanGam CYOA - language learning "choose you own adventure" game</title>
+  <meta name="description" content='Catalog of all our texts - LanGam CYOA - language learning "choose you own adventure" game.'>
   <link rel="preconnect" href={config.backend}>
 </svelte:head>
 

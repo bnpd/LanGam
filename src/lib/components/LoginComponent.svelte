@@ -1,7 +1,7 @@
 <script lang="ts" defer>
-    import { login, newUserLang, signup } from '$lib/components/backend';
+    import { getLang, login, newUserLang, signup } from '$lib/components/backend';
     import { goto } from '$app/navigation';
-	import { failedWords, inlineChatHistory, nativeLang, reviews, targetLang, user } from '$lib/stores';
+	import { failedWords, inlineChatHistory, nativeLang, reviews, targetLang, username } from '$lib/stores';
 	import { ClientResponseError } from 'pocketbase';
 	import TitleWithBackgroundImageComponent from './TitleWithBackgroundImageComponent.svelte';
   
@@ -23,19 +23,16 @@
                 await signup(formDataEntries.get('email')?.toString()!, formDataEntries.get('password')?.toString()!, 'en'/*formDataEntries.get('native_lang')?.toString()!*/)
             }
             let user_obj = (await login(formDataEntries.get('email')?.toString()!, formDataEntries.get('password')?.toString()!)).record
-            if (user_obj.id != $user) {
+            if (user_obj.id != $username) {
                 $failedWords = new Set()
                 $reviews = []
                 $inlineChatHistory = []
-                $user = user_obj.id
+                $username = user_obj.id
             }
             $nativeLang = 'en'/*(await getLangById(user_obj.native_lang)).shortcode.toLowerCase()*/
-            $targetLang = 'pl'
-            if (isSignup) {
-                await newUserLang('pl')
-            }
+            $targetLang = isSignup ? (await newUserLang('pl')).lang : await getLang('pl') // temporary solution until we figure out multilang
 
-            goto('/catalog')
+            goto('/game') //goto('/catalog')
         } catch (e) {
             if (!isSignup && e instanceof ClientResponseError) { // login was rejected
                 showValidationError('password', 'Email or password are wrong.')

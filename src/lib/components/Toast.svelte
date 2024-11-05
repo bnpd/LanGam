@@ -11,10 +11,14 @@
 
     function hide() {
         message=undefined
-        onReject=undefined
-        textReject=undefined
     }
 </script>
+
+<style>
+    #toast {
+        z-index: 201;
+    }
+</style>
 
 {#if message}
 <div id="toast" on:touchmove={hide} on:click={hide} transition:fly={{ y: 100, duration: 500 }}>

@@ -2,7 +2,7 @@ import { writable, type Writable } from 'svelte/store';
 import type DocumentC from './DocumentC';
 
 /* Global Stores */
-export const user = createPersistentStore('username', null);
+export const username = createPersistentStore('username', null);
 export const player = createPersistentStore('player', null);
 export const targetLang = createPersistentStore('target_lang', null);
 export const nativeLang = createPersistentStore('native_lang', null);
@@ -10,18 +10,32 @@ export const loadingTask: Writable<boolean> = writable()
 
 /* Study Component Stores */
 export const isSoundOn = createPersistentStore('isSoundOn', true);
+export const isGrammarHighlightingOn = createPersistentStore('isGrammarHighlightingOn', true);
 export const ttsSpeed = createPersistentStore('ttsSpeed', 0.8);
 export const reviews = createPersistentStore('reviews', []);
 export const reviewDocIds = createPersistentStore('reviewOrder', []);
 export const failedWords = createPersistentStore('failedWords', new Set());
 export const currentTask = createPersistentStore('currentTask', null);
 export const currentlyScrolledParagraphIndex = createPersistentStore('currentScrolledParagraphIndex', 0);
-export const currentGameId = createPersistentStore('currentGameId', null);
+export const currentTaskNParagraphs: Writable<number> = writable();
+export const currentGameId = createPersistentStore('currentGameId', null); // Duplicate from $player.game but this one is used for keeping track of whether saved state belongs to a game or a text. Should be undefined if saved state belongs to a text.
+export const morphHighlightFilter = createPersistentStore('morphHighlightFilter', "Case=Ins");
 
 /* Chat Component Stores */
 export const inlineChatHistory: Writable<{role: string, content: DocumentC}[]> = createPersistentStore('inlineChatHistory', []);
 export const gameChatHistory: Writable<{role: string, content: DocumentC}[]> = createPersistentStore('gameChatHistory', []);
 export const chatOutcome = createPersistentStore('chatOutcome', null);
+
+/* Dictionary Component / SR Stores */
+export const dictionaryWord: Writable<string | undefined> = writable()
+export const freqList = createPersistentStore('freqList', null);
+export const srShowIPA = createPersistentStore('srShowIPA', true);
+export const srShowGenus = createPersistentStore('srShowGenus', true);
+
+/* One time flags */
+export const grammarBookOpened = createPersistentStore('grammarBookOpened', false);
+export const tutorOpened = createPersistentStore('tutorOpened', false);
+//export const powersOpened = createPersistentStore('powersOpened', false);
 
 /* Store Creation Functions */
 

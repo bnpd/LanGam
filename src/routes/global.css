@@ -5,12 +5,15 @@
   --card-border-radius: 2em;
   --box-shadow-light: 0 5px 4px rgba(100, 100, 100, 0.1);
   --box-shadow-strong: 0 5px 4px rgba(100, 100, 100, 0.3);
+  --padding-card: 22px;
+  --padding-x-body: 3vw;
+  --padding-y-body: min(1dvh, 20px);
 }
 
 body {
   background-color: var(--body-background-color);
   font-family: system-ui, Arial, Helvetica, sans-serif;
-  padding: min(1dvh, 20px) 3vw;
+  padding: var(--padding-y-body) var(--padding-x-body);
   height: calc(100dvh - var(--button-height));
   display: flex; 
   flex-direction: column; 
@@ -46,6 +49,10 @@ button, input[type="submit"] {
   margin-top: 10px;
   border-radius: 1em;
   box-shadow: var(--box-shadow-strong); /* Downwards shadow and on left and right side*/
+}
+
+button:disabled, input[type="submit"]:disabled {
+  opacity: 60%;
 }
 
 textarea {
@@ -100,8 +107,11 @@ div[contenteditable]:focus {
   outline-color: blue;
 }
 
+ul {
+  padding-inline-start: 1.5em;
+}
+
 .card, .image-card {
-  --padding-card: 22px;
   padding: var(--padding-card) !important;
   background-color: aliceblue;
   border-radius: var(--card-border-radius);
@@ -122,8 +132,12 @@ div[contenteditable]:focus {
   color: red;
 }
 
+.grammar-marked {
+  color: darkblue;
+}
+
 .srWord {
-  color: goldenrod;
+  color: indigo;
 }
 
 .two-columns {
@@ -148,6 +162,17 @@ div[contenteditable]:focus {
   text-align: center; /* Center text */
 }
 
+.chat-circle-btn {
+    border-radius: 20px;
+    width: var(--button-height);
+}
+   
+#chatInputContainer .chat-circle-btn {
+    position: absolute;
+    bottom: 1px;
+    height: calc(100% - 2px);
+}
+
 .image-card img {
 margin-top: calc(-1 * var(--padding-card));
 margin-left: calc(-1 * var(--padding-card));
@@ -162,6 +187,18 @@ border-radius: var(--card-border-radius) var(--card-border-radius) 0 0;
     z-index: 1;
 }
 
+.flash {
+  animation: glowing 1300ms;
+}
+
+.flash.delayed {
+  animation: glowing-delayed 5000ms;
+}
+
+.background-orange {background-color: orange;}
+.background-lightgreen {background-color: lightgreen;}
+.background-lightblue {background-color: lightblue;}
+
 #divTask, #solutionField {
   padding: 0 0.2em;
   line-height: 1.8em;
@@ -169,6 +206,11 @@ border-radius: var(--card-border-radius) var(--card-border-radius) 0 0;
   height: 0px; /* just need to have a value for flex-grow to work */
   overflow-y: scroll;
   overflow-x: hidden;
+}
+
+button.highlighted, input[type="submit"].highlighted, button.flash, input[type="submit"].flash {
+  background-color: darkblue;
+  color: aliceblue;
 }
 
 #divTask::-webkit-scrollbar, #solutionField::-webkit-scrollbar {
@@ -180,21 +222,16 @@ border-radius: var(--card-border-radius) var(--card-border-radius) 0 0;
   flex-grow: 1;
 }
 
-#answbtn, #levelBackbtn, input[type="submit"] {
+#answbtn, .gameNavBtn, input[type="submit"] {
   margin: 5px auto;
   padding: 0 1em;
   outline: none;
-  background-color: darkblue;
-  color: aliceblue;
+  background-color: aliceblue;
+  color: darkblue;
   height: 50px;
   line-height: 45px;
   font-size: large;
   font-weight: bold;
-}
-
-#levelBackbtn {
-  background-color: aliceblue;
-  color: darkblue;
 }
 
 #contentbox {
@@ -251,18 +288,18 @@ border-radius: var(--card-border-radius) var(--card-border-radius) 0 0;
     display: flex;
 }
 
-#navbar button {
+#navbar > button {
   width: 100px;
   border-radius: 5px;
   flex-grow: 1;
 }
 
-#navbar button:first-child {
+#navbar > button:first-child {
   border-top-left-radius: 20px;
   border-bottom-left-radius: 20px;
 }
 
-#navbar button:last-child {
+#navbar > button:last-child {
   border-top-right-radius: 20px;
   border-bottom-right-radius: 20px;
 }
@@ -279,11 +316,21 @@ border-radius: var(--card-border-radius) var(--card-border-radius) 0 0;
 /* Loading indicator */
 .loading {
   visibility: hidden;
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .loading:after {
   content: " ";
   display: block;
+  position: absolute;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  /* Optional alternative centering without transform */
+  inset: 0;
   width: 50px;
   height: 50px;
   border-radius: 50%;
@@ -305,12 +352,60 @@ border-radius: var(--card-border-radius) var(--card-border-radius) 0 0;
   }
 }
 
+@keyframes glowing {
+  0% {
+    background-color: darkblue;
+    box-shadow: 0 0 3px darkblue;
+  }
+  20% {
+    background-color: darkblue;
+    box-shadow: 0 0 20px darkblue;
+  }
+  100% {
+    background-color: darkblue;
+    box-shadow: 0 0 3px darkblue;
+  }
+}
+@keyframes glowing-delayed {
+  0% {
+    background-color: darkblue;
+    box-shadow: 0 0 3px darkblue;
+  }
+  50% {
+    background-color: darkblue;
+    box-shadow: 0 0 3px darkblue;
+  }
+  60% {
+    background-color: darkblue;
+    box-shadow: 0 0 20px darkblue;
+  }
+  100% {
+    background-color: darkblue;
+    box-shadow: 0 0 3px darkblue;
+  }
+}
+
+
+/* Changes for Tiny mobile (Iphone SE) */
+@media only screen and (max-width: 400px) {
+  #answbtn, .gameNavBtn, input[type="submit"] {
+    font-size: medium;
+  }
+
+  h2, h3 {
+    font-size: medium;
+  }
+
+  * {
+    --padding-card: 18px;
+  }
+}
 
 /* Changes for Mobile*/
 @media only screen and (max-width: 767px) {
 
-  h1 {
-    font-size: medium;
+  h1, h4 {
+    font-size: small;
   }
 
   h3 {
@@ -325,7 +420,7 @@ border-radius: var(--card-border-radius) var(--card-border-radius) 0 0;
 
 /* Changes for PC*/
 @media only screen and (min-width: 768px) {
-  .card {
+  * {
     --padding-card: 30px;
   }
 

@@ -4,7 +4,7 @@
 	import { onMount } from 'svelte';
 	import { getGames } from '$lib/components/backend';
 	import { error } from '@sveltejs/kit';
-	import { targetLang, user } from '$lib/stores';
+	import { targetLang, username } from '$lib/stores';
 	import TitleWithBackgroundImageComponent from '$lib/components/TitleWithBackgroundImageComponent.svelte';
 	import NavbarComponent from '$lib/components/NavbarComponent.svelte';
 	import { goto } from '$app/navigation';
@@ -14,19 +14,20 @@
   let games: any[]
 
   onMount(async () => {
-    if (!$user || !$targetLang) {
+    if (!$username || !$targetLang?.shortcode || !$targetLang?.id) {
         goto('/signup')
+        return
     }
-    games = await getGames($targetLang)
+    games = await getGames($targetLang.id)
   
     if (!games) throw error(405);
   })
 </script>
 
 <svelte:head>
-	<title>Games - Automated Language Learning AI</title>
+	<title>Games - LanGam CYOA - language learning "choose you own adventure" game</title>
   <meta name="description" content="Games - learn languages like play.">
-  <link rel="preconnect" href={config.backend}>
+  <link rel="preconnect" href={config.pocketbase}>
 </svelte:head>
 
 {#if games}
@@ -34,7 +35,7 @@
   <div class="two-columns">
     {#each games as game}
       <div class="image-card">
-          <a href={$user ? "/game?gameId="+game.id : "/signup"}>
+          <a href={$username ? "/game?gameId="+game.id : "/signup"}>
               <div style:position="relative">
                   <img 
                       src={game.img ? `/images/illustrations/${game.img}.avif` : FALLBACK_IMAGE} 
@@ -55,7 +56,7 @@
     {/each}
   </div>
 {/if}
-<br><br>
+<!--<br><br>
 <NavbarComponent>
   <button on:click={()=>goto("/catalog")}>◄ Back</button>
-</NavbarComponent>
+</NavbarComponent>-->

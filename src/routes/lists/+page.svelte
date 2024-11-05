@@ -1,40 +1,35 @@
 <script lang="ts" defer>
-import type Token from "$lib/Token";
-import { getVocab } from "$lib/components/backend.js"
-import { targetLang } from '$lib/stores';
-	import { onMount } from "svelte";
+import { getUserLang } from "$lib/components/backend.js"
+import { targetLang, username } from '$lib/stores';
 import '../global.css';
 import './lists.css';
-	import { goto } from "$app/navigation";
 	import TitleWithBackgroundImageComponent from "$lib/components/TitleWithBackgroundImageComponent.svelte";
 	import VocabListItem from "$lib/components/VocabListItem.svelte";
 	import NavbarComponent from "$lib/components/NavbarComponent.svelte";
-	import BadgeComponent from "$lib/components/BadgeComponent.svelte";
 	import config from '../../config';
+	import SrComponent from "$lib/components/SrComponent.svelte";
 
-let scheduledTokens: {[key: string]: Token} = {}
+let scheduledTokens: {[key: string]: any} = {}
+let usedTokens: {[key: string]: string[]} = {}
 let seenTokens: {[key: string]: string[]} = {}
-onMount(() => {
-  reloadLists()
-})
+let showAllWords = false
 
 // /// Functions ///
 
 /**
  * Reload (or load initially) both lists
  */
-function reloadLists() {
+async function loadVocabLists() {
   // remove previous content
   scheduledTokens = {}
   seenTokens = {}
 
   // load lists
-  getVocab($targetLang).then(vocab => {
-      let scheduledMap, allFormsMap
-      [scheduledMap, allFormsMap] = [...vocab]
-      scheduledTokens = scheduledMap
-      seenTokens = allFormsMap
-  })
+  const user_lang = await getUserLang($username, $targetLang.id)
+  scheduledTokens = user_lang.sr_words
+  usedTokens = user_lang.used_words
+  seenTokens = user_lang.seen_words
+  showAllWords = true
 }
 
 /**
@@ -55,44 +50,63 @@ function reloadLists() {
 </script>
 
 <svelte:head>
-	<title>Your Vocabulary - Automated Language Learning AI</title>
-  <meta name="description" content="Overview of your learned words - learn languages the fun way: talk about texts with AI.">
-  <link rel="preconnect" href={config.backend}>
+	<title>Your Vocabulary - LanGam CYOA - language learning "choose you own adventure" game</title>
+  <meta name="description" content='Overview of your learned words - LanGam CYOA - language learning "choose you own adventure" game.'>
+  <link rel="preconnect" href={config.pocketbase}>
 </svelte:head>
 
 <TitleWithBackgroundImageComponent>Your vocab</TitleWithBackgroundImageComponent>
-<div>
-  <div id="divLeft">
-    <!--<button id="btnExportSRList" on:click={() => exportObject(scheduledTokens, 'Spaced Repetition Words')}>Export</button>-->
-    <h1>
-      Spaced Repetition
-      <span>{Object.keys(scheduledTokens).length ? "("+Object.keys(scheduledTokens).length+" words)" : ""}</span>
-    </h1>
-    <div id="ulSearchList">
-      {#each Object.keys(scheduledTokens) as key}
-        <VocabListItem title={scheduledTokens[key].word} >
-          <BadgeComponent text='AI' tooltip="Estimate when you are likely to forget it, according to Spaced Repetition science. We'll try to show it before that day."/>
-          Due: {Math.min(9999, scheduledTokens[key]?.interval)}&nbsp;d
-        </VocabListItem>
-      {/each}  
+<SrComponent />
+{#if showAllWords}
+  <div class="flex-row">
+    <!-- {#if Object.keys(scheduledTokens)?.length}    
+      <div class="vocab-column">
+        <h3>
+          Spaced Repetition
+          <span>{Object.keys(scheduledTokens).length ? "("+Object.keys(scheduledTokens).length+" words)" : ""}</span>
+        </h3>
+        <div>
+          {#each Object.keys(scheduledTokens) as key}
+            <VocabListItem title={scheduledTokens[key].word} >
+              <BadgeComponent text='AI' tooltip="Estimate when you are likely to forget it, according to Spaced Repetition science. We'll try to show it before that day."/>
+              Due: {Math.min(9999, scheduledTokens[key]?.interval)}&nbsp;d
+            </VocabListItem>
+          {/each}  
+        </div>
+      </div>
+    {/if} -->
+    <div class="vocab-column">
+      <h3>
+        Used in chat
+        <span>{Object.keys(usedTokens).length ? "("+Object.keys(usedTokens).length+" words)" : ""}</span>
+      </h3>
+      <div>
+        {#each Object.keys(usedTokens) as key}
+          <VocabListItem>
+            {usedTokens[key].join(', ')}
+          </VocabListItem>
+        {/each}
+      </div>
+    </div>
+    <div class="vocab-column">
+      <h3>
+        Seen
+        <span>{Object.keys(seenTokens).length ? "("+Object.keys(seenTokens).length+" families)" : ""}</span>
+      </h3>
+      <div>
+        {#each Object.keys(seenTokens) as key}
+          <VocabListItem>
+            {seenTokens[key].join(', ')}
+          </VocabListItem>
+        {/each}  
+      </div>
     </div>
   </div>
-  <div id="divRight">
-    <!--<button id="btnExportSeenList" on:click={() => exportObject(seenTokens, 'Seen Words')}>Export</button>-->
-    <h1>
-      Seen
-      <span>{Object.keys(seenTokens).length ? "("+Object.keys(seenTokens).length+" families)" : ""}</span>
-    </h1>
-    <div id="ulKnownList">
-      {#each Object.keys(seenTokens) as key}
-        <VocabListItem>
-          {seenTokens[key].join(', ')}
-        </VocabListItem>
-      {/each}  
-    </div>
-  </div>
-</div>
-<br><br>
+  <br><br>
+{:else}
+  <button on:click={loadVocabLists}>List all seen words</button>
+{/if}
+  
 <NavbarComponent>
-  <button on:click={history.back}>◄ Back</button>
+  <button on:click={()=>{history.back()}}>◄ Back</button>
 </NavbarComponent>

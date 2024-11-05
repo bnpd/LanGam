@@ -1,6 +1,6 @@
 <script lang="ts" defer>
 	import { getTask } from "./backend";
-	import { targetLang, user } from "$lib/stores";
+	import { targetLang, username } from "$lib/stores";
 	import DocPreviewComponent from "./DocPreviewComponent.svelte";
 	import BadgeComponent from "./BadgeComponent.svelte";
 	import TitleWithBackgroundImageComponent from "./TitleWithBackgroundImageComponent.svelte";
@@ -37,9 +37,9 @@
     {/if}
     Catalog
 </TitleWithBackgroundImageComponent>
-{#if $user}
+{#if $username}
     {#if !offline}
-        {#await getTask($targetLang) then doc}
+        {#await getTask($targetLang.shortcode) then doc}
             <h2>
                 <BadgeComponent text='AI' tooltip='This text optimizes the amount of words that are due for spaced repetition to help you keep your vocabulary fresh.'/>
                 Recommended: 
@@ -63,7 +63,7 @@
     </div>
 {/if}
 <h2>Categories</h2>
-<div style:opacity={$user ? '1' : '0.3'} class="two-columns">
+<div style:opacity={$username ? '1' : '0.3'} class="two-columns">
     {#each content_types as filter}
         {@const key = Object.keys(filter.filter)[0]}
             <a href="/catalog/{key};{filter.filter[key]}">
@@ -74,7 +74,7 @@
     {/each}
 </div>
 <h2>Topics</h2>
-<div style:opacity={$user ? '1' : '0.3'} class="two-columns">
+<div style:opacity={$username ? '1' : '0.3'} class="two-columns">
     {#each topics as filter}
         {@const key = Object.keys(filter.filter)[0]}
             <a href="/catalog/{key};{filter.filter[key]}">
@@ -86,5 +86,5 @@
 </div>
 <br><br>
 <NavbarComponent>
-  <button on:click={()=>goto("/read")}>◄ Back</button>
+  <button on:click={()=>history.back()}>◄ Back</button>
 </NavbarComponent>

@@ -1,8 +1,9 @@
 'use strict';
 import { goto } from '$app/navigation';
+import { VocabCard } from '$lib/fsrs.js';
 import config from '../../config.js';
 import DocumentC from '../DocumentC.js'
-import PocketBase from 'pocketbase';
+import PocketBase, { type RecordModel } from 'pocketbase';
 
 // PocketBase
 const pb = new PocketBase(config.pocketbase)
@@ -13,14 +14,14 @@ const MAX_CHAT_HISTORY_CHARS = 20000
  * @param {string} user
  * @param {string} password
  */
-export async function login(user, password) {
+export async function login(user: string, password: string) {
 	return pb.collection('users').authWithPassword(user, password);
 }
 
 /**
  * @param {string} langId id of the language in pocketbase
  */
-export async function getLangById(langId) {
+export async function getLangById(langId: string) {
 	return pb.collection('langs').getOne(langId);
 }
 
@@ -35,21 +36,21 @@ const ENDPOINT_NEW_USER_LANG = '/new_user_lang'
 /**
  * @param {string} targetLang
  */
-function EndpointGetVocab(targetLang) {return '/vocab/'+targetLang;}
+function EndpointGetVocab(targetLang: string) {return '/vocab/'+targetLang;}
 /**
  * @param {string} targetLang
  * @param {string} docId
  */
-function EndpointGetTask(targetLang, docId) {return `/task/${targetLang}/${docId}`;}
+function EndpointGetTask(targetLang: string, docId: string) {return `/task/${targetLang}/${docId}`;}
 /**
  * @param {string} targetLang
  * @param {string} filter
  */
-function EndpointGetTopTasks(targetLang, filter) {return `/top_tasks/${targetLang}?q=${filter}`;}
+function EndpointGetTopTasks(targetLang: string, filter: string) {return `/top_tasks/${targetLang}?q=${filter}`;}
 /**
  * @param {string} targetLang
  */
-function EndpointGetDueTask(targetLang) {return `/due_task/${targetLang}`;}
+function EndpointGetDueTask(targetLang: string) {return `/due_task/${targetLang}`;}
 /**
  * @param {string} targetLang
  */
@@ -57,11 +58,11 @@ function EndpointGetDueTask(targetLang) {return `/due_task/${targetLang}`;}
  * @param {string} targetLang
  * @param {string} docId
  */
-function EndpointGetUserTaskStats(targetLang, docId) {return `/user_task_stats/${targetLang}/${docId}`;}
+function EndpointGetUserTaskStats(targetLang: string, docId: string) {return `/user_task_stats/${targetLang}/${docId}`;}
 /**
  * @param {string} targetLang
  */
-function EndpointReview(targetLang) {return `/review/${targetLang}`;}
+function EndpointReview(targetLang: string) {return `/review/${targetLang}`;}
 
 /**
  * Specify EITHER: 
@@ -73,7 +74,7 @@ function EndpointReview(targetLang) {return `/review/${targetLang}`;}
  * @param {string | undefined} docId
  * @param {string | undefined} contextParagraphs
  */
-function EndpointChat(chatHistoryString, isInline, targetLang=undefined, docId=undefined, contextParagraphs=undefined) {
+function EndpointChat(chatHistoryString: string, isInline: boolean, targetLang: string | undefined=undefined, docId: string | undefined=undefined, contextParagraphs: string | undefined=undefined) {
 	if (isInline && !(docId && targetLang)) throw 'EndpointChat: Incompatible parameters: isInline without docId+targetLang'
 	if (docId && targetLang && contextParagraphs) throw 'EndpointChat: Incompatible parameters: docId+targetLang+contextParagraphs'
 	return isInline ? `/chat_tandem?hist=${encodeURIComponent(chatHistoryString)}` + (`&docId=${docId}&targetLang=${targetLang}`)
@@ -81,11 +82,19 @@ function EndpointChat(chatHistoryString, isInline, targetLang=undefined, docId=u
 }
 
 /**
+ * @param {string} chatHistoryText
+ * @param {string} contextParagraphs
+ */
+function EndpointTutorChat(chatHistoryText: string, contextParagraphs: string) {
+	return `/chat_tutor?hist=${encodeURIComponent(chatHistoryText)}&ctx=${contextParagraphs}`
+}
+
+/**
  * @param {string} chatHistoryString
  * @param {number} levelSeqId
  * @param {string} playerId
  */
-function EndpointGameChat(chatHistoryString, playerId, levelSeqId) {
+function EndpointGameChat(chatHistoryString: string, playerId: string, levelSeqId: number) {
 	return `/chat_game?hist=${encodeURIComponent(chatHistoryString)}&playerId=${playerId}&seqId=${levelSeqId}`
 }
 
@@ -96,16 +105,20 @@ function EndpointGameChat(chatHistoryString, playerId, levelSeqId) {
  * @param {string} password
  * @param {string} native_lang
  */
-export async function signup(email, password, native_lang) {
+export async function signup(email: string, password: string, native_lang: string) {
 	return backendPost(ENDPOINT_SIGNUP, {email: email, password: password, native_lang: native_lang}, false)
 }
 
 
 /**
- * @param {string} targetLang
+ * @param {string} targetLangShortcode
+ * @returns Promise<{targetLang: any, lang: any}>
  */
-export async function newUserLang(targetLang) {
-	return backendPost(ENDPOINT_NEW_USER_LANG, {target_lang: targetLang}, true)
+export async function newUserLang(targetLangShortcode: string) {
+	return pb.send(`/new_user_lang`, {method: 'POST', body: {
+            'langShortcode': targetLangShortcode
+        }})
+	//return backendPost(ENDPOINT_NEW_USER_LANG, {target_lang: targetLang}, true)
 }
 
 
@@ -114,7 +127,7 @@ export async function newUserLang(targetLang) {
  * @param {string} docId
  * @param {string[]} failedTokens
  */
-export async function sendReview(targetLang, docId, failedTokens) {
+export async function sendReview(targetLang: string, docId: string, failedTokens: string[]) {
 	const json = {docId: docId, failedTokens: failedTokens}
 	return backendPost(EndpointReview(targetLang), json)
 }
@@ -122,23 +135,25 @@ export async function sendReview(targetLang, docId, failedTokens) {
   
 
 /**
- * @param {string} targetLang
+ * @param {string} user
+ * @param {string} targetLangId
  */
-export async function getVocab(targetLang){
-	try { 
-		const responseJson = await backendGet(EndpointGetVocab(targetLang))
-		return [responseJson['scheduled'], responseJson['all_forms']]
-	} catch (error) {
-		console.error(error)
-		return Promise.reject(error)
-	}
+export async function getUserLang(user: string, targetLangId: string){
+	return pb.collection('user_langs').getFirstListItem(`user = "${user}" && target_lang = "${targetLangId}"`)
+}
+
+/**
+ * @param {string} shortcode
+ */
+export async function getLang(shortcode: string){
+	return pb.collection('langs').getFirstListItem(`shortcode = "${shortcode.toUpperCase()}"`)
 }
 
 /**
  * @param {string} targetLang
  * @param {string | null} [docId]
  */
-export async function getTask(targetLang, docId){
+export async function getTask(targetLang: string, docId: string | null){
 	try { 
 		const responseJson = await backendGet(docId ? EndpointGetTask(targetLang, docId) : EndpointGetDueTask(targetLang)) 
 		return DocumentC.fromJson(responseJson)
@@ -153,7 +168,7 @@ export async function getTask(targetLang, docId){
  * @param {string} docId
  * @returns {Promise<[string[], string[]]>}
  */
-export async function getUserTaskStats(targetLang, docId){
+export async function getUserTaskStats(targetLang: string, docId: string): Promise<[string[], string[]]>{
 	try { 
 		//const responseJson = await backendGet(await EndpointGetUserTaskStats(targetLang, docId))
 		return [[], []]// [responseJson['sr_words'], responseJson['new_forms']]
@@ -168,7 +183,7 @@ export async function getUserTaskStats(targetLang, docId){
  * @param {any} query
  * @returns {Promise<any[][]>}
  */
-export async function getTopTasks(targetLang, query){
+export async function getTopTasks(targetLang: string, query: any): Promise<any[][]>{
 	return backendGet(EndpointGetTopTasks(targetLang, JSON.stringify(query)), false)
 }
 
@@ -176,7 +191,7 @@ export async function getTopTasks(targetLang, query){
  * @param {string} targetLang
  * @param {string} docId
  */
-export async function isTaskCached(targetLang, docId){
+export async function isTaskCached(targetLang: string, docId: string){
 	try {
 		await fetch(
 			config.backend + EndpointGetTask(targetLang, docId),
@@ -198,7 +213,7 @@ export async function isTaskCached(targetLang, docId){
  * @param {string | undefined} contextParagraphs
  * @returns {Promise<{correction: DocumentC | undefined, response: DocumentC}>} This document will have only the key text.text defined unless docId and targetLang were given as inputs //TODO: add a parameter inline to this function and the backend endpoint instead of this assumption
  */
-export async function sendChat(chatHistory, isInline, targetLang=undefined, docId=undefined, contextParagraphs=undefined) {
+export async function sendChat(chatHistory: { role: string; content: string; }[], isInline: boolean, targetLang: string | undefined=undefined, docId: string | undefined=undefined, contextParagraphs: string | undefined=undefined): Promise<{ correction: DocumentC | undefined; response: DocumentC; }> {
 	const chatHistoryText = JSON.stringify(chatHistory.slice(-MAX_CHAT_HISTORY_LENGTH))
 	if (chatHistoryText.length > MAX_CHAT_HISTORY_CHARS) {
 		throw new Error("Chat history too long.");		
@@ -206,19 +221,31 @@ export async function sendChat(chatHistory, isInline, targetLang=undefined, docI
 	let {correction_of_learner_message, response} = await backendGet(EndpointChat(chatHistoryText, isInline, targetLang, docId, contextParagraphs))
 	return {correction: correction_of_learner_message ? DocumentC.fromJson(correction_of_learner_message) : undefined, response: DocumentC.fromJson(response)}
 }
+    
 
-// /**
-//  * @param {string} gameId
-//  * @param {string} seqId
-//  */
-// export async function getLevel(gameId, seqId) {
-// 	return pb.collection('levels').getFirstListItem(`game="${gameId}" && seq_id=${seqId}`)
-// }
+/**
+ * Versatile chat, envisioned to be used in the user's native language to ask the tutor about a confusion
+ * @param {{role: string;content: string;}[]} chatHistory
+ * @param {string} contextParagraphs
+ * @returns {Promise<DocumentC>} This document will have only the key text.text defined unless docId and targetLang were given as inputs
+ */
+export async function sendTutorChat(chatHistory: { role: string; content: string; }[], contextParagraphs: string): Promise<DocumentC> {
+	const chatHistoryText = JSON.stringify(chatHistory.slice(-MAX_CHAT_HISTORY_LENGTH))
+	if (chatHistoryText.length > MAX_CHAT_HISTORY_CHARS) {
+		throw new Error("Chat history too long.");		
+	}
+	let {response} = await pb.send(EndpointTutorChat(chatHistoryText, contextParagraphs), {})
+	return DocumentC.fromJson(response)
+}
+
+export async function getLevel(gameId: string, seqId: number): Promise<RecordModel> {
+	return pb.collection('levels').getFirstListItem(`game="${gameId}" && seq_id=${seqId}`, {expand: ['grammar']})
+}
 
 /**
  * @param {string} playerId
  */
-export async function getPlayerLevel(playerId) {	
+export async function getPlayerLevel(playerId: string) {	
 	return pb.send(`/player_level/${playerId}`, {})
 }
 
@@ -228,7 +255,7 @@ export async function getPlayerLevel(playerId) {
  * @param {string} outcome
  * @returns {Promise<any>} The updated player
  */
-export async function completeLevel(playerId, seqId, outcome) {
+export async function completeLevel(playerId: string, seqId: number, outcome: string): Promise<any> {
 	return pb.send(`/complete_level`, {method: 'POST', body: {
 		playerId: playerId, 
 		seqId: seqId, 
@@ -237,28 +264,91 @@ export async function completeLevel(playerId, seqId, outcome) {
 }
 
 /**
+ * @param {string} langId
+ * @param {{[x: string]: string | undefined}} cardJson
+ * @param {boolean} reversed
+ * @returns {Promise<any>} The new card
+ */
+export async function addSrWord(langId: string, cardJson: { [x: string]: string | undefined; }, reversed: boolean): Promise<any> {
+	return pb.send(`/add_sr_word`, {method: 'POST', body: {
+		langId,
+		cardJson: JSON.stringify(cardJson),
+		reversed
+	}}).then(res => res.card)
+}
+
+/**
+ * @param {string} langId
+ * @returns {Promise<{[x: string]: string | undefined}[]>} The due cards
+ */
+export async function getDue(langId: string): Promise<VocabCard[]> {
+	return (await pb.send(`/get_due?langId=${langId}`, {}).then(res => res.due)).map((jsonCard: any) => VocabCard.fromJson(jsonCard)) 
+}
+
+
+
+/**
+ * @param {VocabCard} card
+ * @returns {Promise<any>} Promise when done
+ */
+export function updateSrCard(card: VocabCard): Promise<{ [x: string]: string | undefined; }[]> {
+	if (!card.id) {
+		throw new Error('Card must have id for update in pb')
+	}
+	let jsonCard: any = structuredClone(card)
+	for (const [property, value] of Object.entries(jsonCard.card)) {
+		jsonCard[property] = value
+	}
+	delete jsonCard.card
+	console.log(JSON.stringify(card));
+	
+	return pb.collection('sr_cards').update(jsonCard.id, jsonCard);
+}
+
+/**
+ * @param {VocabCard} card
+ * @returns {Promise<boolean>} Promise when done
+ */
+export function deleteSrCard(card: VocabCard): Promise<boolean> {
+	if (!card.id) {
+		throw new Error('Card must have id for update in pb')
+	}
+	let jsonCard = card as any
+	for (const [property, value] of Object.entries(jsonCard.card)) {
+		jsonCard[property] = value
+	}
+	delete jsonCard.card
+	console.log(JSON.stringify(card));
+	
+	return pb.collection('sr_cards').delete(jsonCard.id);
+}
+
+export function deleteAccount(username: string): Promise<boolean> {
+	return pb.collection('users').delete(username);
+}
+
+/**
  * List all available games
- * @param {string} lang
+ * @param {string} langId
  * @returns {Promise<any[]>}
  */
-export async function getGames(lang) {
-	return pb.collection('games').getFullList({filter: `lang.shortcode = "${lang.toUpperCase()}"`})
+export async function getGames(langId: string): Promise<any[]> {
+	return pb.collection('games').getFullList({filter: `lang = "${langId}"`})
 }
 
 /**
  * Get current user's player for the specified game
- * @param {string} target_lang
  * @param {string} gameId
  */
-export async function getPlayer(target_lang, gameId) {
-	return pb.send(`/user_lang_game_player/${gameId}`, {})
+export async function getPlayer(gameId: string) {
+	return pb.send(`/user_player/${gameId}`, {})
 }
 
 /**
- * Get current user's player for the specified game
+ * Fetch the current player from the backend
  * @param {string} playerId
  */
-export async function refreshPlayer(playerId) {
+export async function refreshPlayer(playerId: string) {
 	return pb.collection('players').getFirstListItem(`id = "${playerId}"`)
 }
 
@@ -266,7 +356,7 @@ export async function refreshPlayer(playerId) {
  * Update the current player in the backend
  * @param {any} player
  */
-export async function updatePlayer(player) {
+export async function updatePlayer(player: any) {
 	return pb.collection('players').update(player.id, player)
 }
     
@@ -278,22 +368,22 @@ export async function updatePlayer(player) {
  * @param {Number} levelSeqId
  * @returns {Promise<{end_conversation: boolean;outcome: string;correction: DocumentC | undefined;response: DocumentC;}>} This document will have only the key text.text defined unless docId and targetLang were given as inputs //TODO: add a parameter inline to this function and the backend endpoint instead of this assumption
  */
-export async function sendGameChat(chatHistory, playerId, levelSeqId) {
+export async function sendGameChat(chatHistory: { role: string; content: string; }[], playerId: string, levelSeqId: number): Promise<{ end_conversation: boolean; outcome: string; correction: DocumentC | undefined; response: DocumentC; }> {
 	const chatHistoryText = JSON.stringify(chatHistory.slice(-MAX_CHAT_HISTORY_LENGTH))
 	if (chatHistoryText.length > MAX_CHAT_HISTORY_CHARS) {
 		throw new Error("Chat history too long.");		
 	}
-	let {correction_of_learner_message, response, end_conversation, outcome} = await backendGet(EndpointGameChat(chatHistoryText, playerId, levelSeqId))
+	let {correction_of_learner_message, response, end_conversation, outcome} = await pb.send(EndpointGameChat(chatHistoryText, playerId, levelSeqId), {})
 	return {end_conversation: end_conversation, outcome: outcome, correction: correction_of_learner_message ? DocumentC.fromJson(correction_of_learner_message) : undefined, response: DocumentC.fromJson(response)}
 }
 
 
-// lowlevel backend communication
+// lowlevel python backend communication
 /**
  * @param {string} path
  * @param {boolean} [authRequired] whether this endpoint requires authorization token
  */
-export async function backendGet(path, authRequired=true) {
+export async function backendGet(path: string, authRequired: boolean=true) {
 	if (authRequired && !pb.authStore.isValid) {
 		goto('/login')
 		return Promise.reject('Not logged in.')
@@ -315,7 +405,7 @@ export async function backendGet(path, authRequired=true) {
  * @param {Object} payload
  * @param {boolean} [authRequired] whether this endpoint requires authorization token
  */
-export async function backendPost(path, payload, authRequired=true) {
+export async function backendPost(path: string, payload: object, authRequired: boolean=true) {
 	if (authRequired && !pb.authStore.isValid) {
 		goto('/login')
 		return Promise.reject('Not logged in.')
@@ -346,7 +436,7 @@ export async function backendPost(path, payload, authRequired=true) {
  * @param {string} text
  * @param {string | undefined} email
  */
-export async function sendFeedback(text, email) {	
+export async function sendFeedback(text: string, email: string | undefined) {	
 	return pb.collection('feedback').create({text: text, email: email});
 }
 

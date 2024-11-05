@@ -1,66 +1,37 @@
 <!-- svelte-ignore a11y-no-static-element-interactions -->
 <!-- svelte-ignore a11y-click-events-have-key-events -->
 <script>
+	import TooltipComponent from "./TooltipComponent.svelte";
+
     export let text;
     export let tooltip = '';
     export let backgroundColor = '#007bff'
-    let showTooltip = false;
-  
-  function toggleTooltip() {
-    const tmp = showTooltip
-    setTimeout(() => { // timeout avoids mouseenter & click events cancelling each other out on touch screens
-      showTooltip = !tmp;        
-    }, 10);
-  }
   </script>
   
   <style>
     .badge {
-      display: inline-block;
       padding: 0.5em 1em;
       color: white;
       border-radius: 1em;
       cursor: pointer;
-      position: relative;
-      font-size: x-small;
-      transform: translateY(-0.25em);
       box-shadow: var(--box-shadow-light);
+      background-color: #007bff;
+      font-size: x-small;
     }
-  
-    .tooltip {
-      visibility: hidden;
-      background-color: black;
-      color: #fff;
-      text-align: center;
-      border-radius: 0.25em;
-      padding: 0.5em;
-      position: absolute;
-      z-index: 1;
-      top: 125%; /* Position the tooltip above the badge */
-      left: 50%;
-      margin-left: -50px;
-      width: 200px;
-      opacity: 0;
-      transition: opacity 0.3s;
-    }
-  
-    .badge:hover .tooltip, .badge:focus .tooltip, .badge:active .tooltip {
-      visibility: visible;
-      opacity: 1;
+
+    .badge-container {
+      display: inline-block;
+      transform: translateY(-0.15em);
     }
   </style>
-  
-  <div 
-    class="badge" 
-    style={'background-color: '+backgroundColor}
-    on:mouseenter={toggleTooltip} 
-    on:mouseleave={toggleTooltip}
-    on:click={toggleTooltip}
-  >
-    {text}
-    {#if showTooltip}
-      <div class="tooltip">
-        {tooltip}
-      </div>
-    {/if}
-  </div>
+
+<div class='badge-container'>
+  {#if tooltip}
+  <TooltipComponent>
+    <span slot='anchor' class="badge" style={'background-color: '+backgroundColor}>{text}</span>
+    <span slot='tooltip'>{tooltip}</span>
+  </TooltipComponent>
+  {:else}
+  <span class="badge" style={'background-color: '+backgroundColor}>{text}</span>
+  {/if}
+</div>

@@ -1,5 +1,5 @@
 <script lang="ts" defer>
-  import { currentTask, currentlyScrolledParagraphIndex } from '../stores';
+  import { currentTask, currentlyScrolledParagraphIndex, loadingTask } from '../stores';
 	import { afterUpdate, tick } from "svelte";
 	import TaskComponent from './TaskComponent.svelte';
 	import type TtsComponent from './TtsComponent.svelte';
@@ -17,9 +17,7 @@
   let scrollRestored = false
 
   let solutionShown: boolean = false
-  export let tts: TtsComponent
   export let solutionText: string
-  export let taskVisible: boolean
   export let srWords: Set<String> | undefined
 
   $: if($currentTask) onTaskReset()
@@ -126,7 +124,6 @@
     const newSolutionParagraphs: { htmlTag: string; string: string; }[] = []
     await tick();
     solution = solution.replace('\r', '').replace('\n\n', '\n')
-    let row = 1
     solution.split('\n').map(paragraph => {
       if (!paragraph.trim()) return // if it was only some kind of whitespace, don't bother
       const headingLevel = getHeadingLevelForSolution(paragraph)
@@ -161,7 +158,6 @@
 
 	async function onShowSolution(event: MouseEvent & { currentTarget: EventTarget & HTMLButtonElement; }) {
     solutionShown = true
-    tts.trySpeakCurrentTask()
     await tick()
     setTimeout(() => { // without this timeout, UI hasn't finished adding all the solution paragraphs, which are needed for scrolling
       onScroll()
@@ -185,8 +181,8 @@
     </div>
   {/if}
   <hr>
-  <div id="divTask" class:hidden={!taskVisible} bind:this={divTask} on:scroll={onScroll}>
-    <TaskComponent task={$currentTask} srWords={srWords} trySpeak={tts?.trySpeak} />
+  <div id="divTask" class:loading={$loadingTask} bind:this={divTask} on:scroll={onScroll}>
+    <TaskComponent task={$currentTask} srWords={srWords}/>
     <div>
       <slot name="afterTask" />
     </div>
