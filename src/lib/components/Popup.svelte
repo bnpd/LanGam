@@ -1,5 +1,6 @@
 <script lang="ts" defer>
 	import { pushState } from '$app/navigation';
+	import { page } from '$app/stores';
     import { createEventDispatcher } from 'svelte';
 
     const dispatch = createEventDispatcher();
@@ -13,16 +14,20 @@
 	function closeSelf() {
 		isOpen = false
 		dispatch('closed')
+		if($page?.state?.popup) {
+			history.back()
+		}
+		
 	}
 </script>
 <!-- svelte-ignore a11y-no-static-element-interactions -->
 <!-- svelte-ignore a11y-click-events-have-key-events -->
 
 {#if isOpen}
-	<div class="popup-container" on:click|self={()=> {if (outsideclose) history.back()}}>
+	<div class="popup-container" on:click|self={() => {if (outsideclose) closeSelf()}}>
 		<div class="popup">
 			<slot></slot>
-			<button class="close-button" on:click={()=>{history.back()}}>{closeButtonText}</button>
+			<button class="close-button" on:click={closeSelf}>{closeButtonText}</button>
 		</div>
 	</div>
 {/if}
