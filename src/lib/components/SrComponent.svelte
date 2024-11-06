@@ -79,13 +79,13 @@
             {/if}
         </span>
         <div style="text-align: center;">
+            <button on:click={()=>showEditForm=true}>Edit</button>
             {#if showSolution}
-                <button on:click={()=>onSubmitRating(card, Rating.Again)}>{'Again'}</button>
-                <button on:click={()=>onSubmitRating(card, Rating.Hard)}>{'Hard'}</button>
-                <button on:click={()=>onSubmitRating(card, Rating.Good)}>{'Good'}</button>
-                <button on:click={()=>onSubmitRating(card, Rating.Easy)}>{'Easy'}</button>
+                <button on:click={()=>onSubmitRating(card, Rating.Again)} class='highlighted'>{'Again'}</button>
+                <button on:click={()=>onSubmitRating(card, Rating.Hard)} class='highlighted'>{'Hard'}</button>
+                <button on:click={()=>onSubmitRating(card, Rating.Good)} class='highlighted'>{'Good'}</button>
+                <button on:click={()=>onSubmitRating(card, Rating.Easy)} class='highlighted'>{'Easy'}</button>
             {:else}
-                <button on:click={()=>showEditForm=true}>Edit</button>
                 <button on:click={()=>showSolution=true} class='highlighted'>Solution</button>
             {/if}
         </div>
