@@ -1,7 +1,6 @@
 <script lang="ts" defer>
 	import { pushState } from '$app/navigation';
     import { createEventDispatcher } from 'svelte';
-	import { page } from '$app/stores';
 
     const dispatch = createEventDispatcher();
 	export let closeButtonText = 'Close';

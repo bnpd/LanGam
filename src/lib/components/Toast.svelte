@@ -6,8 +6,9 @@
     export let message: string | undefined = undefined;
     export let textReject: string | undefined = undefined;
     export let onReject: { (): void; } | undefined = undefined;
+    export let onTimeout: { (): void; } | undefined = undefined;
 
-    $: if (message) setTimeout(() => { message = undefined; }, 4000);
+    $: if (message) setTimeout(() => { message = undefined; if (onTimeout) {onTimeout()} }, 4000);
 
     function hide() {
         message=undefined

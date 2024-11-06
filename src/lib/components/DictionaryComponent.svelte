@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { targetLang, dictionaryWord, freqList, nativeLang } from "$lib/stores";
+	import { targetLang, dictionaryWord, freqList } from "$lib/stores";
 	import { onMount } from "svelte";
 	import Popup from "./Popup.svelte";
 	import BadgeComponent from "./BadgeComponent.svelte";
@@ -7,6 +7,7 @@
 	import { addSrWord } from "./backend";
 	import WiktionaryFrame from "./WiktionaryFrame.svelte";
 	import Toast from "./Toast.svelte";
+	import { pushState } from "$app/navigation";
 
     function getSrFormFields(whichExtraction: number) {return [
         {name: 'Word', id: 'word', value: $dictionaryWord},
@@ -29,6 +30,7 @@
     let badgeBgColor: string
     let wiktionaryFrame: WiktionaryFrame
     let toastDicardFormInput: string
+    let wordAdded: boolean = false
     $: if ($dictionaryWord) onWordChanged()
     function onWordChanged(){ // this might cause problems 
         lemma = $freqList?.[$dictionaryWord.toLowerCase()]?.lemma
@@ -75,6 +77,7 @@
         addSrWord($targetLang.id, formdata, false)
         .then(()=>{
             successMessage = 'Saved!'
+            wordAdded = true
         })
         .catch(_validationError => {
             formError = 'Word<-Meaning combination already exists'
@@ -87,6 +90,7 @@
         addSrWord($targetLang.id, formdata, true)
         .then(()=>{
             successMessage = 'Saved!'
+            wordAdded = true
         })
         .catch(_validationError => {
             formError = 'Word->Meaning combination already exists'
@@ -95,7 +99,7 @@
 
     function onPopstate() {
         if (!wiktionaryFrame.goBack()) {
-            if (formVisible) {
+            if (formVisible && !wordAdded) {
                 toastDicardFormInput = "Discard input?"
             } else {
                 $dictionaryWord = undefined
@@ -153,9 +157,9 @@
         {/if}
     </div>
 </Popup>
-<Toast message={toastDicardFormInput} textReject="Discard" onReject={()=> $dictionaryWord = undefined}/>
-<Toast message={successMessage}/>
-<Toast message={formError}/>
+<Toast bind:message={toastDicardFormInput} textReject="Discard" onReject={()=> $dictionaryWord = undefined} onTimeout={()=>{console.log('onTimeout()'); history.go(1)}}/>
+<Toast bind:message={successMessage}/>
+<Toast bind:message={formError}/>
 
 <style>
     h2 {
