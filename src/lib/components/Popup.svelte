@@ -19,10 +19,10 @@
 <!-- svelte-ignore a11y-click-events-have-key-events -->
 
 {#if isOpen}
-	<div class="popup-container" on:click|self={()=> {if (outsideclose) closeSelf()}}>
+	<div class="popup-container" on:click|self={()=> {if (outsideclose) history.back()}}>
 		<div class="popup">
 			<slot></slot>
-			<button class="close-button" on:click={closeSelf}>{closeButtonText}</button>
+			<button class="close-button" on:click={()=>{history.back()}}>{closeButtonText}</button>
 		</div>
 	</div>
 {/if}
