@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { pushState } from "$app/navigation";
-	import { dictionaryWord } from "$lib/stores";
+	import { dictionaryToken } from "$lib/stores";
     import { onMount } from 'svelte';
 	import { createEventDispatcher } from 'svelte';
 
@@ -8,14 +8,15 @@
 
     let iframe: HTMLIFrameElement;
     let wordHistory: string[] = []
+    export let word: string | undefined
     
-    $: if ($dictionaryWord) injectContentIntoIframe($dictionaryWord);
+    $: if (word) injectContentIntoIframe(word);
     
     export const goBack = () => {
         console.log(wordHistory);
         
         if (wordHistory.length == 1) return false
-        $dictionaryWord = wordHistory.pop()
+        word = wordHistory.pop()
         return true
     }
 
@@ -74,9 +75,9 @@
     function handleIframeMessage(event: MessageEvent): void {
         const { term, extractedCards } = event.data;
         if (term) {
-            wordHistory.push($dictionaryWord)
+            wordHistory.push(word)
             pushState('', {}) // just to enable go back button
-            $dictionaryWord = term
+            word = term
         }    
         if (extractedCards) {
             dispatch('extractedCards', {cards: extractedCards})
@@ -86,7 +87,7 @@
     // onMount lifecycle hook to initialize
     onMount(() => {
         window.addEventListener('message', handleIframeMessage);
-        wordHistory = [$dictionaryWord]
+        wordHistory = [word]
 
         return () => {
             // Clean up the event listeners on destroy
@@ -102,4 +103,4 @@
     }
 </style>
 
-<iframe bind:this={iframe} title="{$dictionaryWord} - Wiktionary" on:popstate|stopPropagation></iframe>
+<iframe bind:this={iframe} title="{word} - Wiktionary" on:popstate|stopPropagation></iframe>

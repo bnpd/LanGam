@@ -27,7 +27,7 @@ export const gameChatHistory: Writable<{role: string, content: DocumentC}[]> = c
 export const chatOutcome = createPersistentStore('chatOutcome', null);
 
 /* Dictionary Component / SR Stores */
-export const dictionaryWord: Writable<string | undefined> = writable()
+export const dictionaryToken: Writable<{word: string, lemma_: string, morph?: string, pos?: number} | undefined> = writable()
 export const freqList = createPersistentStore('freqList', null);
 export const srShowIPA = createPersistentStore('srShowIPA', true);
 export const srShowGenus = createPersistentStore('srShowGenus', true);
