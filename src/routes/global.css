@@ -49,6 +49,8 @@ button, input[type="submit"] {
   margin-top: 10px;
   border-radius: 1em;
   box-shadow: var(--box-shadow-strong); /* Downwards shadow and on left and right side*/
+  font-weight: bold;
+  letter-spacing: 0.7px;
 }
 
 button:disabled, input[type="submit"]:disabled {
