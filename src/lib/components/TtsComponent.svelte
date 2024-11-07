@@ -1,5 +1,5 @@
 <script lang="ts" defer>
-	import { currentTask, isSoundOn, targetLang, ttsSpeed } from "$lib/stores";
+	import { isSoundOn, targetLang, ttsSpeed } from "$lib/stores";
 	import { onMount } from "svelte";
 
     export let text: DocumentC

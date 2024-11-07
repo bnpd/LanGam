@@ -49,6 +49,8 @@ button, input[type="submit"] {
   margin-top: 10px;
   border-radius: 1em;
   box-shadow: var(--box-shadow-strong); /* Downwards shadow and on left and right side*/
+  font-weight: bold;
+  letter-spacing: 0.7px;
 }
 
 button:disabled, input[type="submit"]:disabled {
@@ -237,7 +239,6 @@ button.highlighted, input[type="submit"].highlighted, button.flash, input[type="
 #contentbox {
   text-align: justify;
   height: 100%; /* due to use of flex-grow by children, height of this element does not matter, as long as it is big enough it will be equivalent to fill-available */
-  height: -moz-available; 
   height: -webkit-fill-available;
   height: fill-available;
   display: flex; 

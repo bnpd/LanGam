@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { targetLang, dictionaryWord, freqList, nativeLang } from "$lib/stores";
+	import { targetLang, dictionaryToken, freqList } from "$lib/stores";
 	import { onMount } from "svelte";
 	import Popup from "./Popup.svelte";
 	import BadgeComponent from "./BadgeComponent.svelte";
@@ -9,7 +9,7 @@
 	import Toast from "./Toast.svelte";
 
     function getSrFormFields(whichExtraction: number) {return [
-        {name: 'Word', id: 'word', value: $dictionaryWord},
+        {name: 'Word', id: 'word', value: dictionaryCurrentWord},
         {name: 'Meaning', id: 'meaning', value: extractedCards?.[whichExtraction]?.meaning?.slice(0, 50) + (extractedCards?.[whichExtraction]?.meaning?.length > 50 && '...')},
         {name: 'Notes', id: 'notes'},
         {name: 'Pronunciation', id: 'pronunciation', value: extractedCards?.[whichExtraction]?.pronunciation, hidden: true}
@@ -29,15 +29,22 @@
     let badgeBgColor: string
     let wiktionaryFrame: WiktionaryFrame
     let toastDicardFormInput: string
-    $: if ($dictionaryWord) onWordChanged()
-    function onWordChanged(){ // this might cause problems 
-        lemma = $freqList?.[$dictionaryWord.toLowerCase()]?.lemma
+    let wordAdded: boolean = false
+    let dictionaryCurrentWord: string | undefined
+    $: if ($dictionaryToken) onTokenChanged()
+    $: if (dictionaryCurrentWord) onWordChanged()
+    async function onTokenChanged(){ // this might cause problems
+        dictionaryCurrentWord = $dictionaryToken!.word
+    }
+
+    function onWordChanged() {
+        lemma = dictionaryCurrentWord?.toLowerCase() == $dictionaryToken?.word?.toLowerCase() ? $dictionaryToken!.lemma_ : undefined
         extractedCards = undefined
         currentShownExtraction = 0
         formVisible = false
         successMessage = undefined
         formError = undefined
-        const freqIndex = $freqList?.[$dictionaryWord.toLowerCase()]?.freq
+        const freqIndex = $freqList?.[dictionaryCurrentWord!]?.freq
         freq = freqIndex < 2000 ? 'vital' : 
                 freqIndex < 5000 ? 'basic' :
                 freqIndex < 10000 ? 'common' :
@@ -59,7 +66,8 @@
     }
 
     function onClose() {
-        $dictionaryWord = undefined
+        dictionaryCurrentWord = undefined
+        $dictionaryToken = undefined
     }
 
     onMount(async () => {
@@ -75,6 +83,7 @@
         addSrWord($targetLang.id, formdata, false)
         .then(()=>{
             successMessage = 'Saved!'
+            wordAdded = true
         })
         .catch(_validationError => {
             formError = 'Word<-Meaning combination already exists'
@@ -87,6 +96,7 @@
         addSrWord($targetLang.id, formdata, true)
         .then(()=>{
             successMessage = 'Saved!'
+            wordAdded = true
         })
         .catch(_validationError => {
             formError = 'Word->Meaning combination already exists'
@@ -95,22 +105,22 @@
 
     function onPopstate() {
         if (!wiktionaryFrame.goBack()) {
-            if (formVisible) {
+            if (formVisible && !wordAdded) {
                 toastDicardFormInput = "Discard input?"
             } else {
-                $dictionaryWord = undefined
+                onClose()
             }
         }
     }
 </script>
 
-<Popup on:closed={onClose} isOpen={$dictionaryWord !== undefined} onPopstate={onPopstate} outsideclose={false}>
+<Popup on:closed={onClose} isOpen={$dictionaryToken !== undefined} onPopstate={onPopstate} outsideclose={false}>
     <div id="dictionary-container">
         <h2>
-            {$dictionaryWord}
-            {#if lemma && lemma.toLowerCase() != $dictionaryWord?.toLowerCase()}
+            {dictionaryCurrentWord}
+            {#if lemma && lemma.toLowerCase() != dictionaryCurrentWord?.toLowerCase()}
                 &nbsp;
-                <a on:click={()=>{$dictionaryWord = lemma}}>->&nbsp;{lemma}</a>
+                <a on:click={()=>{dictionaryCurrentWord = lemma}}>→&nbsp;{lemma}</a>
             {/if}
             {#if freq}
                 &nbsp;
@@ -118,13 +128,13 @@
             {/if}
         </h2>
         <WiktionaryFrame 
-            on:wordNotFound={()=>{if (lemma && lemma?.toLowerCase() != $dictionaryWord?.toLowerCase()) $dictionaryWord = lemma}}
+            bind:word={dictionaryCurrentWord}
+            on:wordNotFound={()=>{if (lemma && lemma?.toLowerCase() != dictionaryCurrentWord?.toLowerCase()) dictionaryCurrentWord = lemma}}
             on:extractedCards={e=>{
                 extractedCards = e.detail?.cards
                 console.log(extractedCards);
-                if (extractedCards?.[0]?.word && extractedCards[0].word !== $dictionaryWord) {
-                    $dictionaryWord = extractedCards[0].word
-                    lemma = undefined
+                if (extractedCards?.[0]?.word && extractedCards[0].word !== dictionaryCurrentWord) {
+                    dictionaryCurrentWord = extractedCards[0].word
                 }
             }}
             bind:this={wiktionaryFrame}
@@ -153,9 +163,9 @@
         {/if}
     </div>
 </Popup>
-<Toast message={toastDicardFormInput} textReject="Discard" onReject={()=> $dictionaryWord = undefined}/>
-<Toast message={successMessage}/>
-<Toast message={formError}/>
+<Toast bind:message={toastDicardFormInput} textReject="Discard" onReject={onClose} onTimeout={()=>{console.log('onTimeout()'); history.go(1)}}/>
+<Toast bind:message={successMessage}/>
+<Toast bind:message={formError}/>
 
 <style>
     h2 {

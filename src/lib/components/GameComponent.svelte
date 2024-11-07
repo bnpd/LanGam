@@ -8,7 +8,6 @@
 	import ChatComponent from './ChatComponent.svelte';
 	import SuccessPopup from './SuccessPopup.svelte';
 	import DocumentC from '$lib/DocumentC';
-	import type TtsComponent from './TtsComponent.svelte';
 	import PowersComponent from './PowersComponent.svelte';
 	import DictionaryComponent from './DictionaryComponent.svelte';
 	import GrammarBookComponent from './GrammarBookComponent.svelte';

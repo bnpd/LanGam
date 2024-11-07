@@ -29,7 +29,7 @@ const config = {
 		}),
 		csp: {
 			directives: {
-				'script-src': ['self', 'unsafe-inline'],
+				'script-src': ['self'],
 				'object-src': ['self'],
 				'base-uri': ['self']
 			}
