@@ -27,9 +27,11 @@
     taskAndChatParagraphs = divTask?.querySelectorAll('p, h1, h2, h3, h4, h5, h6, h7')
     solutionAndChatParagraphs = solutionField?.querySelectorAll('p, h1, h2, h3, h4, h5, h6, h7')
     if (!scrollRestored     
+      && taskAndChatParagraphs.length > 0 
       && taskAndChatParagraphs.length >= $currentlyScrolledParagraphIndex 
+      && solutionAndChatParagraphs.length > 0
       && solutionAndChatParagraphs.length >= $currentlyScrolledParagraphIndex
-    ) {
+    ) {      
       scrollRestored = true
       // on first time we added all paragraphs, restore scroll position      
       scrollToParagraph(FIELD.TASK, Math.max($currentlyScrolledParagraphIndex - 1, 0))
@@ -115,7 +117,7 @@
         elToScroll = solutionField        
         break;
     }    
-    elToScroll.scroll({top: findOffsetToAncestor(paragraphs[paragraphIndex] as HTMLElement, (paragraphs[0] as HTMLElement).offsetParent!) - (paragraphs[0] as HTMLElement)?.offsetTop, behavior: 'smooth'});    
+    elToScroll.scroll({top: findOffsetToAncestor(paragraphs[paragraphIndex] as HTMLElement, (paragraphs[0] as HTMLElement)?.offsetParent) - (paragraphs[0] as HTMLElement)?.offsetTop, behavior: 'smooth'});    
   }
 
   

@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { targetLang, dictionaryToken, freqList } from "$lib/stores";
-	import { onMount, tick } from "svelte";
+	import { onMount } from "svelte";
 	import Popup from "./Popup.svelte";
 	import BadgeComponent from "./BadgeComponent.svelte";
 	import FormComponent from "./FormComponent.svelte";
