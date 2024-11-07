@@ -168,6 +168,8 @@
     }
     .promptSuggestion {
         font-size: xx-small;
+        font-weight: normal;
+        letter-spacing: normal;
         width: 31%;
         line-height: 10px;
         height: auto;
