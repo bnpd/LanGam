@@ -10,6 +10,7 @@ const pb = new PocketBase(config.pocketbase)
 const MAX_CHAT_HISTORY_LENGTH = 20
 const MAX_CHAT_HISTORY_CHARS = 20000
 
+
 /**
  * @param {string} user
  * @param {string} password
@@ -18,12 +19,36 @@ export async function login(user: string, password: string) {
 	return pb.collection('users').authWithPassword(user, password);
 }
 
+
+/**
+ * @param {string} email
+ * @param {string} password
+ * @param {string} native_lang
+ */
+export async function signup(email: string, password: string, native_lang: string) {
+	return pb.send('/signup', {method: 'POST', body: {email: email, password: password, native_lang: native_lang}})
+}
+
+
+/**
+ * @param {string} targetLangShortcode
+ * @returns Promise<{targetLang: any, lang: any}>
+ */
+export async function newUserLang(targetLangShortcode: string) {
+	return pb.send(`/new_user_lang`, {method: 'POST', body: {
+            'langShortcode': targetLangShortcode
+        }})
+	//return backendPost(ENDPOINT_NEW_USER_LANG, {target_lang: targetLang}, true)
+}
+
+
 /**
  * @param {string} langId id of the language in pocketbase
  */
 export async function getLangById(langId: string) {
 	return pb.collection('langs').getOne(langId);
 }
+
 
 export function getUserData() {
 	return pb.authStore?.model
@@ -32,11 +57,6 @@ export function getUserData() {
 
 // backend endpoint constants
 const ENDPOINT_SIGNUP = '/signup'
-const ENDPOINT_NEW_USER_LANG = '/new_user_lang'
-/**
- * @param {string} targetLang
- */
-function EndpointGetVocab(targetLang: string) {return '/vocab/'+targetLang;}
 /**
  * @param {string} targetLang
  * @param {string} docId
@@ -54,11 +74,6 @@ function EndpointGetDueTask(targetLang: string) {return `/due_task/${targetLang}
 /**
  * @param {string} targetLang
  */
-/**
- * @param {string} targetLang
- * @param {string} docId
- */
-function EndpointGetUserTaskStats(targetLang: string, docId: string) {return `/user_task_stats/${targetLang}/${docId}`;}
 /**
  * @param {string} targetLang
  */
@@ -96,29 +111,6 @@ function EndpointTutorChat(chatHistoryText: string, contextParagraphs: string) {
  */
 function EndpointGameChat(chatHistoryString: string, playerId: string, levelSeqId: number) {
 	return `/chat_game?hist=${encodeURIComponent(chatHistoryString)}&playerId=${playerId}&seqId=${levelSeqId}`
-}
-
-
-// backend functions
-/**
- * @param {string} email
- * @param {string} password
- * @param {string} native_lang
- */
-export async function signup(email: string, password: string, native_lang: string) {
-	return backendPost(ENDPOINT_SIGNUP, {email: email, password: password, native_lang: native_lang}, false)
-}
-
-
-/**
- * @param {string} targetLangShortcode
- * @returns Promise<{targetLang: any, lang: any}>
- */
-export async function newUserLang(targetLangShortcode: string) {
-	return pb.send(`/new_user_lang`, {method: 'POST', body: {
-            'langShortcode': targetLangShortcode
-        }})
-	//return backendPost(ENDPOINT_NEW_USER_LANG, {target_lang: targetLang}, true)
 }
 
 
