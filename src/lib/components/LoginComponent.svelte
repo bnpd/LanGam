@@ -33,12 +33,12 @@
             $targetLang = isSignup ? (await newUserLang('pl')).lang : await getLang('pl') // temporary solution until we figure out multilang
 
             goto('/game') //goto('/catalog')
-        } catch (e) {
+        } catch (e) {            
             if (!isSignup && e instanceof ClientResponseError) { // login was rejected
                 showValidationError('password', 'Email or password are wrong.')
-            } else if (isSignup && (e as Error).message.includes('validation_invalid_email')) {// signup email was rejected
+            } else if (isSignup && (e as Error).status === 409) {// signup email was rejected
                 showValidationError('email', 'The email is invalid or already in use.')
-            } else if (isSignup && (e as Error).message.includes('validation_is_email')) {// signup email format invalid
+            } else if (isSignup && (e as Error).status === 409) {// signup email format invalid
                 showValidationError('email', 'Please check the format of this email address.')
             } else {   
                 showValidationError('submit', 'Connection error, please try again.')
