@@ -116,7 +116,11 @@
         paragraphs = solutionAndChatParagraphs
         elToScroll = solutionField        
         break;
-    }    
+    }
+    if (!paragraphs?.length) {
+      console.warn("No paragraphs yet to scroll to");
+      return
+    }
     elToScroll.scroll({top: findOffsetToAncestor(paragraphs[paragraphIndex] as HTMLElement, (paragraphs[0] as HTMLElement)?.offsetParent) - (paragraphs[0] as HTMLElement)?.offsetTop, behavior: 'smooth'});    
   }
 
