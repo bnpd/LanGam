@@ -93,7 +93,7 @@
       on:click={() => {onWordClick(token)}} />
   {/each}          
   {#if i==0}
-    <TtsComponent text={task} bind:trySpeak={trySpeak}/>
+    <TtsComponent text={task}/>
   {/if}
 </svelte:element>
 {/each}

@@ -205,7 +205,7 @@
     <strong>In this demo text, you learn the fabulous <em>Drnuk</em> language (and how this app works).</strong> <!-- If you want to dive right in with Polish, create an account at the bottom.-->
 {/if}
 <ReaderComponent tts={tts} solutionText={solutionText} srWords={srWords} bind:this={readerComponent}>
-    <span slot="afterTask" hidden={!$currentTask}><ChatComponent readerComponent={readerComponent} inline={true} chatBoxTitle="Twoja odpowiedź 🤙" chatHistory={inlineChatHistory} srWords={srWords} trySpeak={tts?.trySpeak}/></span>
+    <span slot="afterTask" hidden={!$currentTask}><ChatComponent readerComponent={readerComponent} inline={true} chatBoxTitle="Twoja odpowiedź 🤙" chatHistory={inlineChatHistory} srWords={srWords}/></span>
     <span slot="afterSolution"><ChatComponent readerComponent={readerComponent} inline={true} chatBoxTitle={undefined} chatHistory={inlineChatHistory} translationLang='en'/></span>
 </ReaderComponent>
 <button id="answbtn" class:loading={$loadingTask} on:click={onAnswbtnClick}>
