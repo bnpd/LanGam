@@ -6,6 +6,7 @@
 	import { isGrammarHighlightingOn, srShowGenus, srShowIPA, ttsSpeed } from '$lib/stores';
 	import AccountDeletionComponent from '$lib/components/AccountDeletionComponent.svelte';
 	import { getUserData } from '$lib/components/backend';
+	import { goto } from '$app/navigation';
 
     function onInput(el: HTMLInputElement) {
 
@@ -52,6 +53,7 @@
     </div>
     <div class="setting">
         <AccountDeletionComponent />
+        <button on:click={()=>{localStorage.clear(); window.location.replace('/login')}}>Log Out</button>
     </div>
     <hr>
     <h4>About</h4>

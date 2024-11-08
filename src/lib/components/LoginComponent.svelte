@@ -4,9 +4,16 @@
 	import { failedWords, inlineChatHistory, nativeLang, reviews, targetLang, username } from '$lib/stores';
 	import { ClientResponseError } from 'pocketbase';
 	import TitleWithBackgroundImageComponent from './TitleWithBackgroundImageComponent.svelte';
+	import { onMount } from 'svelte';
   
     export let isSignup: boolean
     let loading: boolean
+
+    onMount(()=>{
+        if ($username){
+            goto('/options')
+        }
+    })
   
     async function onSubmit(event: SubmitEvent) {
         const formDataEntries = new FormData(event.target as HTMLFormElement);
@@ -38,8 +45,6 @@
                 showValidationError('password', 'Email or password are wrong.')
             } else if (isSignup && (e as Error).status === 409) {// signup email was rejected
                 showValidationError('email', 'The email is invalid or already in use.')
-            } else if (isSignup && (e as Error).status === 409) {// signup email format invalid
-                showValidationError('email', 'Please check the format of this email address.')
             } else {   
                 showValidationError('submit', 'Connection error, please try again.')
             }
@@ -58,10 +63,10 @@
             }, duration);        
     }
 
-    function getDatalistOptions() {
-        const options = (document.getElementById('languages') as HTMLDataListElement)?.options;
-        return Array.from(options).map(option => option.value);
-    }
+    // function getDatalistOptions() {
+    //     const options = (document.getElementById('languages') as HTMLDataListElement)?.options;
+    //     return Array.from(options).map(option => option.value);
+    // }
   </script>
 
 <TitleWithBackgroundImageComponent>{isSignup ? 'Welcome :)' : 'Welcome back =)'}</TitleWithBackgroundImageComponent>
