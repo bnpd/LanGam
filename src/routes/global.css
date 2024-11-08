@@ -113,6 +113,46 @@ ul {
   padding-inline-start: 1.5em;
 }
 
+
+
+/* Base styles for the checkbox */
+input[type="checkbox"] {
+  -webkit-appearance: none; /* Remove default checkbox style */
+  -moz-appearance: none;
+  appearance: none;
+  width: 50px; /* Width of the toggle */
+  height: 24px; /* Height of the toggle */
+  background-color: #ccc; /* Background color when unchecked */
+  border-radius: 50px; /* Make it round */
+  position: relative;
+  outline: none;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+/* The circle inside the toggle */
+input[type="checkbox"]::before {
+  content: "";
+  position: absolute;
+  width: 20px; /* Circle width */
+  height: 20px; /* Circle height */
+  border-radius: 50%;
+  background-color: white;
+  top: 2px;
+  left: 2px;
+  transition: transform 0.3s ease;
+}
+
+/* Checked state styles */
+input[type="checkbox"]:checked {
+  background-color: darkblue; /* Background color when checked */
+}
+
+/* Move the circle to the right when checked */
+input[type="checkbox"]:checked::before {
+  transform: translateX(26px);
+}
+
 .card, .image-card {
   padding: var(--padding-card) !important;
   background-color: aliceblue;
