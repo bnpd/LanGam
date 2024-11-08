@@ -1,6 +1,6 @@
 <script lang="ts" defer>
     import { getLang, login, newUserLang, signup } from '$lib/components/backend';
-    import { goto } from '$app/navigation';
+    import { goto, replaceState } from '$app/navigation';
 	import { failedWords, inlineChatHistory, nativeLang, reviews, targetLang, username } from '$lib/stores';
 	import { ClientResponseError } from 'pocketbase';
 	import TitleWithBackgroundImageComponent from './TitleWithBackgroundImageComponent.svelte';
@@ -11,7 +11,7 @@
 
     onMount(()=>{
         if ($username){
-            goto('/options')
+            goto('/options', {replaceState: true})
         }
     })
   
