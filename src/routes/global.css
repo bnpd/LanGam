@@ -113,6 +113,52 @@ ul {
   padding-inline-start: 1.5em;
 }
 
+
+
+/* Base styles for the checkbox */
+input[type="checkbox"] {
+  -webkit-appearance: none; /* Remove default checkbox style */
+  -moz-appearance: none;
+  appearance: none;
+  width: 50px; /* Width of the toggle */
+  height: 24px; /* Height of the toggle */
+  background-color: #ccc; /* Background color when unchecked */
+  border-radius: 50px; /* Make it round */
+  position: relative;
+  outline: none;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+/* The circle inside the toggle */
+input[type="checkbox"]::before {
+  content: "";
+  position: absolute;
+  width: 20px; /* Circle width */
+  height: 20px; /* Circle height */
+  border-radius: 50%;
+  background-color: white;
+  top: 2px;
+  left: 2px;
+  transition: transform 0.3s ease;
+}
+
+/* Checked state styles */
+input[type="checkbox"]:checked {
+  background-color: darkblue; /* Background color when checked */
+}
+
+/* Move the circle to the right when checked */
+input[type="checkbox"]:checked::before {
+  transform: translateX(26px);
+}
+
+div:has(> input[type="checkbox"]) {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
 .card, .image-card {
   padding: var(--padding-card) !important;
   background-color: aliceblue;
@@ -194,7 +240,7 @@ border-radius: var(--card-border-radius) var(--card-border-radius) 0 0;
 }
 
 .flash.delayed {
-  animation: glowing-delayed 5000ms;
+  animation: glowing-delayed 30000ms;
 }
 
 .background-orange {background-color: orange;}
@@ -369,14 +415,18 @@ button.highlighted, input[type="submit"].highlighted, button.flash, input[type="
 }
 @keyframes glowing-delayed {
   0% {
+    background-color: aliceblue;
+    box-shadow: 0 0 3px aliceblue;
+  }
+  90% {
+    background-color: aliceblue;
+    box-shadow: 0 0 3px aliceblue;
+  }
+  91% {
     background-color: darkblue;
     box-shadow: 0 0 3px darkblue;
   }
-  50% {
-    background-color: darkblue;
-    box-shadow: 0 0 3px darkblue;
-  }
-  60% {
+  93% {
     background-color: darkblue;
     box-shadow: 0 0 20px darkblue;
   }

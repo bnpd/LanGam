@@ -24,7 +24,9 @@
         // {name: 'Sentence' extracted from text}
     ].concat(dueWords[0]?.genus?.length ? [
         {name: 'Gender', id: 'genus', value: dueWords[0]?.genus}
-    ] : [])}
+    ] : []).concat([
+        {name: 'Reversed (Word->Meaning)', id: 'reversed', checked: dueWords[0]?.reversed, type: 'checkbox'}
+    ])}
 
     onMount(async ()=>{
         dueWords = await getDue($targetLang?.id)
@@ -47,10 +49,22 @@
     }
 
     function onSubmitEditForm(formdata: { [x: string]: string | undefined; }) {
+        console.log(formdata);
+        console.log(dueWords[0]);
         for (const key in formdata) {
             dueWords[0][key] = formdata[key];
         }
-        updateSrCard(dueWords[0]).then(() => {successMessage = 'Updated.'; showEditForm = false}).catch(() => formError = 'Failed to update, sorry.')
+        console.log(dueWords[0]);
+        
+        updateSrCard(dueWords[0])
+        .then(() => {successMessage = 'Updated.'; showEditForm = false})
+        .catch(e => {            
+            if (e.data?.data?.meaning?.code == "validation_not_unique") {
+                formError = 'This already exists.'
+                return
+            }
+            formError = 'Failed to update, sorry.'
+        })
         dueWords = dueWords
     }
 

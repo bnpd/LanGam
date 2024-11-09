@@ -56,7 +56,6 @@ export function getUserData() {
 
 
 // backend endpoint constants
-const ENDPOINT_SIGNUP = '/signup'
 /**
  * @param {string} targetLang
  * @param {string} docId

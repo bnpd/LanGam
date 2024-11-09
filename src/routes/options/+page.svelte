@@ -6,6 +6,7 @@
 	import { isGrammarHighlightingOn, srShowGenus, srShowIPA, ttsSpeed } from '$lib/stores';
 	import AccountDeletionComponent from '$lib/components/AccountDeletionComponent.svelte';
 	import { getUserData } from '$lib/components/backend';
+	import { goto } from '$app/navigation';
 
     function onInput(el: HTMLInputElement) {
 
@@ -52,6 +53,7 @@
     </div>
     <div class="setting">
         <AccountDeletionComponent />
+        <button on:click={()=>{localStorage.clear(); window.location.replace('/login')}}>Log Out</button>
     </div>
     <hr>
     <h4>About</h4>
@@ -81,9 +83,11 @@
         margin: 1.5em 0;
     }
     .setting {
+        margin: 1.5em 0;
+    }
+    .setting:has(> input[type="text"]) {
         display: flex;
         align-items: baseline;
-        margin: 1.5em 0;
     }
     .slider {
         display: inline-block;
@@ -100,5 +104,12 @@
         padding: 0 5px;
         width: 2.5em;
         text-align: end;
+    }
+    input[type="checkbox"] {
+        margin-right: 0.5em;
+    }
+    label {
+        width: 50%;
+        flex-grow: 1;
     }
 </style>

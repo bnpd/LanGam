@@ -1,7 +1,8 @@
 <script lang="ts" defer>
+	import { browser } from '$app/environment';
 	import { pushState } from '$app/navigation';
 	import { page } from '$app/stores';
-    import { createEventDispatcher } from 'svelte';
+    import { createEventDispatcher, tick } from 'svelte';
 
     const dispatch = createEventDispatcher();
 	export let closeButtonText = 'Close';
@@ -9,7 +10,11 @@
 	export let onPopstate = closeSelf;
 	export let outsideclose = true
 
-	$: if (isOpen) pushState('', {popup: true})
+	$: if (isOpen && browser) {
+		try {
+			pushState('', {popup: true})
+		} catch (error) {}
+	}
 
 	function closeSelf() {
 		isOpen = false

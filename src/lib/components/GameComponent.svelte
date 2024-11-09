@@ -11,6 +11,7 @@
 	import PowersComponent from './PowersComponent.svelte';
 	import DictionaryComponent from './DictionaryComponent.svelte';
 	import GrammarBookComponent from './GrammarBookComponent.svelte';
+	import WelcomePopup from './WelcomePopup.svelte';
 
     const TOAST_REDIRECTED_SAVED_TASK = "Your selected text has been queued cause you have a saved game level."
     const TEXT_REJECT_SAVED_TASK = "Discard saved"
@@ -252,6 +253,7 @@
     <span slot="afterSolution">{#if $gameChatHistory?.length}<ChatComponent readerComponent={readerComponent} inline={true} chatBoxTitle={undefined} chatHistory={gameChatHistory} translationLang='en' isGame={true}/>{/if}</span>
 </ReaderComponent>
 <div style="text-align: center;">
+    <!--<input type="text" name="e" id="e" bind:value={$morphHighlightFilter} style:width="5em">-->
     {#if grammarChapter}
         <GrammarBookComponent content={grammarChapter}/>
     {/if}
@@ -287,3 +289,6 @@
 <Toast bind:message={lockedLevelToast}/>
 <SuccessPopup bind:title={congratsTitle} bind:message={congratsMessage} footnote={nNewForms ? `You just encountered ${nNewForms} new words!\n` : ''} onClose={statsClosedPromiseResolve}/>
 <DictionaryComponent/>
+{#if !$username}
+    <WelcomePopup/>
+{/if}
