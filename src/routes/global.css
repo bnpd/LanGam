@@ -153,6 +153,12 @@ input[type="checkbox"]:checked::before {
   transform: translateX(26px);
 }
 
+div:has(> input[type="checkbox"]) {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
 .card, .image-card {
   padding: var(--padding-card) !important;
   background-color: aliceblue;

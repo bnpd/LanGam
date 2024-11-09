@@ -32,15 +32,8 @@
 <style>
 .input-container {
   position: relative;
-  display: block;
   margin-top: 1em;
   margin-bottom: 0.5em;
-}
-
-.input-container:has(> input[type="checkbox"]) {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
 }
 
 label {

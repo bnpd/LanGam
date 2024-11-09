@@ -83,9 +83,11 @@
         margin: 1.5em 0;
     }
     .setting {
+        margin: 1.5em 0;
+    }
+    .setting:has(> input[type="text"]) {
         display: flex;
         align-items: baseline;
-        margin: 1.5em 0;
     }
     .slider {
         display: inline-block;
@@ -102,5 +104,12 @@
         padding: 0 5px;
         width: 2.5em;
         text-align: end;
+    }
+    input[type="checkbox"] {
+        margin-right: 0.5em;
+    }
+    label {
+        width: 50%;
+        flex-grow: 1;
     }
 </style>
