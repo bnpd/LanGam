@@ -105,11 +105,4 @@
         width: 2.5em;
         text-align: end;
     }
-    input[type="checkbox"] {
-        margin-right: 0.5em;
-    }
-    label {
-        width: 50%;
-        flex-grow: 1;
-    }
 </style>
