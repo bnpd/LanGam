@@ -240,7 +240,7 @@ border-radius: var(--card-border-radius) var(--card-border-radius) 0 0;
 }
 
 .flash.delayed {
-  animation: glowing-delayed 60000ms;
+  animation: glowing-delayed 30000ms;
 }
 
 .background-orange {background-color: orange;}
@@ -418,15 +418,15 @@ button.highlighted, input[type="submit"].highlighted, button.flash, input[type="
     background-color: aliceblue;
     box-shadow: 0 0 3px aliceblue;
   }
-  94% {
+  90% {
     background-color: aliceblue;
     box-shadow: 0 0 3px aliceblue;
   }
-  95% {
+  91% {
     background-color: darkblue;
     box-shadow: 0 0 3px darkblue;
   }
-  96% {
+  93% {
     background-color: darkblue;
     box-shadow: 0 0 20px darkblue;
   }

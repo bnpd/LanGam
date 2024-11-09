@@ -1,15 +1,15 @@
 <!-- svelte-ignore a11y-no-static-element-interactions -->
 <!-- svelte-ignore a11y-click-events-have-key-events -->
 <script lang="ts" defer>
-	import { dictionaryToken, failedWords, isGrammarHighlightingOn, morphHighlightFilter } from "$lib/stores";
+	import { dictionaryToken, grammarBookOpened, isGrammarHighlightingOn, morphHighlightFilter } from "$lib/stores";
     const NON_CLICKABLE_POS_IDS = new Set([-1, 97, 99, 101]) // added -1 for whitespace
 
     export let token: {word: string, pos: number, lemma_: string, morph?: string};
-    $: isFailed = $failedWords?.has(token?.word);
+    //$: isFailed = $failedWords?.has(token?.word);
     export let isSrWord: boolean = false;
     $: isClickable = !NON_CLICKABLE_POS_IDS.has(token?.pos);
 
-    function onDictClick(event: Event) {
+    function onDictClick() {
         $dictionaryToken = token
     }
 </script>
@@ -20,14 +20,14 @@
     class={
         'pointer span-'
         +token?.word 
-        + (isFailed ? ' clicked' : 
+        + (//isFailed ? ' clicked' : 
             isSrWord ? ' srWord' : 
-            $isGrammarHighlightingOn && $morphHighlightFilter?.length && $morphHighlightFilter.split('&&').every(filter => token?.morph?.includes(filter.trim())) ? ' grammar-marked' : 
+            $isGrammarHighlightingOn && $grammarBookOpened && $morphHighlightFilter?.length && $morphHighlightFilter.split('&&').every(filter => token?.morph?.includes(filter.trim())) ? ' grammar-marked' : 
             '')} 
-    on:click>
-    {#if isFailed}
+    on:click={onDictClick}>
+    <!-- {#if isFailed}
     <a href={'langki://word/?w='+token?.word} on:click|stopPropagation|preventDefault={onDictClick}>📕</a>
-    {/if}
+    {/if} -->
     {token?.word}
 </span>
 {:else}
