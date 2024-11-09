@@ -57,20 +57,28 @@
         console.log(dueWords[0]);
         
         updateSrCard(dueWords[0])
-        .then(() => {successMessage = 'Updated.'; showEditForm = false})
+        .then(res=>{
+            if (res) {
+                successMessage='Updated.'
+                showEditForm = false
+            } else formError = 'Internal Error.'
+        })
         .catch(e => {            
             if (e.data?.data?.meaning?.code == "validation_not_unique") {
                 formError = 'This already exists.'
-                return
-            }
-            formError = 'Failed to update, sorry.'
+            } else formError = 'Failed to update, sorry.'
         })
         dueWords = dueWords
     }
 
     function onDeleteConfirmed(){
         showEditForm = false
-        deleteSrCard(dueWords[0]).then(()=>successMessage='Deleted.').catch(()=>formError='Failure.'); 
+        deleteSrCard(dueWords[0])
+        .then(res=>{
+            if (res) successMessage='Deleted.'
+            else formError='Internal Error.'
+        })
+        .catch(()=>formError='Failure.'); 
         dueWords = dueWords.slice(1)
         dueWords = dueWords
     }

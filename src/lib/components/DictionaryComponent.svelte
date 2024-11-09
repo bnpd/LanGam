@@ -81,9 +81,11 @@
         successMessage = undefined
         formError = undefined
         addSrWord($targetLang.id, formdata, false)
-        .then(()=>{
-            successMessage = 'Saved!'
-            wordAdded = true
+        .then(res=>{
+            if (res) {
+                successMessage = 'Saved!'
+                wordAdded = true
+            } else formError = 'Internal Error'
         })
         .catch(_validationError => {
             formError = 'Word<-Meaning combination already exists'
@@ -94,9 +96,11 @@
         successMessage = undefined
         formError = undefined
         addSrWord($targetLang.id, formdata, true)
-        .then(()=>{
-            successMessage = 'Saved!'
-            wordAdded = true
+        .then(res=>{
+            if (res) {
+                successMessage = 'Saved!'
+                wordAdded = true
+            } else formError = 'Internal Error'
         })
         .catch(_validationError => {
             formError = 'Word->Meaning combination already exists'

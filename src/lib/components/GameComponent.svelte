@@ -55,7 +55,7 @@
     let statsClosedPromiseResolve: Function;
     let redirectedDoc: string | null
     let showGameChatSuggestions: boolean = false;
-    let grammarChapter: string | undefined
+    let grammarChapter: { title_en: string; text_en: string; } | undefined
     let showTutorChat: boolean = false
     let lockedLevelToast: string | undefined
 
@@ -213,18 +213,18 @@
 
         // the following calculation of new word count runs async in the background if the player stays for more than 5 seconds on the level
         const docIdBeforeMaybeNavigateToDifferentLevel = $currentTask?.docId
-        setTimeout(() => {
+        setTimeout(async () => {
             if ($currentTask?.docId === docIdBeforeMaybeNavigateToDifferentLevel) {
-                getUserLang($username, $targetLang.id).then(user_lang => {
-                    const prev_seen_words = new Set(Object.keys(user_lang.seen_words))
-                    let new_forms = new Set(Object.values(doc?.title?.tokens).concat(Object.values(doc?.text?.tokens).concat(Object.values(doc?.question?.tokens)))
-                                    .filter(tok => TRACKED_POS.has(tok.pos))
-                                    .map(tok => tok.lemma_))
-                    new_forms = new_forms.difference(prev_seen_words)            
-                    nNewForms = new_forms.size
-                }).catch(_offline => {
+                const user_lang = await getUserLang($username, $targetLang.id).catch(_offline => {
                     nNewForms = undefined
                 })
+                if (!user_lang?.seen_words) return
+                const prev_seen_words = new Set(Object.keys(user_lang.seen_words))
+                let new_forms = new Set(Object.values(doc?.title?.tokens).concat(Object.values(doc?.text?.tokens).concat(Object.values(doc?.question?.tokens)))
+                                .filter((tok: any) => TRACKED_POS.has(tok.pos))
+                                .map((tok: any) => tok.lemma_))
+                new_forms = new_forms.difference(prev_seen_words)            
+                nNewForms = new_forms.size
             }
         }, 5000);
     }
