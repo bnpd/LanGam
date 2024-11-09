@@ -56,7 +56,15 @@
         }
         console.log(dueWords[0]);
         
-        updateSrCard(dueWords[0]).then(() => {successMessage = 'Updated.'; showEditForm = false}).catch(() => formError = 'Failed to update, sorry.')
+        updateSrCard(dueWords[0])
+        .then(() => {successMessage = 'Updated.'; showEditForm = false})
+        .catch(e => {            
+            if (e.data?.data?.meaning?.code == "validation_not_unique") {
+                formError = 'This already exists.'
+                return
+            }
+            formError = 'Failed to update, sorry.'
+        })
         dueWords = dueWords
     }
 
