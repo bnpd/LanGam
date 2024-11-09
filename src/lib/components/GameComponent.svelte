@@ -253,7 +253,7 @@
     <span slot="afterSolution">{#if $gameChatHistory?.length}<ChatComponent readerComponent={readerComponent} inline={true} chatBoxTitle={undefined} chatHistory={gameChatHistory} translationLang='en' isGame={true}/>{/if}</span>
 </ReaderComponent>
 <div style="text-align: center;">
-    <input type="text" name="e" id="e" bind:value={$morphHighlightFilter} style:width="5em">
+    <!--<input type="text" name="e" id="e" bind:value={$morphHighlightFilter} style:width="5em">-->
     {#if grammarChapter}
         <GrammarBookComponent content={grammarChapter}/>
     {/if}
