@@ -113,7 +113,11 @@ ul {
   padding-inline-start: 1.5em;
 }
 
-
+label {
+  width: 50%;
+  flex-grow: 1;
+  text-align: justify;
+}
 
 /* Base styles for the checkbox */
 input[type="checkbox"] {
@@ -128,6 +132,7 @@ input[type="checkbox"] {
   outline: none;
   cursor: pointer;
   transition: background-color 0.3s ease;
+  margin-right: 0.5em;
 }
 
 /* The circle inside the toggle */

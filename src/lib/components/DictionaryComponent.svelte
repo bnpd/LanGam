@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { targetLang, dictionaryToken, freqList } from "$lib/stores";
+	import { targetLang, dictionaryToken, freqList, username } from "$lib/stores";
 	import { onMount } from "svelte";
 	import Popup from "./Popup.svelte";
 	import BadgeComponent from "./BadgeComponent.svelte";
@@ -7,6 +7,8 @@
 	import { addSrWord } from "./backend";
 	import WiktionaryFrame from "./WiktionaryFrame.svelte";
 	import Toast from "./Toast.svelte";
+
+    const ERROR_MSG_NOT_LOGGED_IN = 'To save cards, please create an account.'
 
     function getSrFormFields(whichExtraction: number) {return [
         {name: 'Word', id: 'word', value: dictionaryCurrentWord},
@@ -77,29 +79,18 @@
         }
     })
 
-    function addToSpacedRepetition(formdata: { [x: string]: string | undefined; }) {
+    function addToSpacedRepetition(formdata: { [x: string]: string | undefined; }, isReversed: boolean) {
         successMessage = undefined
         formError = undefined
-        addSrWord($targetLang.id, formdata, false)
-        .then(()=>{
-            successMessage = 'Saved!'
-            wordAdded = true
+        addSrWord($targetLang.id, formdata, isReversed)
+        .then(res=>{
+            if (res) {
+                successMessage = 'Saved!'
+                wordAdded = true
+            } else formError = 'Internal Error'
         })
         .catch(_validationError => {
-            formError = 'Word<-Meaning combination already exists'
-        });
-    }
-
-    function addToSpacedRepetitionReversed(formdata: { [x: string]: string | undefined; }) {
-        successMessage = undefined
-        formError = undefined
-        addSrWord($targetLang.id, formdata, true)
-        .then(()=>{
-            successMessage = 'Saved!'
-            wordAdded = true
-        })
-        .catch(_validationError => {
-            formError = 'Word->Meaning combination already exists'
+            formError = isReversed ? 'Word->Meaning combination already exists' : 'Word<-Meaning combination already exists'
         });
     }
 
@@ -145,8 +136,8 @@
                     <FormComponent 
                     fields={formVisible ? getSrFormFields(i) : undefined} 
                     submitOptions={[
-                        {text:'Reversed', handler: addToSpacedRepetitionReversed, disableOnSubmit: true},
-                        {text:`Meaning ➛ Word`, handler: addToSpacedRepetition, disableOnSubmit: true, cssClass: 'highlighted'}
+                        {text:'Reversed', handler: formdata=>{addToSpacedRepetition(formdata, true)}, disableOnSubmit: true},
+                        {text:`Meaning ➛ Word`, handler: formdata=>{addToSpacedRepetition(formdata, false)}, disableOnSubmit: true, cssClass: 'highlighted'}
                     ]} />
                 </div>
             {/each}
@@ -159,7 +150,7 @@
                 </span>
             {/if}
         {:else}
-            <button on:click={() => formVisible = true}>Add to Spaced Repetition</button>
+            <button on:click={() => {if($username) formVisible = true; else formError=ERROR_MSG_NOT_LOGGED_IN}}>Add to Spaced Repetition</button>
         {/if}
     </div>
 </Popup>

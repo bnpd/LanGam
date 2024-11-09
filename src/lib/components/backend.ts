@@ -273,7 +273,7 @@ export async function addSrWord(langId: string, cardJson: { [x: string]: string 
  * @returns {Promise<{[x: string]: string | undefined}[]>} The due cards
  */
 export async function getDue(langId: string): Promise<VocabCard[]> {
-	return (await pb.send(`/get_due?langId=${langId}`, {}).then(res => res.due)).map((jsonCard: any) => VocabCard.fromJson(jsonCard)) 
+	return pb.send(`/get_due?langId=${langId}`, {}).then(res => res.due?.map((jsonCard: any) => VocabCard.fromJson(jsonCard)))
 }
 
 
