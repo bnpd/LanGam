@@ -98,7 +98,7 @@
 
 <style>
     iframe {
-        max-height: 75vh;
+        max-height: 75dvh;
 		flex-grow: 1;
     }
 </style>
