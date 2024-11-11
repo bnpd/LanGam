@@ -22,6 +22,17 @@
 <TitleWithBackgroundImageComponent>Options</TitleWithBackgroundImageComponent>
 <div style="overflow-y: auto; border-radius: 1em;">
     <div class="card">
+        <h4>Account</h4>
+        <div class="setting">
+            <label for="email">Email</label>&nbsp;&nbsp;
+            <input type="email" name="email" id="email" disabled value={getUserData()?.email}>
+        </div>
+        <div class="setting">
+            <AccountDeletionComponent />
+            <button on:click={()=>{localStorage.clear(); window.location.replace('/login')}}>Log Out</button>
+        </div>
+    </div>
+    <div class="card">
         <h4>Speech</h4>
         <div class="setting">
             <label for="ttsSpeed">Speech Output Pace</label>
@@ -47,17 +58,6 @@
         <div class="setting">
             <input type="checkbox" name="srShowGenus" id="srShowGenus" bind:checked={$srShowGenus}>&nbsp;
             <label for="srShowGenus">Show noun's gender on cards</label>
-        </div>
-    </div>
-    <div class="card">
-        <h4>Account</h4>
-        <div class="setting">
-            <label for="email">Email</label>&nbsp;&nbsp;
-            <input type="email" name="email" id="email" disabled value={getUserData()?.email}>
-        </div>
-        <div class="setting">
-            <AccountDeletionComponent />
-            <button on:click={()=>{localStorage.clear(); window.location.replace('/login')}}>Log Out</button>
         </div>
     </div>
     <div class="card">
