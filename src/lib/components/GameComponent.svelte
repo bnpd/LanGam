@@ -129,7 +129,8 @@
             congratsMessage = ANON_CONGRATS_MESSAGE
             congratsTitle = ANON_CONGRATS_TITLE
             await statsClosedPromise
-            goto('/signup')
+            console.log('resolved');
+            setTimeout(() => goto('/signup'), 0);
             return
         }
 

@@ -20,50 +20,55 @@
 </svelte:head>
 
 <TitleWithBackgroundImageComponent>Options</TitleWithBackgroundImageComponent>
-<div class="card">
-    <h4>Speech</h4>
-    <div class="setting">
-        <label for="ttsSpeed">Speech Output Pace</label>
-        <span class="slider">
-            <label for="ttsSpeed">{$ttsSpeed}</label>
-            <input type="range" name="ttsSpeed" id="ttsSpeed" min=0.25 max=1.5 step=0.125 list="ttsSpeedValues" bind:value={$ttsSpeed} on:input={e=>{onInput(e.currentTarget)}}>
-        </span>
+<div style="overflow-y: auto; border-radius: 1em;">
+    <div class="card">
+        <h4>Account</h4>
+        <div class="setting">
+            <label for="email">Email</label>&nbsp;&nbsp;
+            <input type="email" name="email" id="email" disabled value={getUserData()?.email}>
+        </div>
+        <div class="setting">
+            <AccountDeletionComponent />
+            <button on:click={()=>{localStorage.clear(); window.location.replace('/login')}}>Log Out</button>
+        </div>
     </div>
-    <hr>
-    <h4>Grammar</h4>
-    <div class="setting">
-        <input type="checkbox" name="isGrammarHighlightingOn" id="isGrammarHighlightingOn" bind:checked={$isGrammarHighlightingOn}>&nbsp;
-        <label for="isGrammarHighlightingOn">Highlight current grammar concept in the text</label>
+    <div class="card">
+        <h4>Speech</h4>
+        <div class="setting">
+            <label for="ttsSpeed">Speech Output Pace</label>
+            <span class="slider">
+                <label for="ttsSpeed">{$ttsSpeed}</label>
+                <input type="range" name="ttsSpeed" id="ttsSpeed" min=0.25 max=1.5 step=0.125 list="ttsSpeedValues" bind:value={$ttsSpeed} on:input={e=>{onInput(e.currentTarget)}}>
+            </span>
+        </div>
     </div>
-    <hr>
-    <h4>Spaced Repetition</h4>
-    <div class="setting">
-        <input type="checkbox" name="srShowIPA" id="srShowIPA" bind:checked={$srShowIPA}>&nbsp;
-        <label for="srShowIPA">Show pronunciation 🗣 on cards</label>
+    <div class="card">
+        <h4>Grammar</h4>
+        <div class="setting">
+            <input type="checkbox" name="isGrammarHighlightingOn" id="isGrammarHighlightingOn" bind:checked={$isGrammarHighlightingOn}>&nbsp;
+            <label for="isGrammarHighlightingOn">Highlight current grammar concept in the text</label>
+        </div>
     </div>
-    <div class="setting">
-        <input type="checkbox" name="srShowGenus" id="srShowGenus" bind:checked={$srShowGenus}>&nbsp;
-        <label for="srShowGenus">Show noun's gender on cards</label>
+    <div class="card">
+        <h4>Spaced Repetition</h4>
+        <div class="setting">
+            <input type="checkbox" name="srShowIPA" id="srShowIPA" bind:checked={$srShowIPA}>&nbsp;
+            <label for="srShowIPA">Show pronunciation 🗣 on cards</label>
+        </div>
+        <div class="setting">
+            <input type="checkbox" name="srShowGenus" id="srShowGenus" bind:checked={$srShowGenus}>&nbsp;
+            <label for="srShowGenus">Show noun's gender on cards</label>
+        </div>
     </div>
-    <hr>
-    <h4>Account</h4>
-    <div class="setting">
-        <label for="email">Email</label>&nbsp;&nbsp;
-        <input type="email" name="email" id="email" disabled value={getUserData()?.email}>
+    <div class="card">
+        <h4>About</h4>
+        <div>
+            ©2024 Benjamin Paddags <br>
+            Contact: ben@langam.app
+        </div>
+        <a href="/terms">Terms</a><br>
+        <a href="/privacy">Privacy Policy</a>
     </div>
-    <div class="setting">
-        <AccountDeletionComponent />
-        <button on:click={()=>{localStorage.clear(); window.location.replace('/login')}}>Log Out</button>
-    </div>
-    <hr>
-    <h4>About</h4>
-    <div>
-        ©2024 Benjamin Paddags <br>
-        Contact: ben@langam.app
-    </div>
-    <a href="/terms">Terms</a><br>
-    <a href="/privacy">Privacy Policy</a>
-
 </div>
 <NavbarComponent>
     <button on:click={()=>{history.back()}}>◄ Back</button>

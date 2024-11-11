@@ -24,6 +24,10 @@
             showValidationError('password', "Passwords do not match", 1500);
             return;
         }
+        if (isSignup && !formDataEntries.get('acceptConditions')) {
+            showValidationError('acceptConditions', "This is required.", 1500);
+            return;
+        }
         try {
             loading = true
             if (isSignup) {
@@ -69,6 +73,10 @@
     // }
   </script>
 
+<style>
+    label {font-size: small;}
+</style>
+
 <TitleWithBackgroundImageComponent>{isSignup ? 'Welcome :)' : 'Welcome back =)'}</TitleWithBackgroundImageComponent>
 <div style="text-align: center">
     <form class="card" on:submit|preventDefault={onSubmit}>
@@ -77,8 +85,8 @@
         <input type="password" name="password" placeholder="Password" autocomplete="new-password" id="password" required minlength="8"/>
         {#if isSignup}
             <br>
-            <input type="password" name="passwordConfirm" placeholder="Confirm Password" autocomplete="new-password" required minlength="8"/>
-            <!-- <input type="text" list="languages" name="native_lang" placeholder="Preferred Language" autocomplete="language" id="native_lang" required/> -->
+            <input type="password" name="passwordConfirm" placeholder="Confirm Password" autocomplete="new-password" required minlength="8"/><br>
+            <!-- <input type="text" list="languages" name="native_lang" placeholder="Preferred Language" autocomplete="language" id="native_lang" required/><br> -->
             <datalist id="languages">
                 <option value="en">English</option>
                 <!--
@@ -98,6 +106,10 @@
                 <option value="tr">Turkish</option>
                 -->
             </datalist>
+            <div style="width: 190px; margin: auto;">
+                <input type="checkbox" name="acceptConditions" id="acceptConditions">
+                <label for="acceptConditions">I accept the <a href="/terms">Terms of Use</a> and the <a href="/privacy">Privacy Policy</a>.</label>
+            </div>
         {/if}
         <br>
         <input id="submit" type="submit" value={isSignup ? "Register" : "Login"} disabled={loading}>

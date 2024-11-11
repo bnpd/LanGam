@@ -31,7 +31,7 @@
 {#if isOpen}
 	<div class="popup-container" on:click|self={() => {if (outsideclose) closeSelf()}}>
 		<div class="popup">
-			<slot></slot>
+			<slot></slot> <!-- The slot content needs to make sure that overflow-auto is set (cannot set it here cause we might need some special behavior for some components, e.g. DictionaryComponent)-->
 			<button class="close-button" on:click={closeSelf}>{closeButtonText}</button>
 		</div>
 	</div>
@@ -48,7 +48,7 @@
 		top: 0;
 		left: 0;
 		width: 100%;
-		height: 100%;
+		height: 100dvh;
 		background-color: rgba(0, 0, 0, 0.6);
 		animation: fadeIn 0.5s;
 		z-index: 100;
