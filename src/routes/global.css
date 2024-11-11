@@ -281,7 +281,7 @@ button.highlighted, input[type="submit"].highlighted, button.flash, input[type="
   outline: none;
   background-color: aliceblue;
   color: darkblue;
-  height: 50px;
+  height: fit-content;
   line-height: 45px;
   font-size: large;
   font-weight: bold;
@@ -290,8 +290,6 @@ button.highlighted, input[type="submit"].highlighted, button.flash, input[type="
 #contentbox {
   text-align: justify;
   height: 100%; /* due to use of flex-grow by children, height of this element does not matter, as long as it is big enough it will be equivalent to fill-available */
-  height: -webkit-fill-available;
-  height: fill-available;
   display: flex; 
   flex-direction: column; 
 }
