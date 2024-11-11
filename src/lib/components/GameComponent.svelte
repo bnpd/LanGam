@@ -290,6 +290,8 @@
 <Toast bind:message={lockedLevelToast}/>
 <SuccessPopup bind:title={congratsTitle} bind:message={congratsMessage} footnote={nNewForms ? `You just encountered ${nNewForms} new words!\n` : ''} onClose={statsClosedPromiseResolve}/>
 <DictionaryComponent/>
-{#if !$username}
-    <WelcomePopup/>
-{/if}
+{#await new Promise((resolve,_) => {setTimeout(resolve, 500)}) then _} <!-- delay is necessary cause persistenStores are only retrieved after a few split seconds -->
+    {#if !$username}
+        <WelcomePopup/>
+    {/if}
+{/await}
