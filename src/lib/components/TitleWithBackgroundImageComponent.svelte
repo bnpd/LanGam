@@ -8,6 +8,7 @@
       position: relative;
       text-align: center;
       z-index: 1; /* Ensure the title is on top */
+      color: aliceblue;
     }
     
     /* Background image */

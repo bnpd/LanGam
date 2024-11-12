@@ -26,6 +26,7 @@ body {
 h1 {
   color: darkblue;
   margin: 10px;
+  font-size: medium;
 }
 
 h4 {
@@ -451,6 +452,10 @@ button.highlighted, input[type="submit"].highlighted, button.flash, input[type="
     font-size: medium;
   }
 
+  h1 {
+    font-size: small;
+  }
+
   * {
     --padding-card: 18px;
   }
@@ -458,8 +463,7 @@ button.highlighted, input[type="submit"].highlighted, button.flash, input[type="
 
 /* Changes for Mobile*/
 @media only screen and (max-width: 767px) {
-
-  h1, h4 {
+  h4 {
     font-size: small;
   }
 
@@ -477,6 +481,10 @@ button.highlighted, input[type="submit"].highlighted, button.flash, input[type="
 @media only screen and (min-width: 768px) {
   * {
     --padding-card: 30px;
+  }
+
+  h1 {
+    font-size: larger;
   }
 
   #divTask, #solutionField {
