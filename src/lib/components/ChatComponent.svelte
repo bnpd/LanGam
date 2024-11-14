@@ -77,6 +77,9 @@
      * @param partialContext whether to only send the currently visible paragraphs as context or whole doc (identified by docId). If global isGame is true, no context is sent.
      */
     async function submitChat(partialContext: boolean) {
+        if (!chatPrompt?.trim()?.length) {
+            throw new Error("Empty chat submitted");
+        }
         loading = true
         const newMessage = {role: 'user', content: DocumentC.partialDocument(chatPrompt, $targetLang.shortcode, undefined, undefined)}
         let new_history = $chatHistory
@@ -307,7 +310,7 @@
                 <button id="closeChat" on:click={() => {document?.activeElement?.blur()}} class="chat-circle-btn">x</button>       
             {/if}    
             <button id="submitChat" on:click={onSubmitChatField} disabled={loading} class="chat-circle-btn"><b><em>
-                {#if chatPrompt}
+                {#if chatPrompt?.trim()?.length}
                 ➥
                 {:else}
                 AI            
