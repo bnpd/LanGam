@@ -28,7 +28,7 @@
         <tr><th>Stat</th><th>Strength</th></tr>
         {#if Object.keys($player.stats).length}
             {#each Object.keys($player.stats) as stat}
-                {#if !stat.includes('_approval')} <!-- We do not want to show secret stats (?) -->
+                {#if !stat.includes('_approval') && !stat.includes('_suspicion')} <!-- We do not want to show secret stats (?) -->
                     <tr>
                         <td>{stat}</td>
                         <td>{$player.stats[stat]}</td>
