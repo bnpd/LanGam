@@ -1,12 +1,13 @@
 <script lang="ts" defer>
 	import { chatOutcome, currentTask, failedWords, nativeLang, player, targetLang, username } from "$lib/stores";
-	import { onMount, tick } from "svelte";
+	import { tick } from "svelte";
 	import BadgeComponent from "./BadgeComponent.svelte";
 	import type ReaderComponent from "./ReaderComponent.svelte";
 	import { sendChat, sendGameChat, sendTutorChat } from "./backend";
 	import { writable, type Writable } from "svelte/store";
 	import TaskComponent from "./TaskComponent.svelte";
 	import DocumentC from "$lib/DocumentC";
+	import Toast from "./Toast.svelte";
 
     const ANON_RESPONSE = 'Sign in to gain access to AI tutoring' //'AI cannot help with the Drnuk language yet - but sign up to get help with Polish.'
     const MAX_LENGTH_RESPONSE = "This chat has reached it's maximum length. Try chatting about another text."
@@ -41,6 +42,7 @@
     let loading: boolean = false
     let messageHistoryContainer: HTMLDivElement
     let chatComponent: HTMLDivElement
+    let messageRestartChat: string | undefined
 
     /**
      * Finds the first occurrence of word in the text and returns the corresponding lemma (thus not necessarily the lemma for that ocurrence that the user clicked)
@@ -154,6 +156,12 @@
             chatFocussed = chatComponent?.contains(document.activeElement) ?? false
             console.log(chatFocussed);
         }, 10); // wait a moment in case we re-focussed (e.g. in onSubmitChatField)
+    }
+
+    function resetChat() {
+        if (isGame && inline) $chatOutcome = null
+        const firstNonAgentMsgIndex = $chatHistory.findIndex(msg => msg.role != 'assistant')
+        $chatHistory = firstNonAgentMsgIndex == -1 ? $chatHistory : $chatHistory.slice(0, firstNonAgentMsgIndex)
     }
 
 </script>
@@ -307,7 +315,9 @@
         <div id="chatInputContainer">
             <div contenteditable id="iChat" data-placeholder={chatBoxTitle} bind:innerText={chatPrompt} bind:this={iChat}/>
             {#if chatFocussed }
-                <button id="closeChat" on:click={() => {document?.activeElement?.blur()}} class="chat-circle-btn">x</button>       
+                <button id="closeChat" on:click={() => {document?.activeElement?.blur()}} class="chat-circle-btn">x</button>  
+            {:else if $chatHistory?.length > 1}
+                <button id="restartChat" on:click={()=> messageRestartChat='Restart chat?'} class="chat-circle-btn">↺</button>  
             {/if}    
             <button id="submitChat" on:click={onSubmitChatField} disabled={loading} class="chat-circle-btn"><b><em>
                 {#if chatPrompt?.trim()?.length}
@@ -319,3 +329,4 @@
         </div>
     {/if}
 </div>
+<Toast bind:message={messageRestartChat} textReject='Yes' onReject={resetChat}/>
