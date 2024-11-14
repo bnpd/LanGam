@@ -12,7 +12,7 @@
 
     function getSrFormFields(whichExtraction: number) {return [
         {name: 'Word', id: 'word', value: dictionaryCurrentWord},
-        {name: 'Meaning', id: 'meaning', value: extractedCards?.[whichExtraction]?.meaning?.slice(0, 50) + (extractedCards?.[whichExtraction]?.meaning?.length > 50 && '...')},
+        {name: 'Meaning', id: 'meaning', value: extractedCards?.[whichExtraction]?.meaning?.slice(0, 50) ?? '' + (extractedCards?.[whichExtraction]?.meaning?.length > 50 ? '...' : '')},
         {name: 'Notes', id: 'notes'},
         {name: 'Pronunciation', id: 'pronunciation', value: extractedCards?.[whichExtraction]?.pronunciation, hidden: true}
         // {name: 'Sentence' extracted from text}
@@ -123,7 +123,6 @@
             on:wordNotFound={()=>{if (lemma && lemma?.toLowerCase() != dictionaryCurrentWord?.toLowerCase()) dictionaryCurrentWord = lemma}}
             on:extractedCards={e=>{
                 extractedCards = e.detail?.cards
-                console.log(extractedCards);
                 if (extractedCards?.[0]?.word && extractedCards[0].word !== dictionaryCurrentWord) {
                     dictionaryCurrentWord = extractedCards[0].word
                 }
