@@ -2,7 +2,7 @@
 	import { browser } from '$app/environment';
 	import { pushState } from '$app/navigation';
 	import { page } from '$app/stores';
-    import { createEventDispatcher, tick } from 'svelte';
+    import { createEventDispatcher } from 'svelte';
 
     const dispatch = createEventDispatcher();
 	export let closeButtonText = 'Close';

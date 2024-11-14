@@ -1,18 +1,15 @@
 <script lang="ts" defer>
 	import '../global.css';
-	import config from '../../config';
 	import { username } from '$lib/stores';
 	import { goto } from '$app/navigation';
 	import FeedbackComponent from '$lib/components/FeedbackComponent.svelte';
 	import Install from '$lib/components/Install.svelte';
 	import NavbarComponent from '$lib/components/NavbarComponent.svelte';
 	import TitleWithBackgroundImageComponent from '$lib/components/TitleWithBackgroundImageComponent.svelte';
-	import TtsComponent from '$lib/components/TtsComponent.svelte';
 	import WebPushSubscription from '$lib/components/WebPushSubscription.svelte';
 	import { onMount } from 'svelte';
 	import ReadNChatComponent from '$lib/components/ReadNChatComponent.svelte';
 
-	let tts: TtsComponent;
 
 	onMount(() => {
 		// after 10 seconds, cache assets
@@ -32,10 +29,9 @@
 </svelte:head>
 
 <TitleWithBackgroundImageComponent>LanGam CYOA - language learning "choose you own adventure" game</TitleWithBackgroundImageComponent>
-<ReadNChatComponent {tts}></ReadNChatComponent>
+<ReadNChatComponent></ReadNChatComponent>
 <NavbarComponent>
 	<button on:click={() => goto('/catalog')}>Texts</button>
-	<TtsComponent bind:this={tts} />
 	<Install />
 	<FeedbackComponent />
 	{#if $username}

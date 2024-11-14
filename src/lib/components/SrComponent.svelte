@@ -33,10 +33,6 @@
     })
 
     async function onSubmitRating(card: VocabCard, rating: Grade) {
-        console.log(card);
-        console.log(card.review);
-        
-        
         card.review(rating)
         const updatedPromise = updateSrCard(card)
         dueWords.shift()
@@ -49,13 +45,9 @@
     }
 
     function onSubmitEditForm(formdata: { [x: string]: string | undefined; }) {
-        console.log(formdata);
-        console.log(dueWords[0]);
         for (const key in formdata) {
             dueWords[0][key] = formdata[key];
-        }
-        console.log(dueWords[0]);
-        
+        }        
         updateSrCard(dueWords[0])
         .then(res=>{
             if (res) {

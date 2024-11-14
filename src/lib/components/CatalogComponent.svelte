@@ -5,7 +5,6 @@
 	import BadgeComponent from "./BadgeComponent.svelte";
 	import TitleWithBackgroundImageComponent from "./TitleWithBackgroundImageComponent.svelte";
 	import NavbarComponent from "./NavbarComponent.svelte";
-	import { goto } from "$app/navigation";
 
     let content_types: Array<{title: string; filter: {[filter: string]: string[]}}> = [
         {title: 'Extra Short', filter: {content_type: ['Extra short']}},

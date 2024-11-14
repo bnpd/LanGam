@@ -1,12 +1,13 @@
 <script lang="ts" defer>
 	import { chatOutcome, currentTask, failedWords, nativeLang, player, targetLang, username } from "$lib/stores";
-	import { onMount, tick } from "svelte";
+	import { tick } from "svelte";
 	import BadgeComponent from "./BadgeComponent.svelte";
 	import type ReaderComponent from "./ReaderComponent.svelte";
 	import { sendChat, sendGameChat, sendTutorChat } from "./backend";
 	import { writable, type Writable } from "svelte/store";
 	import TaskComponent from "./TaskComponent.svelte";
 	import DocumentC from "$lib/DocumentC";
+	import Toast from "./Toast.svelte";
 
     const ANON_RESPONSE = 'Sign in to gain access to AI tutoring' //'AI cannot help with the Drnuk language yet - but sign up to get help with Polish.'
     const MAX_LENGTH_RESPONSE = "This chat has reached it's maximum length. Try chatting about another text."
@@ -41,6 +42,7 @@
     let loading: boolean = false
     let messageHistoryContainer: HTMLDivElement
     let chatComponent: HTMLDivElement
+    let messageRestartChat: string | undefined
 
     /**
      * Finds the first occurrence of word in the text and returns the corresponding lemma (thus not necessarily the lemma for that ocurrence that the user clicked)
@@ -61,9 +63,7 @@
         iChat?.focus()
     }
 
-    function onSubmitChatField(e: Event) {
-        console.log('sub');
-        
+    function onSubmitChatField(e: Event) {        
         if (chatPrompt.length) {
             submitChat(false)
             iChat?.focus()
@@ -77,6 +77,9 @@
      * @param partialContext whether to only send the currently visible paragraphs as context or whole doc (identified by docId). If global isGame is true, no context is sent.
      */
     async function submitChat(partialContext: boolean) {
+        if (!chatPrompt?.trim()?.length) {
+            throw new Error("Empty chat submitted");
+        }
         loading = true
         const newMessage = {role: 'user', content: DocumentC.partialDocument(chatPrompt, $targetLang.shortcode, undefined, undefined)}
         let new_history = $chatHistory
@@ -90,9 +93,7 @@
                     ({end_conversation, outcome, correction, response} = await sendGameChat(messageHistoryForChatGpt($chatHistory.concat([newMessage])), $player.id, $player.level));
                     $chatOutcome = end_conversation ? outcome : null
                 } else if (!inline) {
-                    response = await sendTutorChat(messageHistoryForChatGpt($chatHistory.concat([newMessage])), readerComponent.getVisibleParagraphs())
-                    console.log(response);
-                    
+                    response = await sendTutorChat(messageHistoryForChatGpt($chatHistory.concat([newMessage])), readerComponent.getVisibleParagraphs())                    
                 } else {
                     ({correction, response} = 
                         partialContext ? await sendChat(messageHistoryForChatGpt($chatHistory.concat([newMessage])), inline, undefined, undefined, readerComponent.getVisibleParagraphs())
@@ -145,12 +146,15 @@
 
     function handleFocus() {
         setTimeout(async () => {
-            await tick()
-            console.log(document.activeElement);
-            
+            await tick()            
             chatFocussed = chatComponent?.contains(document.activeElement) ?? false
-            console.log(chatFocussed);
         }, 10); // wait a moment in case we re-focussed (e.g. in onSubmitChatField)
+    }
+
+    function resetChat() {
+        if (isGame && inline) $chatOutcome = null
+        const firstNonAgentMsgIndex = $chatHistory.findIndex(msg => msg.role != 'assistant')
+        $chatHistory = firstNonAgentMsgIndex == -1 ? $chatHistory : $chatHistory.slice(0, firstNonAgentMsgIndex)
     }
 
 </script>
@@ -304,10 +308,12 @@
         <div id="chatInputContainer">
             <div contenteditable id="iChat" data-placeholder={chatBoxTitle} bind:innerText={chatPrompt} bind:this={iChat}/>
             {#if chatFocussed }
-                <button id="closeChat" on:click={() => {document?.activeElement?.blur()}} class="chat-circle-btn">x</button>       
+                <button id="closeChat" on:click={() => {document?.activeElement?.blur()}} class="chat-circle-btn">x</button>  
+            {:else if $chatHistory?.length > 1}
+                <button id="restartChat" on:click={()=> messageRestartChat='Restart chat?'} class="chat-circle-btn">↺</button>  
             {/if}    
             <button id="submitChat" on:click={onSubmitChatField} disabled={loading} class="chat-circle-btn"><b><em>
-                {#if chatPrompt}
+                {#if chatPrompt?.trim()?.length}
                 ➥
                 {:else}
                 AI            
@@ -316,3 +322,4 @@
         </div>
     {/if}
 </div>
+<Toast bind:message={messageRestartChat} textReject='Yes' onReject={resetChat}/>

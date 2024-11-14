@@ -77,9 +77,7 @@
                 goto('/games')
                 return
             } else {
-                console.log('no player');
                 $player = await getPlayer($currentGameId)
-                console.log($player);
             }
         }
                 
@@ -129,7 +127,6 @@
             congratsMessage = ANON_CONGRATS_MESSAGE
             congratsTitle = ANON_CONGRATS_TITLE
             await statsClosedPromise
-            console.log('resolved');
             setTimeout(() => goto('/signup'), 0);
             return
         }

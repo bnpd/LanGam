@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { pushState } from "$app/navigation";
-	import { dictionaryToken } from "$lib/stores";
     import { onMount } from 'svelte';
 	import { createEventDispatcher } from 'svelte';
 
@@ -13,8 +12,6 @@
     $: if (word) injectContentIntoIframe(word);
     
     export const goBack = () => {
-        console.log(wordHistory);
-        
         if (wordHistory.length == 1) return false
         word = wordHistory.pop()
         return true

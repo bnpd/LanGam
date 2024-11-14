@@ -8,14 +8,10 @@
 	import ChatComponent from './ChatComponent.svelte';
 	import SuccessPopup from './SuccessPopup.svelte';
 	import DocumentC from '$lib/DocumentC';
-	import type TtsComponent from './TtsComponent.svelte';
-
     const answbtnTxtWhileSolutionShown = "Next text"
     const TOAST_REDIRECTED_FROM_TASK = "Your selected text has been queued cause you have a saved text."
     const TOAST_REDIRECTED_FROM_GAME = "Your selected game has been queued cause you have a saved text."
     const TEXT_REJECT_SAVED_TASK = "Discard saved"
-
-    export let tts: TtsComponent;
 
     let solutionText = ''
     let toast: string | undefined;
@@ -204,7 +200,7 @@
 {#if !$username}
     <strong>In this demo text, you learn the fabulous <em>Drnuk</em> language (and how this app works).</strong> <!-- If you want to dive right in with Polish, create an account at the bottom.-->
 {/if}
-<ReaderComponent tts={tts} solutionText={solutionText} srWords={srWords} bind:this={readerComponent}>
+<ReaderComponent solutionText={solutionText} srWords={srWords} bind:this={readerComponent}>
     <span slot="afterTask" hidden={!$currentTask}><ChatComponent readerComponent={readerComponent} inline={true} chatBoxTitle="Twoja odpowiedź 🤙" chatHistory={inlineChatHistory} srWords={srWords}/></span>
     <span slot="afterSolution"><ChatComponent readerComponent={readerComponent} inline={true} chatBoxTitle={undefined} chatHistory={inlineChatHistory} translationLang='en'/></span>
 </ReaderComponent>
