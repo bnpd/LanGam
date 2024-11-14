@@ -290,9 +290,7 @@ export function updateSrCard(card: VocabCard): Promise<{ [x: string]: string | u
 	for (const [property, value] of Object.entries(jsonCard.card)) {
 		jsonCard[property] = value
 	}
-	delete jsonCard.card
-	console.log(JSON.stringify(card));
-	
+	delete jsonCard.card	
 	return pb.collection('sr_cards').update(jsonCard.id, jsonCard);
 }
 
@@ -308,9 +306,7 @@ export function deleteSrCard(card: VocabCard): Promise<boolean> {
 	for (const [property, value] of Object.entries(jsonCard.card)) {
 		jsonCard[property] = value
 	}
-	delete jsonCard.card
-	console.log(JSON.stringify(card));
-	
+	delete jsonCard.card	
 	return pb.collection('sr_cards').delete(jsonCard.id);
 }
 

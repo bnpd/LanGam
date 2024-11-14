@@ -6,7 +6,6 @@
 	import { error } from '@sveltejs/kit';
 	import { targetLang, username } from '$lib/stores';
 	import TitleWithBackgroundImageComponent from '$lib/components/TitleWithBackgroundImageComponent.svelte';
-	import NavbarComponent from '$lib/components/NavbarComponent.svelte';
 	import { goto } from '$app/navigation';
 
   let FALLBACK_IMAGE = '/images/illustrations/placeholder.avif'

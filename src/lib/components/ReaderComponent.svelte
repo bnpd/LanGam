@@ -2,7 +2,6 @@
   import { currentTask, currentlyScrolledParagraphIndex, loadingTask } from '../stores';
 	import { afterUpdate, tick } from "svelte";
 	import TaskComponent from './TaskComponent.svelte';
-	import type TtsComponent from './TtsComponent.svelte';
 
   enum FIELD {TASK, SOLUTION}
 

@@ -63,9 +63,7 @@
         iChat?.focus()
     }
 
-    function onSubmitChatField(e: Event) {
-        console.log('sub');
-        
+    function onSubmitChatField(e: Event) {        
         if (chatPrompt.length) {
             submitChat(false)
             iChat?.focus()
@@ -95,9 +93,7 @@
                     ({end_conversation, outcome, correction, response} = await sendGameChat(messageHistoryForChatGpt($chatHistory.concat([newMessage])), $player.id, $player.level));
                     $chatOutcome = end_conversation ? outcome : null
                 } else if (!inline) {
-                    response = await sendTutorChat(messageHistoryForChatGpt($chatHistory.concat([newMessage])), readerComponent.getVisibleParagraphs())
-                    console.log(response);
-                    
+                    response = await sendTutorChat(messageHistoryForChatGpt($chatHistory.concat([newMessage])), readerComponent.getVisibleParagraphs())                    
                 } else {
                     ({correction, response} = 
                         partialContext ? await sendChat(messageHistoryForChatGpt($chatHistory.concat([newMessage])), inline, undefined, undefined, readerComponent.getVisibleParagraphs())
@@ -150,11 +146,8 @@
 
     function handleFocus() {
         setTimeout(async () => {
-            await tick()
-            console.log(document.activeElement);
-            
+            await tick()            
             chatFocussed = chatComponent?.contains(document.activeElement) ?? false
-            console.log(chatFocussed);
         }, 10); // wait a moment in case we re-focussed (e.g. in onSubmitChatField)
     }
 

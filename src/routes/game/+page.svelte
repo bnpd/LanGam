@@ -9,11 +9,9 @@
 	import Install from '$lib/components/Install.svelte';
 	import NavbarComponent from '$lib/components/NavbarComponent.svelte';
 	import TitleWithBackgroundImageComponent from '$lib/components/TitleWithBackgroundImageComponent.svelte';
-	import TtsComponent from '$lib/components/TtsComponent.svelte';
 	import BadgeComponent from '$lib/components/BadgeComponent.svelte';
 	import { getDue } from '$lib/components/backend';
 
-	let tts: TtsComponent;
 	let dueWords: any[];
 
 	onMount(() => {

@@ -9,7 +9,6 @@
 	import { page } from '$app/stores';
 	import TitleWithBackgroundImageComponent from '$lib/components/TitleWithBackgroundImageComponent.svelte';
 	import NavbarComponent from '$lib/components/NavbarComponent.svelte';
-	import { goto } from '$app/navigation';
 
   let docs: any[][]
   let category_name: string

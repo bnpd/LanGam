@@ -153,7 +153,7 @@
         {/if}
     </div>
 </Popup>
-<Toast bind:message={toastDicardFormInput} textReject="Discard" onReject={onClose} onTimeout={()=>{console.log('onTimeout()'); history.go(1)}}/>
+<Toast bind:message={toastDicardFormInput} textReject="Discard" onReject={onClose} onTimeout={()=>{history.go(1)}}/>
 <Toast bind:message={successMessage}/>
 <Toast bind:message={formError}/>
 
