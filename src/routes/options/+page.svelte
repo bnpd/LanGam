@@ -66,6 +66,7 @@
             ©2024 Benjamin Paddags <br>
             Contact: ben@langam.app
         </div>
+        <a href="https://blog.langam.app">LanGam Blog</a><br>
         <a href="/terms">Terms</a><br>
         <a href="/privacy">Privacy Policy</a>
     </div>
