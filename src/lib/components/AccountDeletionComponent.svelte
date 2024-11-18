@@ -12,7 +12,7 @@
     This cannot be undone! Type "delete" to confirm.
     <div>
         <input type="text" name="delete" bind:value={deleteConfirmText}>
-        <button style="background-color: pink" disabled={deleteConfirmText?.trim()?.toLowerCase() !== 'delete'} on:click={()=>{deleteAccount($username)}}>Delete</button>
+        <button style="background-color: pink" disabled={deleteConfirmText?.trim()?.toLowerCase() !== 'delete'} on:click={async ()=>{await deleteAccount($username); localStorage.clear(); window.location.replace('/login')}}>Delete</button>
         <!--<button>Suspend</button>-->
     </div>
 </Popup>

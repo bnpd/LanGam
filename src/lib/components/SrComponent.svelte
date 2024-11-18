@@ -65,6 +65,7 @@
 
     function onDeleteConfirmed(){
         showEditForm = false
+        showSolution = false
         deleteSrCard(dueWords[0])
         .then(res=>{
             if (res) successMessage='Deleted.'

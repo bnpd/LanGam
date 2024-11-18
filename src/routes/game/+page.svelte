@@ -39,6 +39,16 @@
 	<title>LanGam CYOA - language learning "choose you own adventure" game</title>
 	<meta name="description" content="Learn languages like play." />
 	<link rel="preconnect" href={config.pocketbase} />
+
+	<!-- Proper representation of site name in google search results -->
+	<script type="application/ld+json">
+	   {
+	   "@context" : "https://schema.org",
+	   "@type" : "WebSite",
+	   "name" : "LanGam",
+	   "url" : "https://langam.app/"
+	   }
+	</script>
 </svelte:head>
 
 <TitleWithBackgroundImageComponent>LanGam CYOA Game</TitleWithBackgroundImageComponent>
