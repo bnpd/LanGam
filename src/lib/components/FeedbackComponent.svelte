@@ -19,7 +19,7 @@
             return
         }
         if (feedbackText) {
-            await sendFeedback(feedbackText, email)
+            await sendFeedback(feedbackText, contactConsent ? email : undefined)
             toast = 'Feedback sent! Thanks!'
             feedbackText = ''
         }        
