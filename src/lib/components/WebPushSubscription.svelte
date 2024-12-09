@@ -17,6 +17,6 @@ onMount(async () => {
     notificationPermission = Notification.permission; 
     done = true
   })}>
-    Reminder
+    <slot>Reminder</slot>
   </button>
 {/if}

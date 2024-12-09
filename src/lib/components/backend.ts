@@ -429,7 +429,7 @@ export async function sendFeedback(text: string, email: string | undefined) {
 
 // Push Notifications
 export function requestNotifications() {
-	return subscribeUserToPush().then(subscription => backendPost('/api/webpush-subscribe', subscription, true));
+	return subscribeUserToPush().then(subscription => pb.send('/webpush-subscribe', {method: 'POST', body: subscription}));
 }
 function subscribeUserToPush() {
 	return navigator.serviceWorker.ready

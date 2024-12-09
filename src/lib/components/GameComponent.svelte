@@ -12,6 +12,7 @@
 	import DictionaryComponent from './DictionaryComponent.svelte';
 	import GrammarBookComponent from './GrammarBookComponent.svelte';
 	import WelcomePopup from './WelcomePopup.svelte';
+	import WebPushSubscription from './WebPushSubscription.svelte';
 
     const TOAST_REDIRECTED_SAVED_TASK = "Your selected text has been queued cause you have a saved game level."
     const TEXT_REJECT_SAVED_TASK = "Discard saved"
@@ -58,6 +59,7 @@
     let grammarChapter: { title_en: string; text_en: string; } | undefined
     let showTutorChat: boolean = false
     let lockedLevelToast: string | undefined
+    let finishedGame = false
 
     onMount(async () => {
         if (!$username) { // new user, not logged in -> trial mode
@@ -170,6 +172,7 @@
     }
 
     async function prevTask(seqId: number) { // like next task but only with the things necessary when moving back to previous level where we already know seqId
+        finishedGame = false
         const level = await getLevel($player.game, seqId)
         let doc = level?.['level']
         doc.docId = level.seq_id
@@ -183,13 +186,17 @@
     }
 
     async function nextTask(restoreScrollPosition: boolean = false){
-        const level = await getPlayerLevel($player.id).catch(_offline => {
+        let level
+        try {
+            level = await getPlayerLevel($player.id)
+        } catch (error) {            
+            if (error.status == 404) {
+                finishedGame = true
+                $loadingTask = false
+                return
+            }
             toast = "Cannot connect to the internet."
-            // setTimeout(() => {
-            //     goto('/catalog')
-            // }, 2000);
-            return undefined
-        })
+        }
         $player.level = level.seq_id
 
         let doc = level?.['level']
@@ -246,33 +253,45 @@
 	}
 </script>
 
-<ReaderComponent solutionText={solutionText} srWords={new Set()} bind:this={readerComponent}>
-    <span slot="afterTask" hidden={!$currentTask}>{#if $gameChatHistory?.length}<ChatComponent readerComponent={readerComponent} inline={true} chatBoxTitle="Twoja odpowiedź 🤙" chatHistory={gameChatHistory} srWords={new Set()} isGame={true} showGameChatSuggestions={showGameChatSuggestions}/>{/if}</span>
-    <span slot="afterSolution">{#if $gameChatHistory?.length}<ChatComponent readerComponent={readerComponent} inline={true} chatBoxTitle={undefined} chatHistory={gameChatHistory} translationLang='en' isGame={true}/>{/if}</span>
-</ReaderComponent>
+{#if finishedGame}
+    <div class="card">
+        <h3 style="text-align: center; margin: 0.5em 1em 2em 1em">Congrats on getting this far!</h3>
+        LanGam's storyline will be finished very soon. <br><br>
+        If you have any feedback, please hit the button at the bottom of the screen, I'd love to hear it. <br><br>
+        Thanks for your patience 🥳<br>
+        <WebPushSubscription>Notify me about new levels!</WebPushSubscription>
+    </div>
+{:else}
+    <ReaderComponent solutionText={solutionText} srWords={new Set()} bind:this={readerComponent}>
+        <span slot="afterTask" hidden={!$currentTask}>{#if $gameChatHistory?.length}<ChatComponent readerComponent={readerComponent} inline={true} chatBoxTitle="Twoja odpowiedź 🤙" chatHistory={gameChatHistory} srWords={new Set()} isGame={true} showGameChatSuggestions={showGameChatSuggestions}/>{/if}</span>
+        <span slot="afterSolution">{#if $gameChatHistory?.length}<ChatComponent readerComponent={readerComponent} inline={true} chatBoxTitle={undefined} chatHistory={gameChatHistory} translationLang='en' isGame={true}/>{/if}</span>
+    </ReaderComponent>
+{/if}
 <div style="text-align: center;">
     <!--<input type="text" name="e" id="e" bind:value={$morphHighlightFilter} style:width="5em">-->
-    {#if grammarChapter}
+    {#if grammarChapter && !finishedGame}
         <GrammarBookComponent content={grammarChapter}/>
     {/if}
     <button class="gameNavBtn" disabled={$loadingTask} on:click={onLevelBackbtnClick} hidden={!$player?.level_history?.order?.length}>
         ◀
     </button>
-    <PowersComponent on:use_power={e => usePower(e.detail.power)}/>
-    {#each (Object.entries($currentTask?.outcomes ?? {})) as [outcome, obj]}
-        {#if $player?.level_history?.[obj.goto] || $chatOutcome == outcome} <!--TODO: fix if there are two outcomes with same seq_id -->
-            <button class="gameNavBtn" class:flash={$currentlyScrolledParagraphIndex >= $currentTaskNParagraphs-1} disabled={$loadingTask} on:click={()=>onAnswbtnClick(outcome)}>
-                ▶
-            </button>
-        {:else}
-            <div style="display: inline-block;">
-                <button class="gameNavBtn" on:click={()=>lockedLevelToast=`There is a hidden outcome here that you can unlock by chatting with ${$currentTask.character}`}>🔒</button>
-            </div>
-        {/if}
-    {/each}
-    {#if !showTutorChat}
-        <button style="position: absolute; right: var(--padding-x-body)" class="chat-circle-btn" on:click={()=>{showTutorChat = true}}><b>
-            🗨</b></button>
+    {#if !finishedGame}
+        <PowersComponent on:use_power={e => usePower(e.detail.power)}/>
+        {#each (Object.entries($currentTask?.outcomes ?? {})) as [outcome, obj]}
+            {#if $player?.level_history?.[obj.goto] || $chatOutcome == outcome} <!--TODO: fix if there are two outcomes with same seq_id -->
+                <button class="gameNavBtn" class:flash={$currentlyScrolledParagraphIndex >= $currentTaskNParagraphs-1} disabled={$loadingTask} on:click={()=>onAnswbtnClick(outcome)}>
+                    ▶
+                </button>
+            {:else}
+                <div style="display: inline-block;">
+                    <button class="gameNavBtn" on:click={()=>lockedLevelToast=`There is a hidden outcome here that you can unlock by chatting with ${$currentTask.character}`}>🔒</button>
+                </div>
+            {/if}
+        {/each}
+        {#if !showTutorChat}
+            <button style="position: absolute; right: var(--padding-x-body)" class="chat-circle-btn" on:click={()=>{showTutorChat = true}}><b>
+                🗨</b></button>
+        {/if}        
     {/if}
 </div>
 <div hidden={!showTutorChat}>

@@ -29,36 +29,6 @@
     }
 </script>
 
-<style>
-.input-container {
-  position: relative;
-  margin-top: 1em;
-  margin-bottom: 0.5em;
-}
-
-label {
-  font-size: x-small; 
-  pointer-events: none; 
-  font-style: italic;
-}
-
-label:has(+ div[contenteditable]) {
-  position: absolute;
-  top: -0.5em; 
-  left: 0; 
-  background-color: aliceblue; 
-  padding: 0.4em 1.6em 0.4em 1.5em; 
-  border-radius: 1em 1em 1em 0;
-}
-
-div[contenteditable] {
-  padding: 0.8em;
-  font-size: 1em;
-  width: 100%;
-  box-sizing: border-box; 
-}
-</style>
-
 {#if fields}
     <form>
         {#each fields as field}
