@@ -130,7 +130,6 @@
                 <input id="inputDictionaryCurrentWord" disabled type="text" size={Math.ceil(dictionaryCurrentWord?.length*0.7)} value={dictionaryCurrentWord} bind:this={inputDictionaryCurrentWord}>
             </form>
             {#if lemma && lemma.toLowerCase() != dictionaryCurrentWord?.toLowerCase()}
-                &nbsp;
                 <a on:click={()=>{dictionaryCurrentWord = lemma}}>→&nbsp;{lemma}</a>
             {/if}
             {#if freq}
@@ -195,13 +194,14 @@
         font-size: inherit;
         width: fit-content;
         margin-bottom: 0;
+        padding-right: 0;
     }
 
     #formDictionaryCurrentWord {
-        display: inline-block;
         display: inline-flex;
         flex-direction: row;
         align-items: baseline;
+        width: fit-content;
     }
 
     #formDictionaryCurrentWord:has([disabled])::before {
