@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { targetLang, dictionaryToken, freqList, username } from "$lib/stores";
-	import { onMount } from "svelte";
+	import { onMount, tick } from "svelte";
 	import Popup from "./Popup.svelte";
 	import BadgeComponent from "./BadgeComponent.svelte";
 	import FormComponent from "./FormComponent.svelte";
@@ -33,6 +33,7 @@
     let toastDicardFormInput: string
     let wordAdded: boolean = false
     let dictionaryCurrentWord: string | undefined
+    let inputDictionaryCurrentWord: HTMLInputElement
     $: if ($dictionaryToken) onTokenChanged()
     $: if (dictionaryCurrentWord) onWordChanged()
     async function onTokenChanged(){ // this might cause problems
@@ -108,9 +109,27 @@
 <Popup on:closed={onClose} isOpen={$dictionaryToken !== undefined} onPopstate={onPopstate} outsideclose={false}>
     <div id="dictionary-container">
         <h2>
-            {dictionaryCurrentWord}
+            <form 
+                id="formDictionaryCurrentWord"
+                on:click={async e => {
+                    if (inputDictionaryCurrentWord.disabled) {
+                        inputDictionaryCurrentWord.disabled = false; 
+                        await tick(); 
+                        inputDictionaryCurrentWord.focus(); 
+                        inputDictionaryCurrentWord.select();
+                    } else {
+                        dictionaryCurrentWord = inputDictionaryCurrentWord.value.trim().toLowerCase(); 
+                        inputDictionaryCurrentWord.disabled = true;
+                    }
+                }}
+                on:submit|preventDefault={() => {
+                    dictionaryCurrentWord = inputDictionaryCurrentWord.value.trim().toLowerCase(); 
+                    inputDictionaryCurrentWord.disabled = true;
+                }}
+            >
+                <input id="inputDictionaryCurrentWord" disabled type="text" size={Math.ceil(dictionaryCurrentWord?.length*0.7)} value={dictionaryCurrentWord} bind:this={inputDictionaryCurrentWord}>
+            </form>
             {#if lemma && lemma.toLowerCase() != dictionaryCurrentWord?.toLowerCase()}
-                &nbsp;
                 <a on:click={()=>{dictionaryCurrentWord = lemma}}>→&nbsp;{lemma}</a>
             {/if}
             {#if freq}
@@ -168,4 +187,30 @@
         flex-direction: column; 
         height: 100dvh;
     }
+
+    #inputDictionaryCurrentWord {
+        background: transparent;
+        border: none;
+        font-size: inherit;
+        width: fit-content;
+        margin-bottom: 0;
+        padding-right: 0;
+    }
+
+    #formDictionaryCurrentWord {
+        display: inline-flex;
+        flex-direction: row;
+        align-items: baseline;
+        width: fit-content;
+    }
+
+    #formDictionaryCurrentWord:has([disabled])::before {
+        content: "✎";
+        opacity: 0.15;
+    }
+
+#formDictionaryCurrentWord:not(:has([disabled]))::before {
+    content: "↵";
+    opacity: 0.15;
+}
 </style>
