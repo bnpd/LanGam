@@ -37,7 +37,7 @@
     </div>
 </Popup>
 {#if !isOpen}
-    <button on:click={() => isOpen = true} class={"gameNavBtn " + (!$grammarBookOpened ? "flash delayed" : "")}>
+    <button on:click={() => isOpen = true} class={"gameNavBtn " + (!$grammarBookOpened ? "flash delayed" : "")} data-umami-event="Open Grammar Book">
         📖
     </button>
 {/if}

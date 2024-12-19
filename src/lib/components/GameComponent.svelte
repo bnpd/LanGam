@@ -279,17 +279,17 @@
         <PowersComponent on:use_power={e => usePower(e.detail.power)}/>
         {#each (Object.entries($currentTask?.outcomes ?? {})) as [outcome, obj]}
             {#if $player?.level_history?.[obj.goto] || $chatOutcome == outcome} <!--TODO: fix if there are two outcomes with same seq_id -->
-                <button class="gameNavBtn" class:flash={$currentlyScrolledParagraphIndex >= $currentTaskNParagraphs-1} disabled={$loadingTask} on:click={()=>onAnswbtnClick(outcome)}>
+                <button class="gameNavBtn" class:flash={$currentlyScrolledParagraphIndex >= $currentTaskNParagraphs-1} disabled={$loadingTask} on:click={()=>onAnswbtnClick(outcome)} data-umami-event="Click Forward Button">
                     ▶
                 </button>
             {:else}
                 <div style="display: inline-block;">
-                    <button class="gameNavBtn" on:click={()=>lockedLevelToast=`There is a hidden outcome here that you can unlock by chatting with ${$currentTask.character}`}>🔒</button>
+                    <button class="gameNavBtn" on:click={()=>lockedLevelToast=`There is a hidden outcome here that you can unlock by chatting with ${$currentTask.character}`} data-umami-event="Click Forward Button (locked)">🔒</button>
                 </div>
             {/if}
         {/each}
         {#if !showTutorChat}
-            <button style="position: absolute; right: var(--padding-x-body)" class="chat-circle-btn" on:click={()=>{showTutorChat = true}}><b>
+            <button style="position: absolute; right: var(--padding-x-body)" class="chat-circle-btn" on:click={()=>{showTutorChat = true}} data-umami-event="Open Tutor Chat"><b>
                 🗨</b></button>
         {/if}        
     {/if}

@@ -61,7 +61,7 @@
     <br>
 </Popup>
 {#if !isOpen}
-    <button class="gameNavBtn" on:click={toggleIsOpen}>
+    <button class="gameNavBtn" on:click={toggleIsOpen} data-umami-event="Open Powers">
         🪄
     </button>
 {/if}
