@@ -15,7 +15,7 @@
     }
 </style>
 
-<Popup isOpen={true} closeButtonText="Let's go!">
+<Popup isOpen={true} closeButtonText="Let's go!" on:closed={()=>umami.track('Welcome closed')}>
     <div style="overflow-y: auto;">
         <h1>Ready for an adventure?</h1>
         <p>
