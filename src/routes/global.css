@@ -84,7 +84,6 @@ form .input-container {
 
 form label {
   font-size: x-small; 
-  pointer-events: none; 
   font-style: italic;
 }
 

@@ -172,7 +172,7 @@
 
 <div class="card" id="contentbox">
   {#if !solutionShown && scrollRestored}
-    <button on:click={onShowSolution} style="margin-left: 50%; transform: translateX(-50%)">Show translation</button>
+    <button on:click={onShowSolution} style="margin-left: 50%; transform: translateX(-50%)" data-umami-event="Show Translation">Show translation</button>
   {:else}
     <div id="solutionField" bind:this={solutionField}>
       {#each solutionParagraphs as para, row}
