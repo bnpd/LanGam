@@ -11,6 +11,7 @@
 	import TitleWithBackgroundImageComponent from '$lib/components/TitleWithBackgroundImageComponent.svelte';
 	import BadgeComponent from '$lib/components/BadgeComponent.svelte';
 	import { getDue } from '$lib/components/backend';
+	import HelpPopup from '$lib/components/HelpPopup.svelte';
 
 	let dueWords: any[];
 
@@ -57,6 +58,8 @@
 	{#if $username}
 	<!--<button on:click={() => goto('/catalog')}>Texts</button>-->
 	<button on:click={() => goto('/options')}>Options</button>
+	{:else}
+		<HelpPopup/>
 	{/if}
 	<Install />
 	<FeedbackComponent />

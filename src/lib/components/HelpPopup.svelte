@@ -2,6 +2,7 @@
 	import Popup from "./Popup.svelte";
 	// let onClose: Function;
 	
+    let isOpen = false
 </script>
 <!-- svelte-ignore a11y-no-static-element-interactions -->
 <!-- svelte-ignore a11y-click-events-have-key-events -->
@@ -15,7 +16,7 @@
     }
 </style>
 
-<Popup isOpen={true} closeButtonText="Let's go!" on:closed={()=>umami.track('Welcome closed')}>
+<Popup bind:isOpen={isOpen} closeButtonText="Let's go!" on:closed={()=>umami.track('Help closed')}>
     <div style="overflow-y: auto;">
         <h1>Ready for an adventure?</h1>
         <p>
@@ -28,3 +29,8 @@
         <br>
     </div>
 </Popup>
+{#if !isOpen}
+    <button on:click={()=>{isOpen = true}} data-umami-event="Help opened">
+        ❔
+    </button>
+{/if}

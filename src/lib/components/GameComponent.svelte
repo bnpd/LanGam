@@ -11,15 +11,15 @@
 	import PowersComponent from './PowersComponent.svelte';
 	import DictionaryComponent from './DictionaryComponent.svelte';
 	import GrammarBookComponent from './GrammarBookComponent.svelte';
-	import WelcomePopup from './WelcomePopup.svelte';
 	import WebPushSubscription from './WebPushSubscription.svelte';
 
     const TOAST_REDIRECTED_SAVED_TASK = "Your selected text has been queued cause you have a saved game level."
     const TEXT_REJECT_SAVED_TASK = "Discard saved"
     const DEFAULT_CONGRATS_MESSAGE = 'Well done, keep up the pace!'
     const DEFAULT_CONGRATS_TITLE = 'Level complete 🙌'
-    const ANON_CONGRATS_MESSAGE = 'Please create a free account to continue with the next one.'
+    const ANON_CONGRATS_MESSAGE = '📂 Save your progress!\nCreate a free account now.'
     const ANON_CONGRATS_TITLE = 'Thanks for trying the first chapter'
+    const ANON_SUCCESS_POPUP_CLOSE_TEXT = 'Sign Up to Continue'
 
     const UNKNOWN_POS = 0
     const STUDIED_POS = new Set([UNKNOWN_POS, 84, 86, 92, 93, 100])
@@ -304,10 +304,11 @@
     goto('/read?doc='+redirectedDoc);
 }}/>
 <Toast bind:message={lockedLevelToast}/>
-<SuccessPopup bind:title={congratsTitle} bind:message={congratsMessage} footnote={nNewForms ? `You just encountered ${nNewForms} new words!\n` : ''} onClose={statsClosedPromiseResolve}/>
+<SuccessPopup 
+    bind:title={congratsTitle} 
+    bind:message={congratsMessage} 
+    footnote={nNewForms ? `You just encountered ${nNewForms} new words!\n` : ''} 
+    onClose={statsClosedPromiseResolve}
+    closeButtonText={congratsTitle == ANON_CONGRATS_TITLE ? ANON_SUCCESS_POPUP_CLOSE_TEXT : undefined}
+/>
 <DictionaryComponent/>
-{#await new Promise((resolve,_) => {setTimeout(resolve, 500)}) then _} <!-- delay is necessary cause persistenStores are only retrieved after a few split seconds -->
-    {#if !$username}
-        <WelcomePopup/>
-    {/if}
-{/await}
