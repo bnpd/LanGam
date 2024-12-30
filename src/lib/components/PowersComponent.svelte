@@ -60,7 +60,7 @@
     </table>
     <br>
 </Popup>
-{#if !isOpen}
+{#if !isOpen && (Object.keys($player?.stats ?? {}).length || Object.keys($player?.powers ?? {}).length)}
     <button class="gameNavBtn" on:click={toggleIsOpen} data-umami-event="Open Powers">
         🪄
     </button>

@@ -76,6 +76,10 @@ input[type="text"], input[type="email"], input[type="password"] {
   background-color: aliceblue;
 }
 
+.card label:has(+div[contenteditable]), .card input[type="email"], .card input[type="password"] {
+    background-color: white;
+}
+
 form .input-container {
   position: relative;
   margin-top: 1em;
