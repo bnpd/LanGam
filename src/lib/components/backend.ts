@@ -229,15 +229,34 @@ export async function sendTutorChat(chatHistory: { role: string; content: string
 	return DocumentC.fromJson(response)
 }
 
-export async function getLevel(gameId: string, seqId: number): Promise<RecordModel> {
-	return pb.collection('levels').getFirstListItem(`game="${gameId}" && seq_id=${seqId}`, {expand: ['grammar']})
+export async function getLevel(gameId: string, seqId: number, simplificationLevel?: string): Promise<RecordModel> {
+	const level = await pb.collection('levels').getFirstListItem(`game="${gameId}" && seq_id=${seqId}`, {expand: ['grammar']})
+
+	// move the desired simplification to default .text/title/question keys, unless simplificationLevel == ''
+	if (simplificationLevel?.length && level.level[`text${simplificationLevel}`]?.text?.length) {
+		level.level.title = level.level[`title${simplificationLevel}`]
+		level.level.text = level.level[`text${simplificationLevel}`]
+		level.level.question = level.level[`question${simplificationLevel}`]
+	}
+	console.log(level);
+	
+	return level
 }
 
 /**
  * @param {string} playerId
  */
-export async function getPlayerLevel(playerId: string) {	
-	return pb.send(`/player_level/${playerId}`, {})
+export async function getPlayerLevel(playerId: string, simplificationLevel?: string): Promise<RecordModel> {	
+	const level = await pb.send(`/player_level/${playerId}`, {})
+	// move the desired simplification to default .text/title/question keys, unless simplificationLevel == ''
+	if (simplificationLevel?.length && level.level[`text${simplificationLevel}`]?.text?.length) {
+		level.level.title = level.level[`title${simplificationLevel}`]
+		level.level.text = level.level[`text${simplificationLevel}`]
+		level.level.question = level.level[`question${simplificationLevel}`]
+	}
+	console.log(level);
+	
+	return level
 }
 
 /**

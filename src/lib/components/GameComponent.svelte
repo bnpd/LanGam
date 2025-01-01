@@ -2,7 +2,7 @@
     import { onMount } from 'svelte';
     import ReaderComponent from './ReaderComponent.svelte';
     import { completeLevel, getLevel, getPlayer, getPlayerLevel, getUserLang, updatePlayer } from './backend';
-    import { username, nativeLang, targetLang, isSoundOn, currentTask, failedWords, currentlyScrolledParagraphIndex, loadingTask, gameChatHistory, player, chatOutcome, currentGameId, inlineChatHistory, morphHighlightFilter, currentTaskNParagraphs } from '$lib/stores';
+    import { username, nativeLang, targetLang, isSoundOn, currentTask, failedWords, currentlyScrolledParagraphIndex, loadingTask, gameChatHistory, player, chatOutcome, currentGameId, inlineChatHistory, morphHighlightFilter, currentTaskNParagraphs, simplificationLevel } from '$lib/stores';
 	import { goto } from '$app/navigation';
 	import Toast from './Toast.svelte';
 	import ChatComponent from './ChatComponent.svelte';
@@ -173,7 +173,7 @@
 
     async function prevTask(seqId: number) { // like next task but only with the things necessary when moving back to previous level where we already know seqId
         finishedGame = false
-        const level = await getLevel($player.game, seqId)
+        const level = await getLevel($player.game, seqId, $simplificationLevel)
         let doc = level?.['level']
         doc.docId = level.seq_id
         if (doc) $loadingTask = false;
@@ -188,7 +188,7 @@
     async function nextTask(restoreScrollPosition: boolean = false){
         let level
         try {
-            level = await getPlayerLevel($player.id)
+            level = await getPlayerLevel($player.id, $simplificationLevel)
         } catch (error) {            
             if (error.status == 404) {
                 finishedGame = true
