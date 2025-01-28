@@ -1,5 +1,5 @@
 <script lang="ts">
-  export let height = undefined
+  export let height: string | undefined = undefined
 </script>
 
 <style>
