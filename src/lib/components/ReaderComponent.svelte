@@ -26,10 +26,10 @@
     taskAndChatParagraphs = divTask?.querySelectorAll('p, h1, h2, h3, h4, h5, h6, h7')
     solutionAndChatParagraphs = solutionField?.querySelectorAll('p, h1, h2, h3, h4, h5, h6, h7')
     if (!scrollRestored     
-      && taskAndChatParagraphs.length > 0 
-      && taskAndChatParagraphs.length >= $currentlyScrolledParagraphIndex 
-      && solutionAndChatParagraphs.length > 0
-      && solutionAndChatParagraphs.length >= $currentlyScrolledParagraphIndex
+      && taskAndChatParagraphs?.length > 0 
+      && taskAndChatParagraphs?.length >= $currentlyScrolledParagraphIndex 
+      && solutionAndChatParagraphs?.length > 0
+      && solutionAndChatParagraphs?.length >= $currentlyScrolledParagraphIndex
     ) {      
       scrollRestored = true
       // on first time we added all paragraphs, restore scroll position      

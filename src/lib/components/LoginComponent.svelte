@@ -77,9 +77,11 @@
     label {font-size: small;}
 </style>
 
-<TitleWithBackgroundImageComponent>{isSignup ? 'Welcome :)' : 'Welcome back =)'}</TitleWithBackgroundImageComponent>
+<TitleWithBackgroundImageComponent height='50dvh'><h2 style="height: 25dvh; line-height: 45dvh; font-size: xxx-large">
+    {isSignup ? 'Welcome' : 'Welcome back'}
+</h2></TitleWithBackgroundImageComponent>
 <div style="text-align: center">
-    <form class="card" on:submit|preventDefault={onSubmit}>
+    <form class="card" on:submit|preventDefault={onSubmit} style="--padding-card: 10%; margin-left: 5vw; margin-right: 5vw;">
         <input type="email" name="email" placeholder="Email" autocomplete="email" id="email" required />
         <br>
         <input type="password" name="password" placeholder="Password" autocomplete="new-password" id="password" required minlength="8"/>
@@ -112,7 +114,7 @@
             </div>
         {/if}
         <br>
-        <input id="submit" type="submit" value={isSignup ? "Register" : "Login"} disabled={loading}>
+        <input id="submit" type="submit" value={isSignup ? "Register 🪄" : "Login 🪄"} disabled={loading}>
         {#if loading}
             <div class:loading/>
         {/if}

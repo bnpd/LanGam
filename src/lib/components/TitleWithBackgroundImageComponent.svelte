@@ -1,3 +1,7 @@
+<script lang="ts">
+  export let height = undefined
+</script>
+
 <style>
     .header {
       position: relative;
@@ -29,7 +33,7 @@
     }
 </style>
 
-<div class="header">
+<div class="header" style={height ? `--header-before-height: ${height}` : ''}>
   <h1 class="title">
     <slot />
   </h1>
