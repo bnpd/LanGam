@@ -18,13 +18,16 @@
 
 <Popup bind:isOpen={isOpen} closeButtonText="Let's go!" on:closed={()=>umami.track('Help closed')}>
     <div style="overflow-y: auto;">
-        <h1>Ready for an adventure?</h1>
-        <p>
-            Make the jump to advanced Polish by playing this text based game where you decide how the story unfolds.
-    
-            As you progress through each part of the story, you'll meet unique characters to talk with, and your interactions will create your very own story.
-    
-            Language learning is woven into every chapter and you can explore vocabulary and grammar at your own pace. Tap on any word for a quick definition and save it for spaced repetition practice.
+        <h1 style="margin-bottom: 2vh;">You decide how the story unfolds</h1>
+        <p>    
+            ☝ Tap on any word for a quick definition.
+
+            Press &nbsp;▶&nbsp; to navigate to the next chapter.
+            <!--Press &nbsp;📖&nbsp; to for optional grammar help.
+            -->
+            There, you'll meet unique characters to talk with, and your interactions will create your very own story.
+            <!--Language learning is woven into every chapter and you can explore vocabulary and grammar at your own pace. -->
+            
         </p>
         <br>
     </div>

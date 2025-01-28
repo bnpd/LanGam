@@ -62,7 +62,7 @@
 		<HelpPopup/>
 	{/if}
 	<Install />
-	<FeedbackComponent />
+	<!--<FeedbackComponent />-->
 	{#if $username}
 		<button on:click={() => goto('/lists')}>
 			Review vocab
