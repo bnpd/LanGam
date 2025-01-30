@@ -72,5 +72,5 @@
 </style>
 
 {#if voice}
-    <button id="btnSound" on:click={onSoundClick} class="tts-button" data-umami-event="Click TTS">{currentIcon}</button>
+    <button id="btnSound" on:click={onSoundClick} class="tts-button" data-umami-event="TTS Toggle">{currentIcon}</button>
 {/if}

@@ -22,7 +22,7 @@
 	}
 </script>
 
-<Popup closeButtonText="Done" bind:isOpen={isOpen}>
+<Popup closeButtonText="Done" bind:isOpen={isOpen} on:closed={() => umami.track('Powers closed')}>
     <h1>Stats and Powers</h1>
     <table>
         <tr><th>Stat</th><th>Strength</th></tr>
@@ -61,7 +61,7 @@
     <br>
 </Popup>
 {#if !isOpen && (Object.keys($player?.stats ?? {}).length || Object.keys($player?.powers ?? {}).length)}
-    <button class="gameNavBtn" on:click={toggleIsOpen} data-umami-event="Open Powers">
+    <button class="gameNavBtn" on:click={toggleIsOpen} data-umami-event="Powers opened">
         🪄
     </button>
 {/if}

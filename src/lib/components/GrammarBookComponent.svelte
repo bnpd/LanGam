@@ -25,7 +25,7 @@
     }
 </style>
 
-<Popup closeButtonText="Done" bind:isOpen={isOpen} on:closed={()=> $grammarBookOpened = true}>
+<Popup closeButtonText="Done" bind:isOpen={isOpen} on:closed={()=> {$grammarBookOpened = true; umami.track('Grammar Book closed')}}>
     <div class="grammar-container">
         <h1>{content.title_en}</h1>
         {#if !$grammarBookOpened}
@@ -37,7 +37,7 @@
     </div>
 </Popup>
 {#if !isOpen}
-    <button on:click={() => isOpen = true} class={"gameNavBtn " + (!$grammarBookOpened ? "flash delayed" : "")} data-umami-event="Open Grammar Book">
+    <button on:click={() => isOpen = true} class={"gameNavBtn " + (!$grammarBookOpened ? "flash delayed" : "")} data-umami-event="Grammar Book opened">
         📖
     </button>
 {/if}

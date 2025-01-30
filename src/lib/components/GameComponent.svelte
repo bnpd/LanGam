@@ -12,14 +12,12 @@
 	import DictionaryComponent from './DictionaryComponent.svelte';
 	import GrammarBookComponent from './GrammarBookComponent.svelte';
 	import WebPushSubscription from './WebPushSubscription.svelte';
+	import Popup from './Popup.svelte';
 
     const TOAST_REDIRECTED_SAVED_TASK = "Your selected text has been queued cause you have a saved game level."
     const TEXT_REJECT_SAVED_TASK = "Discard saved"
     const DEFAULT_CONGRATS_MESSAGE = 'Well done, keep up the pace!'
     const DEFAULT_CONGRATS_TITLE = 'Level complete 🙌'
-    const ANON_CONGRATS_MESSAGE = '📂 Save your progress!\nCreate a free account now.'
-    const ANON_CONGRATS_TITLE = 'Thanks for trying the first chapter'
-    const ANON_SUCCESS_POPUP_CLOSE_TEXT = 'Sign Up to Continue'
 
     const UNKNOWN_POS = 0
     const STUDIED_POS = new Set([UNKNOWN_POS, 84, 86, 92, 93, 100])
@@ -60,6 +58,7 @@
     let showTutorChat: boolean = false
     let lockedLevelToast: string | undefined
     let finishedGame = false
+    let showSignupPrompt = false
 
     onMount(async () => {
         if (!$username) { // new user, not logged in -> trial mode
@@ -126,10 +125,8 @@
         })
 
         if (!$username) {
-            congratsMessage = ANON_CONGRATS_MESSAGE
-            congratsTitle = ANON_CONGRATS_TITLE
-            await statsClosedPromise
-            setTimeout(() => goto('/signup'), 0);
+            showSignupPrompt = true
+            umami.track('Signup Prompt shown')
             return
         }
 
@@ -279,17 +276,17 @@
         <PowersComponent on:use_power={e => usePower(e.detail.power)}/>
         {#each (Object.entries($currentTask?.outcomes ?? {})) as [outcome, obj]}
             {#if $player?.level_history?.[obj.goto] || $chatOutcome == outcome} <!--TODO: fix if there are two outcomes with same seq_id -->
-                <button class="gameNavBtn" class:flash={$currentlyScrolledParagraphIndex >= $currentTaskNParagraphs-1} disabled={$loadingTask} on:click={()=>onAnswbtnClick(outcome)} data-umami-event="Click Forward Button">
+                <button class="gameNavBtn" class:flash={$currentlyScrolledParagraphIndex >= $currentTaskNParagraphs-1} disabled={$loadingTask} on:click={()=>onAnswbtnClick(outcome)} data-umami-event="Forward Button">
                     ▶
                 </button>
             {:else}
                 <div style="display: inline-block;">
-                    <button class="gameNavBtn" on:click={()=>lockedLevelToast=`There is a hidden outcome here that you can unlock by chatting with ${$currentTask.character}`} data-umami-event="Click Forward Button (locked)">🔒</button>
+                    <button class="gameNavBtn" on:click={()=>lockedLevelToast=`There is a hidden outcome here that you can unlock by chatting with ${$currentTask.character}`} data-umami-event="Forward Button (locked)">🔒</button>
                 </div>
             {/if}
         {/each}
         {#if !showTutorChat}
-            <button style="position: absolute; right: var(--padding-x-body)" class="chat-circle-btn" on:click={()=>{showTutorChat = true}} data-umami-event="Open Tutor Chat"><b>
+            <button style="position: absolute; right: var(--padding-x-body)" class="chat-circle-btn" on:click={()=>{showTutorChat = true}} data-umami-event="Tutor Chat opened"><b>
                 🗨</b></button>
         {/if}        
     {/if}
@@ -309,6 +306,10 @@
     bind:message={congratsMessage} 
     footnote={nNewForms ? `You just encountered ${nNewForms} new words!\n` : ''} 
     onClose={statsClosedPromiseResolve}
-    closeButtonText={congratsTitle == ANON_CONGRATS_TITLE ? ANON_SUCCESS_POPUP_CLOSE_TEXT : undefined}
 />
+<Popup closeButtonText="I'm not done reading" bind:isOpen={showSignupPrompt} on:closed={() => umami.track('Signup Prompt dismissed')}>
+    <h1>Thanks for trying the first chapter</h1>
+	<p style="line-height: 200%; margin-bottom: 0.4em">📂 Save your progress!<br>Create a free account now.</p>
+    <button on:click={()=>goto('/signup')} class="highlighted" data-umami-event="Signup Prompt accepted">Sign up to continue</button>
+</Popup>
 <DictionaryComponent/>

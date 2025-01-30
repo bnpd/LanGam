@@ -38,7 +38,7 @@
     $: if (dictionaryCurrentWord) onWordChanged()
     async function onTokenChanged(){ // this might cause problems
         dictionaryCurrentWord = $dictionaryToken!.word
-        umami.track('Open Dictionary')
+        umami.track('Dictionary opened')
     }
 
     function onWordChanged() {
@@ -169,7 +169,7 @@
                 </span>
             {/if}
         {:else}
-            <button on:click={() => {if($username) formVisible = true; else formError=ERROR_MSG_NOT_LOGGED_IN}} data-umami-event="Click Add to SR">Add to Spaced Repetition</button>
+            <button on:click={() => {if($username) formVisible = true; else formError=ERROR_MSG_NOT_LOGGED_IN}} data-umami-event="Add to SR Button">Add to Spaced Repetition</button>
         {/if}
     </div>
 </Popup>
