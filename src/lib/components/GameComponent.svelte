@@ -307,7 +307,7 @@
     footnote={nNewForms ? `You just encountered ${nNewForms} new words!\n` : ''} 
     onClose={statsClosedPromiseResolve}
 />
-<Popup closeButtonText={$currentlyScrolledParagraphIndex >= $currentTaskNParagraphs-1 ? undefined : "I'm not done reading"} bind:isOpen={showSignupPrompt} on:closed={() => umami.track('Signup Prompt dismissed')}>
+<Popup closeButtonText="I'm not done reading" bind:isOpen={showSignupPrompt} on:closed={() => umami.track('Signup Prompt dismissed')}>
     <h1>Thanks for trying the first chapter</h1>
 	<p style="line-height: 200%; margin-bottom: 0.4em">📂 Save your progress!<br>Create a free account now.</p>
     <button on:click={()=>goto('/signup')} class="highlighted" data-umami-event="Signup Prompt accepted">Sign up to continue</button>
