@@ -43,7 +43,8 @@
             $nativeLang = 'en'/*(await getLangById(user_obj.native_lang)).shortcode.toLowerCase()*/
             $targetLang = isSignup ? (await newUserLang('pl')).lang : await getLang('pl') // temporary solution until we figure out multilang
 
-            goto('/game?gameId=4sdspc36rwuf05e') //goto('/game') //goto('/catalog') // hardcoing gameId is kinda very risky
+            try {umami.track((isSignup ? 'Signup' : 'Login'), {id: $username})} catch (_undef) {}
+            goto('/game?gameId=4sdspc36rwuf05e') //goto('/game') //goto('/catalog') // hardcoding gameId is kinda very risky
         } catch (e) {            
             if (!isSignup && e instanceof ClientResponseError) { // login was rejected
                 showValidationError('password', 'Email or password are wrong.')

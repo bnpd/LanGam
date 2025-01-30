@@ -16,7 +16,7 @@
     }
 </style>
 
-<Popup bind:isOpen={isOpen} closeButtonText="Let's go!" on:closed={()=>umami.track('Help closed')}>
+<Popup bind:isOpen={isOpen} closeButtonText="Let's go!" on:closed={() => {try {umami.track('Help closed')} catch (_undef) {}}}>
     <div style="overflow-y: auto;">
         <h1 style="margin-bottom: 2vh;">You decide how the story unfolds</h1>
         <p>    
