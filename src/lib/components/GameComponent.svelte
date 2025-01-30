@@ -126,7 +126,7 @@
 
         if (!$username) {
             showSignupPrompt = true
-            umami.track('Signup Prompt shown')
+            try {umami.track('Signup Prompt shown')} catch (_undef) {}
             return
         }
 
@@ -233,7 +233,7 @@
 
     function initChatHistory() {
         $gameChatHistory = $currentTask?.question?.text ? [{role: 'assistant', content: DocumentC.partialDocument($currentTask?.question?.text, $currentTask?.lang, $currentTask?.question?.translations, $currentTask?.question?.tokens)}] : [];
-        $chatOutcome = !($gameChatHistory?.length) ? 'default' : null
+        $chatOutcome = !($gameChatHistory?.length) ? 'default' : null // if AI is NOT starting a chat with us, chatOutcome = default so that forward button is enabled
     }
 
 
@@ -307,7 +307,7 @@
     footnote={nNewForms ? `You just encountered ${nNewForms} new words!\n` : ''} 
     onClose={statsClosedPromiseResolve}
 />
-<Popup closeButtonText="I'm not done reading" bind:isOpen={showSignupPrompt} on:closed={() => umami.track('Signup Prompt dismissed')}>
+<Popup closeButtonText="I'm not done reading" bind:isOpen={showSignupPrompt} on:closed={() => {try {umami.track('Signup Prompt dismissed')} catch (_undef) {}}}>
     <h1>Thanks for trying the first chapter</h1>
 	<p style="line-height: 200%; margin-bottom: 0.4em">📂 Save your progress!<br>Create a free account now.</p>
     <button on:click={()=>goto('/signup')} class="highlighted" data-umami-event="Signup Prompt accepted">Sign up to continue</button>

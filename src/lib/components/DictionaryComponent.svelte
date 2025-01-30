@@ -38,7 +38,7 @@
     $: if (dictionaryCurrentWord) onWordChanged()
     async function onTokenChanged(){ // this might cause problems
         dictionaryCurrentWord = $dictionaryToken!.word
-        umami.track('Dictionary opened')
+        try {umami.track('Dictionary opened')} catch (_undef) {}
     }
 
     function onWordChanged() {
