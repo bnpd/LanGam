@@ -1,0 +1,11 @@
+[
+  {
+    "applyTo": "umami.langam.app",
+    "headers": [
+      {
+        "name": "Access-Control-Allow-Origin",
+        "value": "allai-frontend.onrender.com"
+      }
+    ]
+  }
+]
