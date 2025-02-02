@@ -44,7 +44,8 @@
             $targetLang = isSignup ? (await newUserLang('pl')).lang : await getLang('pl') // temporary solution until we figure out multilang
 
             try {umami.track((isSignup ? 'Signup' : 'Login'), {id: $username})} catch (_undef) {}
-            goto('/game?gameId=4sdspc36rwuf05e') //goto('/game') //goto('/catalog') // hardcoding gameId is kinda very risky
+            let advanceLevelAfterSignup = new URLSearchParams(window.location.search).get('advanceLevelAfterSignup')
+            goto('/game?gameId=4sdspc36rwuf05e' + (advanceLevelAfterSignup ? `&advanceLevelAfterSignup=${advanceLevelAfterSignup}` : '')) //goto('/game') //goto('/catalog') // hardcoding gameId is kinda very risky
         } catch (e) {            
             if (!isSignup && e instanceof ClientResponseError) { // login was rejected
                 showValidationError('password', 'Email or password are wrong.')
