@@ -77,8 +77,11 @@
             if (!$currentGameId) {
                 goto('/games')
                 return
-            } else {
-                $player = await getPlayer($currentGameId)
+            }
+
+            $player = await getPlayer($currentGameId)
+            if ($player.level == 1 && new URLSearchParams(window.location.search).get('advanceLevelAfterSignup') == 'true') {
+                $player = await completeLevel($player.id, $player.level, 'default')
             }
         }
                 
@@ -310,6 +313,6 @@
 <Popup closeButtonText="I'm not done reading" bind:isOpen={showSignupPrompt} on:closed={() => {try {umami.track('Signup Prompt dismissed')} catch (_undef) {}}}>
     <h1>Thanks for trying the first chapter</h1>
 	<p style="line-height: 200%; margin-bottom: 0.4em">📂 Save your progress!<br>Create a free account now.</p>
-    <button on:click={()=>goto('/signup')} class="highlighted" data-umami-event="Signup Prompt accepted">Sign up to continue</button>
+    <button on:click={()=>goto('/signup?advanceLevelAfterSignup=true')} class="highlighted" data-umami-event="Signup Prompt accepted">Sign up to continue</button>
 </Popup>
 <DictionaryComponent/>

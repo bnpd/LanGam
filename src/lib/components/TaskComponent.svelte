@@ -1,6 +1,6 @@
 <script lang="ts" defer>
 	import type DocumentC from "$lib/DocumentC";
-	import { failedWords, currentTaskNParagraphs } from "$lib/stores";
+	import { failedWords, currentTaskNParagraphs, player } from "$lib/stores";
 	import type Token from "$lib/Token";
 	import TokenComponent from "./TokenComponent.svelte";
 	import TtsComponent from "./TtsComponent.svelte";
@@ -86,12 +86,15 @@
 
 {#each taskParagraphs as taskParagraph, i (taskParagraph.words)} <!-- The "key" specified in parentheses is important cause svelte will otherwise use the array index and try to only insert new indexes or do nothing if the array length doesn't change -->
 <svelte:element this={taskParagraph.htmlTag}>
+  {#if i==0 && task?.title}
+    <small>#{($player?.level_history?.order?.length ?? 0) + 1}&nbsp; </small>
+  {/if}
   {#each taskParagraph.words as token}
     <TokenComponent 
       token={token}
       isSrWord={srWords?.has(token?.lemma_)}
       on:click={() => {onWordClick(token)}} />
-  {/each}          
+  {/each}
   {#if i==0}
     <TtsComponent text={task}/>
   {/if}

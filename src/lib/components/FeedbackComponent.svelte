@@ -42,7 +42,7 @@
 </Popup>
 {#if !isOpen}
     <button id="btnFeedback" on:click={() => {isOpen = true}}>
-        Feedback
+        Give Feedback
     </button>
 {/if}
 <Toast message={toast} textReject={textRejectOffline} onReject={()=> isOpen = false}/>
