@@ -6,7 +6,7 @@
 	import { isGrammarHighlightingOn, srShowGenus, srShowIPA, ttsSpeed } from '$lib/stores';
 	import AccountDeletionComponent from '$lib/components/AccountDeletionComponent.svelte';
 	import { getUserData } from '$lib/components/backend';
-	import { goto } from '$app/navigation';
+	import FeedbackComponent from '$lib/components/FeedbackComponent.svelte';
 
     function onInput(el: HTMLInputElement) {
 
@@ -66,6 +66,7 @@
             ©2024 Benjamin Paddags <br>
             Contact: ben@langam.app
         </div>
+        
         <a href="https://blog.langam.app">LanGam Blog</a><br>
         <a href="/terms">Terms</a><br>
         <a href="/privacy">Privacy Policy</a>
@@ -73,6 +74,7 @@
 </div>
 <NavbarComponent>
     <button on:click={()=>{history.back()}}>◄ Back</button>
+    <FeedbackComponent/>
 </NavbarComponent>
 
 <datalist id="ttsSpeedValues">
