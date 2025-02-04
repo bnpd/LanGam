@@ -20,6 +20,11 @@ export async function login(user: string, password: string) {
 }
 
 
+export async function loginWithGoogle(native_lang: string) {
+	return pb.collection('users').authWithOAuth2({ provider: 'google', createData: {native_lang: native_lang} });
+}
+
+
 /**
  * @param {string} email
  * @param {string} password

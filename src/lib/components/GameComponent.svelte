@@ -60,6 +60,8 @@
     let finishedGame = false
     let showSignupPrompt = false
 
+    $: if($currentlyScrolledParagraphIndex >= $currentTaskNParagraphs-1) try {umami.track('Scroll 100%')} catch (_undef) {}
+
     onMount(async () => {
         if (!$username) { // new user, not logged in -> trial mode
             //goto('/signup')
