@@ -42,7 +42,7 @@ p {
   margin: 5px 0 0 0;
 }
 
-button:not(.gsi-material-button), input[type="submit"] {
+button, input[type="submit"] {
   background-color: aliceblue;
   color: darkblue;
   border-color: aliceblue;
