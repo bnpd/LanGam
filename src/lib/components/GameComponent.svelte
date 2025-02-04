@@ -286,7 +286,14 @@
                 </button>
             {:else}
                 <div style="display: inline-block;">
-                    <button class="gameNavBtn" on:click={()=>lockedLevelToast=`There is a hidden outcome here that you can unlock by chatting with ${$currentTask.character}`} data-umami-event="Forward Button (locked)">🔒</button>
+                    <button 
+                        class="gameNavBtn" 
+                        on:click={()=>{
+                            readerComponent.scrollToBottom();
+                            lockedLevelToast=`There is a hidden outcome here that you can unlock by chatting with ${$currentTask.character}`
+                        }} 
+                        data-umami-event="Forward Button (locked)"
+                    >🔒</button>
                 </div>
             {/if}
         {/each}

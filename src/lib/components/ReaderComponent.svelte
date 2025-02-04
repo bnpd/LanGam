@@ -123,6 +123,10 @@
     elToScroll.scroll({top: findOffsetToAncestor(paragraphs[paragraphIndex] as HTMLElement, (paragraphs[0] as HTMLElement)?.offsetParent) - (paragraphs[0] as HTMLElement)?.offsetTop, behavior: 'smooth'});    
   }
 
+
+  export function scrollToBottom() {
+    divTask.scroll({top: divTask.scrollHeight, behavior: 'smooth'})
+  }
   
 
   async function setSolution(solution: string) {
