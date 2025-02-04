@@ -1,5 +1,5 @@
 <script lang="ts" defer>
-	import { chatOutcome, currentTask, failedWords, nativeLang, player, targetLang, username } from "$lib/stores";
+	import { chatOutcome, currentlyScrolledParagraphIndex, currentTask, currentTaskNParagraphs, failedWords, nativeLang, player, targetLang, username } from "$lib/stores";
 	import { tick } from "svelte";
 	import BadgeComponent from "./BadgeComponent.svelte";
 	import type ReaderComponent from "./ReaderComponent.svelte";
@@ -306,7 +306,7 @@
             </div>
         {/if}
         <div id="chatInputContainer">
-            <div contenteditable id="iChat" data-placeholder={chatBoxTitle} bind:innerText={chatPrompt} bind:this={iChat}/>
+            <div contenteditable id="iChat" data-placeholder={chatBoxTitle} bind:innerText={chatPrompt} bind:this={iChat} class:flash={isGame && $currentlyScrolledParagraphIndex >= $currentTaskNParagraphs-1}/>
             {#if chatFocussed }
                 <button id="closeChat" on:click={() => {document?.activeElement?.blur()}} class="chat-circle-btn">x</button>  
             {:else if $chatHistory?.length > 1}
