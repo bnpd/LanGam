@@ -175,6 +175,7 @@
 
     async function prevTask(seqId: number) { // like next task but only with the things necessary when moving back to previous level where we already know seqId
         finishedGame = false
+        $loadingTask = true
         const level = await getLevel($player.game, seqId, $simplificationLevel)
         let doc = level?.['level']
         doc.docId = level.seq_id
