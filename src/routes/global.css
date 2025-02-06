@@ -427,6 +427,10 @@ button.highlighted, input[type="submit"].highlighted, button.flash, input[type="
   margin: auto;
 }
 
+.loading.semitransparent::after {
+  opacity: 0.5;
+}
+
 @keyframes loading-indicator {
   0% {
     transform: rotate(0deg);

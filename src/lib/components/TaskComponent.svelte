@@ -83,7 +83,19 @@
 
 </script>
 
+{#if !task}
+<div>
+    <div class="loading semitransparent" style="transform: translateY(30vh);"/>
+    <h3><small>#1&nbsp; </small>Niespodziewany list</h3>
+    <p>Jesteś młodym dorosłym. Żyjesz spokojnie. Codziennie robisz to samo: rano idziesz do pracy, wieczorem odpoczywasz. Czasem spotykasz się z przyjaciółmi. Czasami czujesz, że chcesz czegoś więcej, ale życie nie jest jak w bajce, prawda?</p>
 
+    <p>Pewnego dnia, po pracy, wracasz do domu i znajdujesz list w swojej skrzynce. To nie email, tylko prawdziwy list. Na kopercie jest tylko twoje imię, a nie ma nadawcy. Otwierasz kopertę, czując dziwne uczucie.</p>
+
+    <p>W środku nie ma nic. Tylko pusta kartka. Patrzysz na nią, zdziwiony. Nagle kartka zaczyna znikać, jakby rozpływała się w powietrzu.</p>
+
+    <p>Zastanawiasz się, co się stało. Pamiętasz, jak kiedyś interesowałeś się magią, ale nigdy nie wierzyłeś, że to prawda. Może się myliłeś? Może magia naprawdę istnieje? Twoje serce bije szybciej. Może to początek czegoś, co zmieni twoje życie na zawsze.</p>
+</div>
+{/if}
 {#each taskParagraphs as taskParagraph, i (taskParagraph.words)} <!-- The "key" specified in parentheses is important cause svelte will otherwise use the array index and try to only insert new indexes or do nothing if the array length doesn't change -->
 <svelte:element this={taskParagraph.htmlTag}>
   {#if i==0 && task?.title}
