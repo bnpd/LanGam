@@ -177,7 +177,7 @@
 <div class="card" id="contentbox">
   {#if !solutionShown && scrollRestored}
     <button on:click={onShowSolution} style="margin-left: 50%; transform: translateX(-50%)" data-umami-event="Show Translation">Show translation</button>
-  {:else}
+  {:else if solutionParagraphs?.length}
     <div id="solutionField" bind:this={solutionField}>
       {#each solutionParagraphs as para, row}
       <svelte:element this={para.htmlTag} style:gridRow={row}>
@@ -188,6 +188,8 @@
         <slot name="afterSolution" />
       </div>
     </div>
+  {:else}
+    <div style:height="var(--button-height)"/>
   {/if}
   <hr>
   <div id="divTask" class:loading={$loadingTask} bind:this={divTask} on:scroll={onScroll}>
