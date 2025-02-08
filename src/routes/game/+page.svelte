@@ -4,7 +4,6 @@
 	import { username, targetLang } from '$lib/stores';
 	import { goto } from '$app/navigation';
 	import { onMount } from 'svelte';
-	import FeedbackComponent from '$lib/components/FeedbackComponent.svelte';
 	import GameComponent from '$lib/components/GameComponent.svelte';
 	import Install from '$lib/components/Install.svelte';
 	import NavbarComponent from '$lib/components/NavbarComponent.svelte';
