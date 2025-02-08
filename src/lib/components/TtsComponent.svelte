@@ -1,4 +1,5 @@
 <script lang="ts" defer>
+	import type DocumentC from "$lib/DocumentC";
 	import { isSoundOn, targetLang, ttsSpeed } from "$lib/stores";
 	import { onMount } from "svelte";
 
@@ -9,13 +10,10 @@
 
     onMount(() => {
         // run setVoice when voices are loaded (onvoiceschanged)
-        if (
-            typeof speechSynthesis !== "undefined" &&
-            speechSynthesis.onvoiceschanged !== undefined
-        ) {
+        if (speechSynthesis?.onvoiceschanged !== undefined) {
             speechSynthesis.onvoiceschanged = setVoice
         }
-        if (speechSynthesis.getVoices() && speechSynthesis.getVoices().length) {
+        if (speechSynthesis?.getVoices()?.length) {
             setVoice()  // if we were too slow and the voice has already been set before speechSynthesis.onvoiceschanged = setVoice, just call setVoice immediately
         }
     })
@@ -37,7 +35,7 @@
     }
 
     export function trySpeak(str: string) {
-        if ($isSoundOn && voice) {
+        if ($isSoundOn && voice && speechSynthesis) {
             currentlySpeaking = true
             let utterance = new SpeechSynthesisUtterance(str)
             utterance.voice = voice
@@ -49,10 +47,13 @@
     }
 
     function setVoice() {
-        const separator = speechSynthesis.getVoices()[0].lang.includes('-') ? '-' : '_'
-        let voices_in_lang = speechSynthesis.getVoices().filter(voice=>{return voice.lang.split(separator)[0].toUpperCase()===$targetLang.shortcode.toUpperCase()})
-        if (voices_in_lang.length!==0) {
-            voice = voices_in_lang[0]
+        const allVoices = speechSynthesis.getVoices()
+        if (allVoices?.length) {
+            const separator = allVoices[0].lang.includes('-') ? '-' : '_'
+            let voices_in_lang = allVoices.filter(voice=>{return voice.lang.split(separator)[0].toUpperCase()===$targetLang.shortcode.toUpperCase()})
+            if (voices_in_lang.length) {
+                voice = voices_in_lang[0]
+            }
         }
     }
 </script>
@@ -71,6 +72,6 @@
     }
 </style>
 
-{#if voice}
+{#if voice && speechSynthesis}
     <button id="btnSound" on:click={onSoundClick} class="tts-button" data-umami-event="TTS Toggle">{currentIcon}</button>
 {/if}
