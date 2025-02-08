@@ -1,4 +1,5 @@
 <script lang="ts" defer>
+	import type DocumentC from "$lib/DocumentC";
 	import { isSoundOn, targetLang, ttsSpeed } from "$lib/stores";
 	import { onMount } from "svelte";
 
@@ -37,7 +38,7 @@
     }
 
     export function trySpeak(str: string) {
-        if ($isSoundOn && voice) {
+        if ($isSoundOn && voice && speechSynthesis) {
             currentlySpeaking = true
             let utterance = new SpeechSynthesisUtterance(str)
             utterance.voice = voice
