@@ -124,7 +124,7 @@
     })
 
     async function onAnswbtnClick(outcome: string) {
-        speechSynthesis.cancel()
+        speechSynthesis?.cancel()
         statsClosedPromise = new Promise<boolean>((resolve, reject) => {
             statsClosedPromiseResolve = resolve
         })
