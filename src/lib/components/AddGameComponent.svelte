@@ -23,7 +23,7 @@ if (!isLoggedIn()) {
     try {
       const createdGame = await createGame(game);
       console.log('Game created:', createdGame);
-      goto(`/new?game=${createdGame.id}`);
+      goto(`/new?game=${createdGame.game.id}`);
     } catch (error) {
       console.error('Error creating game:', error);
     }

@@ -12,6 +12,14 @@ const MAX_CHAT_HISTORY_CHARS = 20000
 
 
 /**
+ * Check if the user is logged in
+ * @returns {boolean} True if the user is logged in, false otherwise
+ */
+export function isLoggedIn(): boolean {
+	return pb.authStore.isValid;
+}
+
+/**
  * @param {string} user
  * @param {string} password
  */
@@ -343,8 +351,16 @@ export function deleteAccount(username: string): Promise<boolean> {
  * @param {string} langId
  * @returns {Promise<any[]>}
  */
-export async function getGames(langId: string): Promise<any[]> {
+export async function getGamesByLang(langId: string): Promise<any[]> {
 	return pb.collection('games').getFullList({filter: `lang = "${langId}"`})
+}
+
+/**
+ * List all games owned by this user
+ * @returns {Promise<any[]>}
+ */
+export async function getOwnGames(): Promise<any[]> {
+	return pb.collection('games').getFullList({filter: `owner = "${getUserData()?.id}"`})
 }
 
 /**
@@ -487,14 +503,6 @@ export async function createGame(game: { name: string; lang: string; img: string
  * @returns {Promise<any>} The created chapter object.
  */
 export async function createChapter(chapter: any): Promise<any> {
-  return pb.collection('chapters').create(chapter);
-}
-
-/**
- * Check if the user is logged in
- * @returns {boolean} True if the user is logged in, false otherwise
- */
-export function isLoggedIn(): boolean {
-  return pb.authStore.isValid;
+  console.error('NOT IMPLEMENTED: createChapter');
 }
 
