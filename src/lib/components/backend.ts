@@ -466,6 +466,35 @@ function subscribeUserToPush() {
 		})
 		.then(pushSubscription => {
 			return pushSubscription;
-		});
+			});
+}
+
+/**
+ * Create a new game in PocketBase
+ * @param {Object} game - The game object containing name, lang, and img.
+ * @returns {Promise<any>} The created game object.
+ */
+export async function createGame(game: { name: string; lang: string; img: string }): Promise<any> {
+  return pb.send('/new_game', {
+    method: 'POST',
+    body: game,
+  });
+}
+
+/**
+ * Create a new chapter in PocketBase
+ * @param {Object} chapter - The chapter object containing all chapter details.
+ * @returns {Promise<any>} The created chapter object.
+ */
+export async function createChapter(chapter: any): Promise<any> {
+  return pb.collection('chapters').create(chapter);
+}
+
+/**
+ * Check if the user is logged in
+ * @returns {boolean} True if the user is logged in, false otherwise
+ */
+export function isLoggedIn(): boolean {
+  return pb.authStore.isValid;
 }
 

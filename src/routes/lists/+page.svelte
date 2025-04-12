@@ -8,11 +8,24 @@ import './lists.css';
 	import NavbarComponent from "$lib/components/NavbarComponent.svelte";
 	import config from '../../config';
 	import SrComponent from "$lib/components/SrComponent.svelte";
-
+  import { isLoggedIn } from '$lib/components/backend';
+	import { onMount } from 'svelte';
+	import { goto } from '$app/navigation';
+  
 let scheduledTokens: {[key: string]: any} = {}
 let usedTokens: {[key: string]: string[]} = {}
 let seenTokens: {[key: string]: string[]} = {}
 let showAllWords = false
+
+onMount(() => {
+// Check if the user is logged in
+if (!isLoggedIn()) {
+    setTimeout(() => {
+        // Wait for 0.1 second before redirecting
+        goto('/login');
+    }, 100);
+}
+});
 
 // /// Functions ///
 
