@@ -80,11 +80,51 @@ if (!isLoggedIn()) {
     chapter.suggested_replies = chapter.suggested_replies.filter((_, i) => i !== index);
   }
 
+  let successMessage = '';
+  let errorMessage = '';
+
   async function submitChapter() {
+    successMessage = '';
+    errorMessage = '';
+
     try {
-      await createChapter(chapter);
+      const createdChapter = await createChapter(chapter);
+      console.log('Chapter created:', createdChapter);
+
+      // Set new seq_id to the first outcome's goto value
+      const firstOutcomeKey = Object.keys(chapter.outcomes)[0];
+
+      // Clear all fields
+      chapter = {
+        character: '',
+        game: chapter.game, // Retain the selected game
+        img: '',
+        outcomes: {},
+        question: {
+          lang: 'pl',
+          text: ''
+        },
+        seq_id: firstOutcomeKey ? chapter.outcomes[firstOutcomeKey].goto : 0,
+        suggested_replies: [],
+        system_prompt: '',
+        text: {
+          lang: 'pl',
+          text: ''
+        },
+        title: {
+          lang: 'pl',
+          text: ''
+        }
+      };
+
+      successMessage = 'Chapter submitted successfully!';
     } catch (error) {
       console.error('Error creating chapter:', error);
+    //   if (error.message.includes('seq_id already exists')) {
+        errorMessage = 'Error: This Sequence Id already exists for this game.';
+    //   } else {
+    //     errorMessage = 'An unexpected error occurred. Please try again.';
+    //   }
     }
   }
 
@@ -165,6 +205,16 @@ if (!isLoggedIn()) {
     border: 1px solid #ccc;
     padding: 1rem;
     border-radius: 5px;
+  }
+
+  .success-message {
+    color: green;
+    font-weight: bold;
+  }
+
+  .error-message {
+    color: red;
+    font-weight: bold;
   }
 </style>
 
@@ -263,6 +313,14 @@ if (!isLoggedIn()) {
       <button type="button" on:click={addSuggestedReply}>Add Reply</button>
     </div>
   </div>
+
+  {#if successMessage}
+    <div class="success-message">{successMessage}</div>
+  {/if}
+
+  {#if errorMessage}
+    <div class="error-message">{errorMessage}</div>
+  {/if}
 
   <button type="submit">Submit Chapter</button>
 </form>
