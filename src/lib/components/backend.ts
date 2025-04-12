@@ -487,10 +487,10 @@ function subscribeUserToPush() {
 
 /**
  * Create a new game in PocketBase
- * @param {Object} game - The game object containing name, lang, and img.
+ * @param {Object} game - The game object.
  * @returns {Promise<any>} The created game object.
  */
-export async function createGame(game: { name: string; lang: string; img: string }): Promise<any> {
+export async function createGame(game: { name: string; lang: string; img: string; public: boolean }): Promise<any> {
   return pb.send('/new_game', {
     method: 'POST',
     body: game,
@@ -504,7 +504,6 @@ export async function createGame(game: { name: string; lang: string; img: string
  */
 export async function createChapter(chapter: any): Promise<any> {
   console.log(chapter);
-  
-  console.error('NOT IMPLEMENTED: createChapter');
+  return pb.collection('levels').create({game: chapter.game, seq_id: chapter.seq_id, level: chapter});
 }
 

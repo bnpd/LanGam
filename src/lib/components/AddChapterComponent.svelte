@@ -56,25 +56,76 @@ if (!isLoggedIn()) {
 
   function addOutcome() {
     const key = `outcome_${Object.keys(chapter.outcomes).length + 1}`;
-    chapter.outcomes[key] = {
-      goto: 0,
-      stats: {},
-      text: '',
-      title: ''
+    chapter.outcomes = {
+      ...chapter.outcomes,
+      [key]: {
+        goto: 0,
+        stats: {},
+        text: '',
+        title: ''
+      }
     };
   }
 
   function removeOutcome(key) {
-    delete chapter.outcomes[key];
+    const { [key]: _, ...remainingOutcomes } = chapter.outcomes;
+    chapter.outcomes = remainingOutcomes;
+  }
+
+  function addSuggestedReply() {
+    chapter.suggested_replies = [...chapter.suggested_replies, ''];
+  }
+
+  function removeSuggestedReply(index) {
+    chapter.suggested_replies = chapter.suggested_replies.filter((_, i) => i !== index);
   }
 
   async function submitChapter() {
     try {
-      const createdChapter = await createChapter(chapter);
-      console.log('Chapter created:', createdChapter);
-      goto('/');
+      await createChapter(chapter);
     } catch (error) {
       console.error('Error creating chapter:', error);
+    }
+  }
+
+  function addStat(outcomeKey) {
+    const outcome = chapter.outcomes[outcomeKey];
+    const newKey = `key_${Object.keys(outcome.stats).length + 1}`;
+    if (!outcome.stats[newKey]) {
+      outcome.stats = {
+        ...outcome.stats,
+        [newKey]: ''
+      };
+      chapter.outcomes = { ...chapter.outcomes, [outcomeKey]: outcome };
+    }
+  }
+
+  function removeStat(outcomeKey, statKey) {
+    const outcome = chapter.outcomes[outcomeKey];
+    const { [statKey]: _, ...remainingStats } = outcome.stats;
+    outcome.stats = remainingStats;
+    chapter.outcomes = { ...chapter.outcomes, [outcomeKey]: outcome };
+  }
+
+  function updateStatKey(outcomeKey, oldKey, newKey) {
+    const outcome = chapter.outcomes[outcomeKey];
+    if (newKey && !outcome.stats[newKey]) {
+      const { [oldKey]: value, ...remainingStats } = outcome.stats;
+      outcome.stats = {
+        ...remainingStats,
+        [newKey]: value
+      };
+      chapter.outcomes = { ...chapter.outcomes, [outcomeKey]: outcome };
+    }
+  }
+
+  function updateOutcomeKey(oldKey, newKey) {
+    if (newKey && !chapter.outcomes[newKey]) {
+      const { [oldKey]: value, ...remainingOutcomes } = chapter.outcomes;
+      chapter.outcomes = {
+        ...remainingOutcomes,
+        [newKey]: value
+      };
     }
   }
 </script>
@@ -149,15 +200,23 @@ if (!isLoggedIn()) {
     {#each Object.entries(chapter.outcomes) as [key, outcome]}
       <div>
         <label>
-          Outcome Key: {key}
+          Outcome Key:
+          <input type="text" value={key} on:change={(e) => updateOutcomeKey(key, e.target.value)} />
         </label>
         <label>
           Goto:
           <input type="number" bind:value={outcome.goto} />
         </label>
         <label>
-          Stats (JSON):
-          <textarea bind:value={outcome.stats}></textarea>
+          Stats:
+          {#each Object.entries(outcome.stats) as [statKey, statValue]}
+            <div>
+              <input type="text" value={statKey} on:change={(e) => updateStatKey(key, statKey, e.target.value)} />
+              <input type="text" bind:value={outcome.stats[statKey]} />
+              <button type="button" on:click={() => removeStat(key, statKey)}>Remove</button>
+            </div>
+          {/each}
+          <button type="button" on:click={() => addStat(key)}>Add Stat</button>
         </label>
         <label>
           Text:
@@ -193,10 +252,16 @@ if (!isLoggedIn()) {
       <textarea bind:value={chapter.question.text}></textarea>
     </label>
     
-      <label>
-        Suggested Replies (Comma-separated):
-        <input type="text" bind:value={chapter.suggested_replies} />
-      </label>
+    <div class="collapsible">
+      <h3>Suggested Replies</h3>
+      {#each chapter.suggested_replies as reply, index}
+        <div>
+          <input type="text" bind:value={chapter.suggested_replies[index]} />
+          <button type="button" on:click={() => removeSuggestedReply(index)}>Remove</button>
+        </div>
+      {/each}
+      <button type="button" on:click={addSuggestedReply}>Add Reply</button>
+    </div>
   </div>
 
   <button type="submit">Submit Chapter</button>
