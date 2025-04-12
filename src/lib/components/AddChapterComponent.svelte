@@ -3,14 +3,15 @@
   import { page } from '$app/stores';
 	import { onMount } from 'svelte';
   import { createChapter, getOwnGames, isLoggedIn } from './backend';
+  import '../../routes/global.css';
 
   onMount(() => {
 // Check if the user is logged in
 if (!isLoggedIn()) {
     setTimeout(() => {
-        // Wait for 0.1 second before redirecting
+        // Wait for 0.5 second before redirecting
         goto('/login');
-    }, 100);
+    }, 500);
 }
 });
 
@@ -170,82 +171,37 @@ if (!isLoggedIn()) {
   }
 </script>
 
-<style>
-  form {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-  }
-
-  label {
-    font-weight: bold;
-  }
-
-  input, textarea, select {
-    width: 100%;
-    padding: 0.5rem;
-    font-size: 1rem;
-  }
-
-  button {
-    padding: 0.5rem 1rem;
-    font-size: 1rem;
-    background-color: #007BFF;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-  }
-
-  button:hover {
-    background-color: #0056b3;
-  }
-
-  .collapsible {
-    border: 1px solid #ccc;
-    padding: 1rem;
-    border-radius: 5px;
-  }
-
-  .success-message {
-    color: green;
-    font-weight: bold;
-  }
-
-  .error-message {
-    color: red;
-    font-weight: bold;
-  }
-</style>
-
 <form on:submit|preventDefault={submitChapter}>
-  <label>
-    Game:
-    <select bind:value={chapter.game}>
-      <option value="" disabled>Select a game</option>
-      {#each games as game}
-        <option value={game.id} selected={game.id === selectedGame}>{game.name} ({game.lang})</option>
-      {/each}
-    </select>
-  </label>
-  <label>
-    Character:
-    <input type="text" bind:value={chapter.character} />
-  </label>
-  <label>
-    Image URL:
-    <input type="text" bind:value={chapter.img} />
-  </label>
-  <label>
-    Sequence ID:
-    <input type="number" bind:value={chapter.seq_id} />
-  </label>
-  <label>
-    System Prompt:
-    <textarea bind:value={chapter.system_prompt}></textarea>
-  </label>
+  <div class="section">
+    <h3>Game Details</h3>
+    <label>
+      Game:
+      <select bind:value={chapter.game}>
+        <option value="" disabled>Select a game</option>
+        {#each games as game}
+          <option value={game.id} selected={game.id === selectedGame}>{game.name}</option>
+        {/each}
+      </select>
+    </label>
+    <label>
+      Character:
+      <input type="text" bind:value={chapter.character} />
+    </label>
+    <label>
+      Image URL:
+      <input type="text" bind:value={chapter.img} />
+    </label>
+    <label>
+      Sequence ID:
+      <input type="number" bind:value={chapter.seq_id} />
+    </label>
+    <label>
+      System Prompt:
+      <textarea bind:value={chapter.system_prompt}></textarea>
+    </label>
+  </div>
 
-  <div class="collapsible">
+  <div class="section">
     <h3>Outcomes</h3>
     {#each Object.entries(chapter.outcomes) as [key, outcome]}
       <div>
@@ -282,36 +238,31 @@ if (!isLoggedIn()) {
     <button type="button" on:click={addOutcome}>Add Outcome</button>
   </div>
 
-  <div class="collapsible">
+  <div class="section">
+    <h3>Suggested Replies</h3>
+    {#each chapter.suggested_replies as reply, index}
+      <div>
+        <input type="text" bind:value={chapter.suggested_replies[index]} />
+        <button type="button" on:click={() => removeSuggestedReply(index)}>Remove</button>
+      </div>
+    {/each}
+    <button type="button" on:click={addSuggestedReply}>Add Reply</button>
+  </div>
+
+  <div class="section">
+    <h3>Text and Title</h3>
     <label>
       Title:
       <input type="text" bind:value={chapter.title.text} />
     </label>
-  </div>
-
-  <div class="collapsible">
     <label>
       Text:
       <textarea bind:value={chapter.text.text}></textarea>
     </label>
-  </div>
-
-  <div class="collapsible">
     <label>
       Question:
       <textarea bind:value={chapter.question.text}></textarea>
     </label>
-    
-    <div class="collapsible">
-      <h3>Suggested Replies</h3>
-      {#each chapter.suggested_replies as reply, index}
-        <div>
-          <input type="text" bind:value={chapter.suggested_replies[index]} />
-          <button type="button" on:click={() => removeSuggestedReply(index)}>Remove</button>
-        </div>
-      {/each}
-      <button type="button" on:click={addSuggestedReply}>Add Reply</button>
-    </div>
   </div>
 
   {#if successMessage}
@@ -324,3 +275,7 @@ if (!isLoggedIn()) {
 
   <button type="submit">Submit Chapter</button>
 </form>
+
+<style>
+  /* Removed local form styles to use global.css */
+</style>

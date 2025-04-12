@@ -478,6 +478,35 @@ button.highlighted, input[type="submit"].highlighted, button.flash, input[type="
   }
 }
 
+/* Styling for dropdowns */
+select {
+  width: 100%;
+  margin-bottom: 10px;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 1em;
+  background-color: aliceblue;
+  font-size: 1em;
+}
+
+select:focus {
+  outline-color: blue;
+}
+
+/* Add spacing between form sections */
+form .section {
+  margin-bottom: 20px;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 1em;
+  background-color: #f9f9f9;
+  box-shadow: var(--box-shadow-light);
+}
+
+form .section h3 {
+  margin-top: 0;
+  color: darkblue;
+}
 
 /* Changes for Tiny mobile (Iphone SE) */
 @media only screen and (max-width: 400px) {
