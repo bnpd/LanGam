@@ -503,6 +503,8 @@ export async function createGame(game: { name: string; lang: string; img: string
  * @returns {Promise<any>} The created chapter object.
  */
 export async function createChapter(chapter: any): Promise<any> {
+  console.log(chapter);
+  
   console.error('NOT IMPLEMENTED: createChapter');
 }
 

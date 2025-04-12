@@ -4,8 +4,7 @@
 	import { onMount } from 'svelte';
   import { createChapter, getOwnGames, isLoggedIn } from './backend';
 
-
-onMount(() => {
+  onMount(() => {
 // Check if the user is logged in
 if (!isLoggedIn()) {
     setTimeout(() => {
@@ -19,35 +18,29 @@ if (!isLoggedIn()) {
     character: '',
     game: '',
     img: '',
-    outcomes: {
-      default: {
-        goto: 0,
-        text: '',
-        title: ''
-      }
-    },
+    outcomes: {},
     question: {
-      lang: '',
-      text: '',
-      tokens: {}
+      lang: 'pl',
+      text: ''
     },
     seq_id: 0,
     suggested_replies: [],
     system_prompt: '',
     text: {
-      lang: '',
+      lang: 'pl',
       text: ''
     },
     title: {
-      lang: '',
+      lang: 'pl',
       text: ''
     }
   };
 
-  export let selectedGame = '';
   let games = [];
+  let selectedGame = '';
 
-  $: if (selectedGame) {
+  $: if ($page.url.searchParams.has('game')) {
+    selectedGame = $page.url.searchParams.get('game');
     chapter.game = selectedGame;
   }
 
@@ -60,6 +53,20 @@ if (!isLoggedIn()) {
   }
 
   loadGames();
+
+  function addOutcome() {
+    const key = `outcome_${Object.keys(chapter.outcomes).length + 1}`;
+    chapter.outcomes[key] = {
+      goto: 0,
+      stats: {},
+      text: '',
+      title: ''
+    };
+  }
+
+  function removeOutcome(key) {
+    delete chapter.outcomes[key];
+  }
 
   async function submitChapter() {
     try {
@@ -102,6 +109,12 @@ if (!isLoggedIn()) {
   button:hover {
     background-color: #0056b3;
   }
+
+  .collapsible {
+    border: 1px solid #ccc;
+    padding: 1rem;
+    border-radius: 5px;
+  }
 </style>
 
 <form on:submit|preventDefault={submitChapter}>
@@ -110,7 +123,7 @@ if (!isLoggedIn()) {
     <select bind:value={chapter.game}>
       <option value="" disabled>Select a game</option>
       {#each games as game}
-        <option value={game.id} selected={game.id === selectedGame}>{game.name}</option>
+        <option value={game.id} selected={game.id === selectedGame}>{game.name} ({game.lang})</option>
       {/each}
     </select>
   </label>
@@ -123,12 +136,68 @@ if (!isLoggedIn()) {
     <input type="text" bind:value={chapter.img} />
   </label>
   <label>
-    Title:
-    <input type="text" bind:value={chapter.title.text} />
+    Sequence ID:
+    <input type="number" bind:value={chapter.seq_id} />
   </label>
   <label>
-    Text:
-    <textarea bind:value={chapter.text.text}></textarea>
+    System Prompt:
+    <textarea bind:value={chapter.system_prompt}></textarea>
   </label>
+
+  <div class="collapsible">
+    <h3>Outcomes</h3>
+    {#each Object.entries(chapter.outcomes) as [key, outcome]}
+      <div>
+        <label>
+          Outcome Key: {key}
+        </label>
+        <label>
+          Goto:
+          <input type="number" bind:value={outcome.goto} />
+        </label>
+        <label>
+          Stats (JSON):
+          <textarea bind:value={outcome.stats}></textarea>
+        </label>
+        <label>
+          Text:
+          <textarea bind:value={outcome.text}></textarea>
+        </label>
+        <label>
+          Title:
+          <input type="text" bind:value={outcome.title} />
+        </label>
+        <button type="button" on:click={() => removeOutcome(key)}>Remove Outcome</button>
+      </div>
+    {/each}
+    <button type="button" on:click={addOutcome}>Add Outcome</button>
+  </div>
+
+  <div class="collapsible">
+    <label>
+      Title:
+      <input type="text" bind:value={chapter.title.text} />
+    </label>
+  </div>
+
+  <div class="collapsible">
+    <label>
+      Text:
+      <textarea bind:value={chapter.text.text}></textarea>
+    </label>
+  </div>
+
+  <div class="collapsible">
+    <label>
+      Question:
+      <textarea bind:value={chapter.question.text}></textarea>
+    </label>
+    
+      <label>
+        Suggested Replies (Comma-separated):
+        <input type="text" bind:value={chapter.suggested_replies} />
+      </label>
+  </div>
+
   <button type="submit">Submit Chapter</button>
 </form>
