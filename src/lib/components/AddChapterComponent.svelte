@@ -4,6 +4,7 @@
 	import { onMount } from 'svelte';
   import { createChapter, getOwnGames, isLoggedIn } from './backend';
   import '../../routes/global.css';
+	import TitleWithBackgroundImageComponent from './TitleWithBackgroundImageComponent.svelte';
 
   onMount(() => {
 // Check if the user is logged in
@@ -171,9 +172,9 @@ if (!isLoggedIn()) {
   }
 </script>
 
+<TitleWithBackgroundImageComponent>Add Chapter</TitleWithBackgroundImageComponent>
 <form on:submit|preventDefault={submitChapter}>
-  <div class="section">
-    <h3>Game Details</h3>
+  <div class="card">
     <label>
       Game:
       <select bind:value={chapter.game}>
@@ -201,7 +202,7 @@ if (!isLoggedIn()) {
     </label>
   </div>
 
-  <div class="section">
+  <div class="card">
     <h3>Outcomes</h3>
     {#each Object.entries(chapter.outcomes) as [key, outcome]}
       <div>
@@ -238,7 +239,7 @@ if (!isLoggedIn()) {
     <button type="button" on:click={addOutcome}>Add Outcome</button>
   </div>
 
-  <div class="section">
+  <div class="card">
     <h3>Suggested Replies</h3>
     {#each chapter.suggested_replies as reply, index}
       <div>
@@ -249,7 +250,7 @@ if (!isLoggedIn()) {
     <button type="button" on:click={addSuggestedReply}>Add Reply</button>
   </div>
 
-  <div class="section">
+  <div class="card">
     <h3>Text and Title</h3>
     <label>
       Title:
@@ -275,7 +276,3 @@ if (!isLoggedIn()) {
 
   <button type="submit">Submit Chapter</button>
 </form>
-
-<style>
-  /* Removed local form styles to use global.css */
-</style>

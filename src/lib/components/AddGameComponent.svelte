@@ -5,6 +5,7 @@
   import '../../routes/global.css';
 
   import { onMount } from 'svelte';
+	import TitleWithBackgroundImageComponent from './TitleWithBackgroundImageComponent.svelte';
 
   onMount(() => {
     // Check if the user is logged in
@@ -48,8 +49,5 @@
   ];
 </script>
 
+<TitleWithBackgroundImageComponent>Add Game</TitleWithBackgroundImageComponent>
 <FormComponent {fields} {submitOptions} />
-
-<style>
-  /* Removed local form styles to use global.css */
-</style>
