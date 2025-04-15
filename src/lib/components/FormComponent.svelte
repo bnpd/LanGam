@@ -1,6 +1,6 @@
 <script lang="ts">
-    export let fields: {id: string, name: string, type?: string, value?: string, hidden?: boolean, checked?: boolean, options?: { value: string; label: string }[]}[]
-    export let sections: {title: string | undefined, fields: string[]}[] = []
+    export let fields: {id: string, name: string, type?: string, value?: string, hidden?: boolean, checked?: boolean, options?: { value: string; label: string }[], multiInitialCount?: number}[]
+    export let sections: {title: string | undefined, fields: string[], multiInitialCount?: number}[] = []
     export let submitOptions: {text: string, handler: (formdata: { [x: string]: string | undefined; }, disableOnSubmit?: boolean, disabled?: boolean, cssClass?: string) => void}
 
     const ALLOWED_TYPES = ['text', 'checkbox', 'select']
@@ -46,11 +46,34 @@
 {#if fields?.length && sections?.length}
     <form>
       {#each sections as section}
-        {#if section.title}
-          <h1>{section.title}</h1>
-        {/if}
-        
-        <div class={section.title ? "card" : ""}>
+      
+      <div class={section.title ? "card" : ""}>
+          {#if section.title}
+            <h1>{section.title}
+              {#if section.multiInitialCount != undefined}
+                  <button type="button" on:click={() => {
+                    section.multiInitialCount += 1
+                    const newFields = fields.filter(field => section.fields.includes(field.id))
+                    newFields.forEach(field => {
+                      const newField = {...field}
+                      newField.id = `${field.id}_${section.multiInitialCount}`
+                      fields.push(newField)
+                    })
+                    sections.push({title: section.title, fields: newFields.map(field => field.id)})
+                    sections = sections
+                  }}>+</button>
+              {/if}
+              {#if section.multiInitialCount > 0}
+                  <button type="button" on:click={() => {
+                    //section.multiInitialCount -= 1
+                    fields = fields.filter(field => !section.fields.includes(field.id))
+                    sections = sections.filter(s => s !== section)
+                    console.log(sections);
+                    
+                  }}>-</button>
+              {/if}
+            </h1>
+          {/if}
           {#each section.fields as field_id}
           {@const field = fields.filter(field => field.id === field_id)[0]}
           <div class="input-container">

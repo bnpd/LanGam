@@ -26,6 +26,9 @@
     { id: 'img', name: 'Image URL', type: 'text', value: '' },
     { id: 'public', name: 'Public', type: 'checkbox', checked: false }
   ];
+  let sections = [
+    { title: 'Game Details', fields: ['name', 'lang', 'img', 'public'], multiInitialCount: 0 }
+  ];
 
   let submitOptions = [
     {
@@ -50,4 +53,4 @@
 </script>
 
 <TitleWithBackgroundImageComponent>Add Game</TitleWithBackgroundImageComponent>
-<FormComponent {fields} {submitOptions} />
+<FormComponent {fields} {sections} {submitOptions} />
