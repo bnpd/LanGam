@@ -42,7 +42,7 @@
             public: formData.public
           });
           console.log('Game created:', createdGame);
-          goto(`/new?game=${createdGame.game.id}`);
+          goto(`/chapters/new?game=${createdGame.game.id}`);
         } catch (error) {
           console.error('Error creating game:', error);
         }
