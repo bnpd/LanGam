@@ -1,10 +1,11 @@
 <script lang="ts">
   import { goto } from '$app/navigation';
   import { page } from '$app/stores';
-  import { onMount } from 'svelte';
+  import { onMount, tick } from 'svelte';
   import { createChapter, getOwnGames, isLoggedIn } from './backend';
   import '../../routes/global.css';
   import TitleWithBackgroundImageComponent from './TitleWithBackgroundImageComponent.svelte';
+	import { text } from '@sveltejs/kit';
 
   onMount(() => {
     // Check if the user is logged in
@@ -82,8 +83,9 @@
   }
 
   loadGames();
+  addOutcome('default');
 
-  function addOutcome() {
+  function addOutcome(title?: string) {
     const tempKey = `${tempOutcomeKeys.at(-1) ?? "outcome"}_prime`;
     tempOutcomeKeys = [...tempOutcomeKeys, tempKey];
     
@@ -98,6 +100,17 @@
     
     // Initialize stat keys array for this outcome
     outcomeStatKeys[tempKey] = [];
+
+    tick()
+      .then(() => {
+        // Set the title if provided
+        if (title) {
+          outcomeRefs[tempKey].title.value = title;
+        }
+      })
+      .catch(error => {
+        console.error('Error during tick:', error);
+      });
   }
 
   function removeOutcome(key) {
@@ -254,9 +267,17 @@
     errorMessage = '';
 
     // Reset validations
-    formElement.querySelectorAll('input').forEach(input => {
-      input.setCustomValidity('');
+    formElement.querySelectorAll('input').forEach((input: HTMLInputElement) => {
+      if (!input.checkValidity()) {        
+        input.reportValidity();
+        return
+      }
     });
+
+    if (!textRef.innerText.trim()?.length) {
+      errorMessage = 'Text is required.';
+      return;
+    }
     
     // Validate and generate real outcome keys from titles
     const processedOutcomes = {};
@@ -301,7 +322,7 @@
         
         // Build outcome object
         processedOutcomes[generatedKey] = {
-          goto: outcomeRefs[tempKey].goto ? parseInt(outcomeRefs[tempKey].goto.value) || 0 : 0,
+          goto: parseInt(outcomeRefs[tempKey].goto.value),
           stats: stats,
           text: outcomeRefs[tempKey].text ? outcomeRefs[tempKey].text.innerHTML : '',
           title: titleValue
@@ -320,7 +341,7 @@
           lang: 'pl',
           text: questionRef.innerHTML
         },
-        seq_id: parseInt(seqIdRef.value) || 0,
+        seq_id: seqIdRef.value,
         suggested_replies: suggestedReplyRefs.filter(ref => ref).map(ref => ref.value),
         system_prompt: systemPromptRef.innerHTML,
         text: {
@@ -340,7 +361,7 @@
       location.reload();
     } catch (error) {
       console.error('Error creating chapter:', error);
-      if (error.message && error.message.includes('seq_id already exists')) {
+      if (error.message && error.message.includes('seq_id already exists')) { //TODO: implement this in backend
         seqIdRef.setCustomValidity('This Sequence ID already exists for this game');
         seqIdRef.reportValidity();
       } else {
@@ -353,7 +374,7 @@
 <TitleWithBackgroundImageComponent>Add Chapter</TitleWithBackgroundImageComponent>
 <form on:submit|preventDefault={submitChapter} bind:this={formElement} novalidate>
   <div class="card">
-    <h4>Game Details</h4>
+    <h4>Chapter</h4>
     <div class="input-container">
       <label for="game">Game</label>&nbsp;&nbsp;
       <select id="game" bind:this={gameSelectRef} required>
@@ -364,24 +385,25 @@
       </select>
     </div>
     <div class="input-container">
-      <label for="character">Character</label>
-      <input type="text" id="character" bind:this={characterRef} />
+      <label for="seq_id">Sequence ID</label>&nbsp;&nbsp;
+      <input type="number" id="seq_id" bind:this={seqIdRef} required placeholder="Should be auto-generated"/>
+    </div> <!-- Should be auto-generated -->
+    <div class="input-container">
+      <label for="title">Title</label>
+      <input type="text" id="title" bind:this={titleRef} required/>
+    </div>
+    <div class="input-container">
+      <label for="text">Text</label>
+      <div 
+        id="text" 
+        contenteditable
+        bind:this={textRef}
+        style="min-height: 4em;"
+      ></div>
     </div>
     <div class="input-container">
       <label for="img">Image URL</label>
-      <input type="text" id="img" bind:this={imgRef} />
-    </div>
-    <div class="input-container">
-      <label for="seq_id">Sequence ID</label>&nbsp;&nbsp;
-      <input type="number" id="seq_id" bind:this={seqIdRef} required />
-    </div>
-    <div class="input-container">
-      <label for="system_prompt">System Prompt</label>
-      <div 
-        id="system_prompt" 
-        contenteditable="true" 
-        bind:this={systemPromptRef}
-      ></div>
+      <input type="text" id="img" bind:this={imgRef} placeholder="Should be an upload button. If applicable"/>
     </div>
   </div>
 
@@ -404,6 +426,7 @@
             type="number" 
             id={`outcome-goto-${key}`} 
             bind:this={outcomeRefs[key].goto}
+            required
           />
         </div>
         
@@ -438,7 +461,7 @@
           <label for={`outcome-text-${key}`}>Text</label>
           <div 
             id={`outcome-text-${key}`} 
-            contenteditable="true"
+            contenteditable
             bind:this={outcomeRefs[key].text}
           ></div>
         </div>
@@ -449,12 +472,37 @@
       </div>
     {/each}
     <div class="input-container">
-      <button type="button" on:click={addOutcome}>Add Outcome</button>
+      <button type="button" on:click={()=>addOutcome()}>Add Outcome</button>
     </div>
   </div>
 
   <div class="card">
-    <h4>Suggested Replies</h4>
+    <h4>Chat</h4>
+    <div class="input-container">
+      <label for="character">Conversation partner name</label>
+      <input type="text" id="character" bind:this={characterRef} />
+    </div>
+    <div class="input-container">
+      <label for="question">Question</label>
+      <div 
+        id="question" 
+        contenteditable
+        bind:this={questionRef}
+      ></div>
+    </div>
+    <div class="input-container">
+      <label for="system_prompt">System Prompt</label>
+      <div 
+        id="system_prompt" 
+        contenteditable 
+        bind:this={systemPromptRef}
+        data-placeholder="You are ..
+        You are talking to .. who has just discovered that .. and your goal is to ..
+        If the player .., you will .. Otherwise, you will .. End the conversation after 3 messages."
+        style="min-height: 4em;"
+      ></div>
+    </div>
+    <h5>Suggested Replies (optional)</h5>
     {#each suggestedReplyIndexes as uniqueIndex, index (uniqueIndex)}
       <div class="input-container">
         <input type="text" bind:this={suggestedReplyRefs[index]} />
@@ -463,30 +511,6 @@
     {/each}
     <div class="input-container">
       <button type="button" on:click={addSuggestedReply}>Add Reply</button>
-    </div>
-  </div>
-
-  <div class="card">
-    <h4>Text and Title</h4>
-    <div class="input-container">
-      <label for="title">Title</label>
-      <input type="text" id="title" bind:this={titleRef} />
-    </div>
-    <div class="input-container">
-      <label for="text">Text</label>
-      <div 
-        id="text" 
-        contenteditable="true"
-        bind:this={textRef}
-      ></div>
-    </div>
-    <div class="input-container">
-      <label for="question">Question</label>
-      <div 
-        id="question" 
-        contenteditable="true"
-        bind:this={questionRef}
-      ></div>
     </div>
   </div>
 
@@ -499,6 +523,7 @@
   {/if}
 
   <div class="input-container">
+    <button type="button">Test Chat</button>
     <button type="submit">Submit Chapter</button>
   </div>
 </form>
