@@ -28,6 +28,9 @@
   let textRef;
   let questionRef;
 
+  // Toggle for showing chat fields
+  let showChat = false;
+
   // Empty template for chapter structure
   const emptyChapter = {
     character: '',
@@ -322,7 +325,7 @@
         
         // Build outcome object
         processedOutcomes[generatedKey] = {
-          goto: parseInt(outcomeRefs[tempKey].goto.value),
+          goto: parseInt(outcomeRefs[tempKey].goto.value), //TODO: create a placeholder chapter and autofill & update it when choosing its seqId in the form later
           stats: stats,
           text: outcomeRefs[tempKey].text ? outcomeRefs[tempKey].text.innerHTML : '',
           title: titleValue
@@ -333,17 +336,10 @@
     try {
       // Assemble the complete chapter object
       const chapter = {
-        character: characterRef.value,
         game: gameSelectRef.value,
         img: imgRef.value,
         outcomes: processedOutcomes,
-        question: {
-          lang: 'pl',
-          text: questionRef.innerHTML
-        },
         seq_id: seqIdRef.value,
-        suggested_replies: suggestedReplyRefs.filter(ref => ref).map(ref => ref.value),
-        system_prompt: systemPromptRef.innerHTML,
         text: {
           lang: 'pl',
           text: textRef.innerHTML
@@ -353,6 +349,17 @@
           text: titleRef.value
         }
       };
+      
+      // Only add chat-related fields if showChat is true
+      if (showChat) {
+        chapter.character = characterRef.value;
+        chapter.question = {
+          lang: 'pl',
+          text: questionRef.innerHTML
+        };
+        chapter.system_prompt = systemPromptRef.innerHTML;
+        chapter.suggested_replies = suggestedReplyRefs.filter(ref => ref).map(ref => ref.value);
+      }
 
       // Submit the chapter
       const createdChapter = await createChapter(chapter);
@@ -476,8 +483,13 @@
     </div>
   </div>
 
+  
   <div class="card">
-    <h4>Chat</h4>
+    <div>
+      <label for="show-chat"><h4>Chat</h4></label>
+      <input type="checkbox" id="show-chat" bind:checked={showChat} />
+    </div>
+    {#if showChat}
     <div class="input-container">
       <label for="character">Conversation partner name</label>
       <input type="text" id="character" bind:this={characterRef} />
@@ -512,6 +524,7 @@
     <div class="input-container">
       <button type="button" on:click={addSuggestedReply}>Add Reply</button>
     </div>
+    {/if}
   </div>
 
   {#if successMessage}
@@ -523,7 +536,9 @@
   {/if}
 
   <div class="input-container">
+    {#if showChat}
     <button type="button">Test Chat</button>
+    {/if}
     <button type="submit">Submit Chapter</button>
   </div>
 </form>
@@ -545,4 +560,6 @@
     border: 1px solid red !important;
     background-color: rgba(255, 0, 0, 0.05) !important;
   }
+  
+  
 </style>
