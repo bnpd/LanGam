@@ -27,7 +27,7 @@
     { id: 'public', name: 'Public', type: 'checkbox', checked: false }
   ];
   let sections = [
-    { title: 'Game Details', fields: ['name', 'lang', 'img', 'public'], multiInitialCount: 0 }
+    { title: 'Game Details', fields: ['name', 'lang', 'img', 'public'] }
   ];
 
   let submitOptions = [
