@@ -116,7 +116,7 @@
     }
 </style>
 
-<TitleWithBackgroundImageComponent height='40dvh'><h2 style="height: 15dvh; line-height: 20dvh; font-size: xxx-large">
+<TitleWithBackgroundImageComponent height='40dvh'><h2 style="height: 15dvh; line-height: 20dvh; font-size: xxx-large; overflow: hidden;">
     {isSignup ? 'Welcome' : 'Welcome back'}
 </h2></TitleWithBackgroundImageComponent>
 <div style="text-align: center">
