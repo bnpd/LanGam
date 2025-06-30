@@ -29,11 +29,11 @@ const config = {
 		}),
 		csp: {
 			directives: {
-				'default-src': ['self'],
+				'default-src': ['self', 'https://*.langam.app'],
 				'img-src': ['self', 'data:', 'https://*.langam.app'],
 				'style-src': ['self', 'https:', "'unsafe-inline'"],
-				'connect-src': ['self', 'https://*.langam.app'],
-				'script-src': ['self'],
+				'connect-src': ['self', 'https://*.langam.app', 'https://*.wiktionary.org'],
+				'script-src': ['self', 'https://*.langam.app'],
 				'object-src': ['self'],
 				'base-uri': ['self']
 			}
