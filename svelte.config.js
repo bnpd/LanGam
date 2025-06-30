@@ -29,6 +29,10 @@ const config = {
 		}),
 		csp: {
 			directives: {
+				'default-src': ['self'],
+				'img-src': ['self', 'data:', 'https://*.langam.app'],
+				'style-src': ['self', 'https:', "'unsafe-inline'"],
+				'connect-src': ['self', 'https://*.langam.app'],
 				'script-src': ['self'],
 				'object-src': ['self'],
 				'base-uri': ['self']
