@@ -31,10 +31,10 @@ const config = {
 			directives: {
 				'default-src': ['self', 'https://*.langam.app'],
 				'connect-src': ['self', 'https://*.langam.app', 'https://*.wiktionary.org'],
-				'media-src': ['self', 'https://*.langam.app', 'https://*.wiktionary.org'],
-				'img-src': ['self', 'data:', 'https://*.langam.app', 'https://*.wiktionary.org'],
-				'style-src': ['self', 'https:', "'unsafe-inline'"],
 				'script-src': ['self', 'https://*.langam.app'],
+				'media-src': ['self', 'data:', 'https:'],
+				'img-src': ['self', 'data:', 'https:'],
+				'style-src': ['self', 'https:', "'unsafe-inline'"],
 				'object-src': ['self'],
 				'base-uri': ['self']
 			}
