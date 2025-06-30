@@ -30,6 +30,7 @@ const config = {
 		csp: {
 			directives: {
 				'default-src': ['self', 'https://*.langam.app'],
+				'connect-src': ['self', 'https://*.langam.app', 'https://*.wiktionary.org'],
 				'media-src': ['self', 'https://*.langam.app', 'https://*.wiktionary.org'],
 				'img-src': ['self', 'data:', 'https://*.langam.app', 'https://*.wiktionary.org'],
 				'style-src': ['self', 'https:', "'unsafe-inline'"],
