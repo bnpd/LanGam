@@ -1,0 +1,36 @@
+name: Run SonarQube Scan
+
+on:
+  # Runs on pushes targeting the default branch
+  push:
+    branches: ["main", "svelte"]
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+# Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  # sonarqube job
+  sonarqube:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        # Disabling shallow clones is recommended for improving the relevancy of reporting
+        fetch-depth: 0
+    - name: SonarQube Scan
+      uses: SonarSource/sonarqube-scan-action@v5.2.0 # See the latest version at https://github.com/marketplace/actions/official-sonarqube-scan
+      env:
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        SONAR_HOST_URL: https://sonarcloud.io
+    - name: SonarQube Quality Gate check
+      id: sonarqube-quality-gate-check
+      uses: sonarsource/sonarqube-quality-gate-action@master
+      with:
+        pollingTimeoutSec: 600
+      env:
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
