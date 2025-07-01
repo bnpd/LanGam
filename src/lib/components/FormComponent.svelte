@@ -1,8 +1,9 @@
 <script lang="ts">
-    export let fields: {id: string, name: string, type?: string, value?: string, hidden?: boolean, checked?: boolean}[]
+    export let fields: {id: string, name: string, type?: string, value?: string, hidden?: boolean, checked?: boolean, options?: { value: string; label: string }[], multiInitialCount?: number}[]
+    export let sections: {title: string | undefined, fields: string[], multiInitialCount?: number}[] = []
     export let submitOptions: {text: string, handler: (formdata: { [x: string]: string | undefined; }, disableOnSubmit?: boolean, disabled?: boolean, cssClass?: string) => void}
 
-    const ALLOWED_TYPES = ['text', 'checkbox']
+    const ALLOWED_TYPES = ['text', 'checkbox', 'select']
 
     $: if (new Set(fields.map(field=>field.id)).size != fields.length) {
       console.error('Duplicate input ids used for form');
@@ -10,6 +11,12 @@
       console.error('Unknown input type used for form');
     } else if (fields.some(field => field.type == 'checkbox' && field.value != undefined)) {
       console.error('Checkboxes should use checked instead of value');
+    } else if (fields.some(field => field.type === 'select' && !field.options)) {
+      console.error('Dropdown fields must include an options array');
+    }
+
+    $: if (!sections?.length && fields?.length) {
+      sections = [{title: undefined, fields: fields.map(field => field.id)}]
     }
 
     let inputsById: {[id: string]: HTMLElement} = {}
@@ -27,32 +34,78 @@
       selection?.removeAllRanges();
       selection?.addRange(range);
     }
+
+    $: if (inputsById) {
+      console.log(sections);
+      console.log(inputsById);
+      console.log(fields);
+      
+    }
 </script>
 
-{#if fields}
+{#if fields?.length && sections?.length}
     <form>
-        {#each fields as field}
-        <div class="input-container">
-          {#if !field.type || field.type === 'text'}
-            <label for={field.id} hidden={field.hidden}>{field.name}</label>
-            <div contenteditable id={field.id} hidden={field.hidden} bind:this={inputsById[field.id]} on:focus={onFocusNode}>{field?.value ?? ''}</div>
-          {:else if field.type === 'checkbox'}
-            <input type="checkbox" id={field.id} hidden={field.hidden} bind:this={inputsById[field.id]} on:focus={onFocusNode} checked={field?.checked ?? false}>&nbsp;
-            <label for={field.id} hidden={field.hidden}>{field.name}</label>
+      {#each sections as section}
+      
+      <div class={section.title ? "card" : ""}>
+          {#if section.title}
+            <h1>{section.title}
+              {#if section.multiInitialCount != undefined}
+                  <button type="button" on:click={() => {
+                    section.multiInitialCount += 1
+                    const newFields = fields.filter(field => section.fields.includes(field.id))
+                    newFields.forEach(field => {
+                      const newField = {...field}
+                      newField.id = `${field.id}_${section.multiInitialCount}`
+                      fields.push(newField)
+                    })
+                    sections.push({title: section.title, fields: newFields.map(field => field.id)})
+                    sections = sections
+                  }}>+</button>
+              {/if}
+              {#if section.multiInitialCount > 0}
+                  <button type="button" on:click={() => {
+                    //section.multiInitialCount -= 1
+                    fields = fields.filter(field => !section.fields.includes(field.id))
+                    sections = sections.filter(s => s !== section)
+                    console.log(sections);
+                    
+                  }}>-</button>
+              {/if}
+            </h1>
           {/if}
+          {#each section.fields as field_id}
+          {@const field = fields.filter(field => field.id === field_id)[0]}
+          <div class="input-container">
+            {#if !field.type || field.type === 'text'}
+              <label for={field.id} hidden={field.hidden}>{field.name}</label>
+              <div contenteditable id={field.id} hidden={field.hidden} bind:this={inputsById[field.id]} on:focus={onFocusNode}>{field?.value ?? ''}</div>
+            {:else if field.type === 'checkbox'}
+              <input type="checkbox" id={field.id} hidden={field.hidden} bind:this={inputsById[field.id]} on:focus={onFocusNode} checked={field?.checked ?? false}>&nbsp;
+              <label for={field.id} hidden={field.hidden}>{field.name}</label>
+            {:else if field.type === 'select'}
+              <label for={field.id} hidden={field.hidden}>{field.name}</label>
+              <select id={field.id} hidden={field.hidden} bind:this={inputsById[field.id]} on:focus={onFocusNode}>
+                {#each field.options as option}
+                  <option value={option.value} selected={option.value === field.value}>{option.label}</option>
+                {/each}
+              </select>
+            {/if}
+          </div>
+          {/each}
         </div>
-        {/each}
-        {#each submitOptions as submitOption}
-            <input 
-            type="submit" 
-            value={submitOption.text} 
-            on:click|preventDefault={()=>{
-              submitOption.handler(fields.reduce((acc, field) => {acc[field.id] = inputsById[field.id] instanceof HTMLDivElement ? inputsById[field.id]?.innerText : inputsById[field.id].type === 'checkbox' ? inputsById[field.id]?.checked : new Error('this type should not be here'); return acc}, {}))
-              if (submitOption.disableOnSubmit) submitOption.disabled = true
-            }}
-            disabled={submitOption.disabled}
-            class={submitOption.cssClass}
-            >
-        {/each}
+      {/each}
+      {#each submitOptions as submitOption}
+          <input 
+          type="submit" 
+          value={submitOption.text} 
+          on:click|preventDefault={()=>{
+            submitOption.handler(fields.reduce((acc, field) => {acc[field.id] = inputsById[field.id] instanceof HTMLDivElement ? inputsById[field.id]?.innerText : field.type === 'checkbox' ? inputsById[field.id]?.checked : field.type === 'select' ? inputsById[field.id]?.value : new Error('this type should not be here: '+inputsById[field.id].type); return acc}, {}))
+            if (submitOption.disableOnSubmit) submitOption.disabled = true
+          }}
+          disabled={submitOption.disabled}
+          class={submitOption.cssClass}
+          >
+      {/each}
     </form>
 {/if}

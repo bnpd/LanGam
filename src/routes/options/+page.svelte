@@ -7,10 +7,19 @@
 	import AccountDeletionComponent from '$lib/components/AccountDeletionComponent.svelte';
 	import { getUserData } from '$lib/components/backend';
 	import FeedbackComponent from '$lib/components/FeedbackComponent.svelte';
+    import { isLoggedIn } from '$lib/components/backend';
+	import { onMount } from 'svelte';
+	import { goto } from '$app/navigation';
 
-    function onInput(el: HTMLInputElement) {
-
-    }
+onMount(() => {
+// Check if the user is logged in
+if (!isLoggedIn()) {
+    setTimeout(() => {
+        // Wait for 0.1 second before redirecting
+        goto('/login');
+    }, 100);
+}
+});
 </script>
 
 <svelte:head>

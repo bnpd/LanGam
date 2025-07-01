@@ -2,7 +2,7 @@
   import '../global.css'
   import config from '$lib/../config.js';
 	import { onMount } from 'svelte';
-	import { getGames } from '$lib/components/backend';
+	import { getGamesByLang } from '$lib/components/backend';
 	import { error } from '@sveltejs/kit';
 	import { targetLang, username } from '$lib/stores';
 	import TitleWithBackgroundImageComponent from '$lib/components/TitleWithBackgroundImageComponent.svelte';
@@ -17,7 +17,7 @@
         goto('/signup')
         return
     }
-    games = await getGames($targetLang.id)
+    games = await getGamesByLang($targetLang.id)
   
     if (!games) throw error(405);
   })

@@ -68,16 +68,16 @@ textarea {
   resize: vertical;
 }
 
-input[type="text"], input[type="email"], input[type="password"] {
+input[type="text"], input[type="email"], input[type="password"], input[type="number"] {
   margin-bottom: 10px;
   padding: 8px;
   padding-left: 1em;
-  border: 1px solid #ccc;
+  border: none;
   border-radius: 1em;
   background-color: aliceblue;
 }
 
-.card label:has(+div[contenteditable]), .card input[type="email"], .card input[type="password"] {
+.card input[type="email"], .card input[type="password"], .card div[contenteditable], .card input[type="text"], .card input[type="number"], .card select, .card label:has(+div[contenteditable]), .card label:has(+select), .card label:has(+input[type="text"]), .card label:has(+input[type="email"]), .card label:has(+input[type="password"]), .card label:has(+input[type="number"]) {
     background-color: white;
 }
 
@@ -92,7 +92,7 @@ form label {
   font-style: italic;
 }
 
-form label:has(+ div[contenteditable]) {
+form label:has(+ div[contenteditable]), form label:has(+ select), form label:has(+ input[type="text"]), form label:has(+ input[type="email"]), form label:has(+ input[type="password"]), form label:has(+ input[type="number"]) {
   position: absolute;
   top: -0.5em; 
   left: 0; 
@@ -101,11 +101,25 @@ form label:has(+ div[contenteditable]) {
   border-radius: 1em 1em 1em 0;
 }
 
-form div[contenteditable] {
+form div[contenteditable], form select, form input[type="text"], form input[type="email"], form input[type="password"], form input[type="number"] {
   padding: 0.8em;
   font-size: 1em;
   width: 100%;
   box-sizing: border-box; 
+}
+
+/* Styling for dropdowns */
+select {
+  font-size: 1em;
+  width: 100%;
+  box-sizing: border-box; 
+  margin-bottom: 10px;
+  border: none;
+  border-radius: 20px;
+  background-color: aliceblue;
+  padding: 0.8em;
+  box-shadow: var(--box-shadow-light); /* Downwards shadow and on left and right side*/
+  line-height: 1.3em;
 }
 
 hr { /* necessary to avoid corruption in flex-columns*/
@@ -140,7 +154,7 @@ div[contenteditable]:empty::before {
   pointer-events: none;
 }
 
-div[contenteditable]:focus {
+div[contenteditable]:focus, select:focus {
   outline-color: blue;
 }
 
