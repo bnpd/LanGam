@@ -36,7 +36,6 @@ export const srShowGenus = createPersistentStore('srShowGenus', true);
 /* One time flags */
 export const grammarBookOpened = createPersistentStore('grammarBookOpened', false);
 export const tutorOpened = createPersistentStore('tutorOpened', false);
-//export const powersOpened = createPersistentStore('powersOpened', false);
 
 /* Store Creation Functions */
 
@@ -53,6 +52,7 @@ function createPersistentStore(key: string, initialValue: any): Writable<any> {
             value = storedValue ? JSON.parse(storedValue) : initialValue;
         }
     } catch (error) {
+        console.error(`Error parsing stored value for key "${key}":`, error);
         value = storedValue;
     }
     const store = writable(value);
