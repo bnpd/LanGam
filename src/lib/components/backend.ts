@@ -102,10 +102,17 @@ function EndpointReview(targetLang: string) {return `/review/${targetLang}`;}
  * @param {string | undefined} contextParagraphs
  */
 function EndpointChat(chatHistoryString: string, isInline: boolean, targetLang: string | undefined=undefined, docId: string | undefined=undefined, contextParagraphs: string | undefined=undefined) {
-	if (isInline && !(docId && targetLang)) throw 'EndpointChat: Incompatible parameters: isInline without docId+targetLang'
-	if (docId && targetLang && contextParagraphs) throw 'EndpointChat: Incompatible parameters: docId+targetLang+contextParagraphs'
-	return isInline ? `/chat_tandem?hist=${encodeURIComponent(chatHistoryString)}` + (`&docId=${docId}&targetLang=${targetLang}`)
-					: `/chat_tutor?hist=${encodeURIComponent(chatHistoryString)}` + (contextParagraphs ? `&ctx=${encodeURIComponent(contextParagraphs)}` : docId && targetLang ? `&docId=${docId}&targetLang=${targetLang}` : '');;
+	if (isInline && !(docId && targetLang)) throw new Error('EndpointChat: Incompatible parameters: isInline without docId+targetLang')
+	if (docId && targetLang && contextParagraphs) throw new Error('EndpointChat: Incompatible parameters: docId+targetLang+contextParagraphs')
+	let tutorParams = '';
+	if (contextParagraphs) {
+		tutorParams = `&ctx=${encodeURIComponent(contextParagraphs)}`;
+	} else if (docId && targetLang) {
+		tutorParams = `&docId=${docId}&targetLang=${targetLang}`;
+	}
+	return isInline
+		? `/chat_tandem?hist=${encodeURIComponent(chatHistoryString)}` + (`&docId=${docId}&targetLang=${targetLang}`)
+		: `/chat_tutor?hist=${encodeURIComponent(chatHistoryString)}` + tutorParams;
 }
 
 /**
@@ -163,22 +170,7 @@ export async function getTask(targetLang: string, docId: string | null){
 		return DocumentC.fromJson(responseJson)
 	} catch (error) {
 		console.error(error)
-		return Promise.reject(error)
-	}
-}
-
-/**
- * @param {string} targetLang
- * @param {string} docId
- * @returns {Promise<[string[], string[]]>}
- */
-export async function getUserTaskStats(targetLang: string, docId: string): Promise<[string[], string[]]>{
-	try { 
-		//const responseJson = await backendGet(await EndpointGetUserTaskStats(targetLang, docId))
-		return [[], []]// [responseJson['sr_words'], responseJson['new_forms']]
-	} catch (error) {
-		console.error(error)
-		return Promise.reject(error)
+		return Promise.reject(error as Error)
 	}
 }
 
@@ -243,7 +235,7 @@ export async function sendTutorChat(chatHistory: { role: string; content: string
 }
 
 export async function getLevel(gameId: string, seqId: number, simplificationLevel?: string): Promise<RecordModel> {
-	const level = await pb.collection('levels').getFirstListItem(`game="${gameId}" && seq_id=${seqId}`, {expand: ['grammar']})
+	const level = await pb.collection('levels').getFirstListItem(`game="${gameId}" && seq_id=${seqId}`, {expand: 'grammar'})
 
 	// move the desired simplification to default .text/title/question keys, unless simplificationLevel == ''
 	if (simplificationLevel?.length && level.level[`text${simplificationLevel}`]?.text?.length) {

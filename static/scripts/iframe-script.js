@@ -1,4 +1,4 @@
-language = 'Polish' // $targetLang.nameEN
+let language = 'Polish' // $targetLang.nameEN
 const FOOTER_HTML = `
 <div class="post-content footer-content">
     <div class="minerva-footer-logo"><img src="https://www.wiktionary.org/static/images/mobile/copyright/wiktionary-wordmark-en.svg" alt="Wiktionary" width="107" height="19" style="width: 6.6875em; height: 1.1875em;"></div>
@@ -59,7 +59,7 @@ parent.postMessage({ extractedCards: extractCards() }, '*');
 
 // extract cards and send them up to WiktionaryFrame
 function extractCards() {
-    var meanings = []
+    let meanings = []
 
     for (const ol of document.getElementsByTagName('ol')) {
         // find translation, which is the ol which is next sibling of next sibling of part of speach (POS)

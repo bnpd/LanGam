@@ -423,7 +423,6 @@ button.highlighted, input[type="submit"].highlighted, button.flash, input[type="
 
 .loading:after {
   content: " ";
-  display: block;
   position: absolute;
   display: flex;
   justify-content: center;
