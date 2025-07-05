@@ -49,7 +49,7 @@ export async function signup(email: string, password: string, native_lang: strin
  */
 export async function newUserLang(targetLangShortcode: string) {
 	return pb.send(`/new_user_lang`, {method: 'POST', body: {
-            'langShortcode': targetLangShortcode
+            'langShortcode': targetLangShortcode.toLowerCase()
         }})
 	//return backendPost(ENDPOINT_NEW_USER_LANG, {target_lang: targetLang}, true)
 }
@@ -157,7 +157,7 @@ export async function getUserLang(user: string, targetLangId: string){
  * @param {string} shortcode
  */
 export async function getLang(shortcode: string){
-	return pb.collection('langs').getFirstListItem(`shortcode = "${shortcode.toUpperCase()}"`)
+	return pb.collection('langs').getFirstListItem(`shortcode = "${shortcode.toLowerCase()}"`)
 }
 
 /**
