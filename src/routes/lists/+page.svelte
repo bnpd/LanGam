@@ -6,11 +6,11 @@ import './lists.css';
 	import TitleWithBackgroundImageComponent from "$lib/components/TitleWithBackgroundImageComponent.svelte";
 	import VocabListItem from "$lib/components/VocabListItem.svelte";
 	import NavbarComponent from "$lib/components/NavbarComponent.svelte";
-	import config from '../../config';
 	import SrComponent from "$lib/components/SrComponent.svelte";
   import { isLoggedIn } from '$lib/components/backend';
 	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
+	import { PUBLIC_POCKETBASE_URL } from "$env/static/public";
   
 let scheduledTokens: {[key: string]: any} = {}
 let usedTokens: {[key: string]: string[]} = {}
@@ -65,7 +65,7 @@ async function loadVocabLists() {
 <svelte:head>
 	<title>Your Vocabulary - LanGam CYOA - language learning "choose you own adventure" game</title>
   <meta name="description" content='Overview of your learned words - LanGam CYOA - language learning "choose you own adventure" game.'>
-  <link rel="preconnect" href={config.pocketbase}>
+  <link rel="preconnect" href={PUBLIC_POCKETBASE_URL}>
 </svelte:head>
 
 <TitleWithBackgroundImageComponent>Your vocab</TitleWithBackgroundImageComponent>

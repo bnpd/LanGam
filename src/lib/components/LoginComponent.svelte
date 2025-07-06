@@ -6,6 +6,7 @@
 	import TitleWithBackgroundImageComponent from './TitleWithBackgroundImageComponent.svelte';
 	import { onMount } from 'svelte';
 	import SignInWithGoogleButton from './SignInWithGoogleButton.svelte';
+    import { PUBLIC_LANG } from '$env/static/public';
   
     export let isSignup: boolean
     let loading: boolean
@@ -21,7 +22,6 @@
     async function onSubmit(_event: SubmitEvent) {
         const formDataEntries = new FormData(formElement);
         let nl = formDataEntries.get('native_lang')?.toString() || ''
-        let tl = getTargetLangFromSubdomain()
         
         if (isSignup && formDataEntries.get('password') !== formDataEntries.get('passwordConfirm')) {
             showValidationError('password', "Passwords do not match", 1500);
@@ -48,7 +48,7 @@
                 $username = user_obj.id
             }
             $nativeLang = nl || (await getLangById(user_obj.native_lang)).shortcode
-            $targetLang = isSignup ? (await newUserLang(tl)).lang : await getLang(tl)
+            $targetLang = isSignup ? (await newUserLang(PUBLIC_LANG)).lang : await getLang(PUBLIC_LANG)
 
             try {umami.track((isSignup ? 'Signup' : 'Login'), {id: $username, method: 'password'})} catch (_undef) {}
             let advanceLevelAfterSignup = new URLSearchParams(window.location.search).get('advanceLevelAfterSignup')
@@ -73,7 +73,6 @@
             return;
         }
         let nl = formDataEntries.get('native_lang')?.toString() || ''
-        let tl = getTargetLangFromSubdomain()
         try {
             loading = true
 
@@ -88,7 +87,7 @@
                 $username = user_obj.id
             }
             $nativeLang = nl || (await getLangById(user_obj.native_lang)).shortcode
-            $targetLang = isSignup ? (await newUserLang(tl)).lang : await getLang(tl)
+            $targetLang = isSignup ? (await newUserLang(PUBLIC_LANG)).lang : await getLang(PUBLIC_LANG)
 
             try {umami.track((isSignup ? 'Signup' : 'Login'), {id: $username, method: 'google'})} catch (_undef) {}
             let advanceLevelAfterSignup = new URLSearchParams(window.location.search).get('advanceLevelAfterSignup')
@@ -114,15 +113,6 @@
     //     const options = (document.getElementById('languages') as HTMLDataListElement)?.options;
     //     return Array.from(options).map(option => option.value);
     // }
-  
-
-	function getTargetLangFromSubdomain() {
-		let tl = location?.host.split('.')[0]
-        if (tl?.length != 2) {
-            tl = 'en'
-        }
-        return tl
-	}
 </script>
 
 <style>

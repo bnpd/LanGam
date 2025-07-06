@@ -13,6 +13,7 @@
 	import GrammarBookComponent from './GrammarBookComponent.svelte';
 	import WebPushSubscription from './WebPushSubscription.svelte';
 	import Popup from './Popup.svelte';
+    import { page } from '$app/stores';
 
     const TOAST_REDIRECTED_SAVED_TASK = "Your selected text has been queued cause you have a saved game level."
     const TEXT_REJECT_SAVED_TASK = "Discard saved"
@@ -22,15 +23,25 @@
     const UNKNOWN_POS = 0
     const STUDIED_POS = new Set([UNKNOWN_POS, 84, 86, 92, 93, 100])
     const TRACKED_POS = new Set([...STUDIED_POS, 85, 87, 89, 90, 91, 94, 95, 98])
-    const FALLBACK_GAME_ID = '4sdspc36rwuf05e'
-    const ANON_LANG = {
-        id: 'mmgox8wdjtvp7uw',
-        shortcode: 'PL',
-        name: 'Polish',
+    // Remove hardcoded fallback IDs
+    // const FALLBACK_GAME_ID = '4sdspc36rwuf05e'
+    // const ANON_LANG = {
+    //     id: 'mmgox8wdjtvp7uw',
+    //     shortcode: 'PL',
+    //     name: 'Polish',
+    //     learnable: true
+    // }
+    // Instead, use values from $page.data
+    $: fallbackGameId = $page.data?.gameId;
+    $: anonLang = {
+        id: $page.data?.lang.id,
+        shortcode: $page.data?.lang.shortcode,
+        name: $page.data?.lang.name,
         learnable: true
-    }
+    };
+
     function GET_ANON_PLAYER(gameId: string){return {
-        "collectionId": "ckikccyphcv508t",
+        "collectionId": $page.data?.collectionId,
         "collectionName": "players",
         "created": "1970-01-01 00:00:00.000Z",
         "game": gameId,
@@ -65,8 +76,8 @@
     onMount(async () => {
         if (!$username) { // new user, not logged in -> trial mode
             //goto('/signup')
-            $player = GET_ANON_PLAYER($currentGameId ?? new URLSearchParams(window.location.search).get('gameId') ?? FALLBACK_GAME_ID)
-            $targetLang = ANON_LANG
+            $player = GET_ANON_PLAYER($currentGameId ?? new URLSearchParams(window.location.search).get('gameId') ?? fallbackGameId)
+            $targetLang = anonLang
             $nativeLang = 'en'
             await prevTask($player.level); 
             initChatHistory();

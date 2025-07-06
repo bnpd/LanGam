@@ -1,15 +1,23 @@
 'use strict';
 import { goto } from '$app/navigation';
+import { PUBLIC_POCKETBASE_URL, PUBLIC_WEBPUSH_PUBLIC_KEY } from '$env/static/public';
 import { VocabCard } from '$lib/fsrs.js';
-import config from '../../config.js';
 import DocumentC from '../DocumentC.js'
 import PocketBase, { type RecordModel } from 'pocketbase';
 
 // PocketBase
-const pb = new PocketBase(config.pocketbase)
+const pb = new PocketBase(PUBLIC_POCKETBASE_URL)
 const MAX_CHAT_HISTORY_LENGTH = 20
 const MAX_CHAT_HISTORY_CHARS = 20000
 
+
+export function getTargetLangFromSubdomain(hostname: string | undefined = undefined): string {
+	let tl = (hostname ?? location?.host).split('.')[0]
+	if (tl?.length != 2) {
+		tl = 'en'
+	}
+	return tl
+}
 
 /**
  * Check if the user is logged in
@@ -51,7 +59,6 @@ export async function newUserLang(targetLangShortcode: string) {
 	return pb.send(`/new_user_lang`, {method: 'POST', body: {
             'langShortcode': targetLangShortcode.toLowerCase()
         }})
-	//return backendPost(ENDPOINT_NEW_USER_LANG, {target_lang: targetLang}, true)
 }
 
 
@@ -67,29 +74,6 @@ export function getUserData() {
 	return pb.authStore?.model
 }
 
-
-// backend endpoint constants
-/**
- * @param {string} targetLang
- * @param {string} docId
- */
-function EndpointGetTask(targetLang: string, docId: string) {return `/task/${targetLang}/${docId}`;}
-/**
- * @param {string} targetLang
- * @param {string} filter
- */
-function EndpointGetTopTasks(targetLang: string, filter: string) {return `/top_tasks/${targetLang}?q=${filter}`;}
-/**
- * @param {string} targetLang
- */
-function EndpointGetDueTask(targetLang: string) {return `/due_task/${targetLang}`;}
-/**
- * @param {string} targetLang
- */
-/**
- * @param {string} targetLang
- */
-function EndpointReview(targetLang: string) {return `/review/${targetLang}`;}
 
 /**
  * Specify EITHER: 
@@ -132,19 +116,6 @@ function EndpointGameChat(chatHistoryString: string, playerId: string, levelSeqI
 	return `/chat_game?hist=${encodeURIComponent(chatHistoryString)}&playerId=${playerId}&seqId=${levelSeqId}`
 }
 
-
-/**
- * @param {string} targetLang
- * @param {string} docId
- * @param {string[]} failedTokens
- */
-export async function sendReview(targetLang: string, docId: string, failedTokens: string[]) {
-	const json = {docId: docId, failedTokens: failedTokens}
-	return backendPost(EndpointReview(targetLang), json)
-}
-
-  
-
 /**
  * @param {string} user
  * @param {string} targetLangId
@@ -159,46 +130,6 @@ export async function getUserLang(user: string, targetLangId: string){
 export async function getLang(shortcode: string){
 	return pb.collection('langs').getFirstListItem(`shortcode = "${shortcode.toLowerCase()}"`)
 }
-
-/**
- * @param {string} targetLang
- * @param {string | null} [docId]
- */
-export async function getTask(targetLang: string, docId: string | null){
-	try { 
-		const responseJson = await backendGet(docId ? EndpointGetTask(targetLang, docId) : EndpointGetDueTask(targetLang)) 
-		return DocumentC.fromJson(responseJson)
-	} catch (error) {
-		console.error(error)
-		return Promise.reject(error as Error)
-	}
-}
-
-/**
- * @param {string} targetLang
- * @param {any} query
- * @returns {Promise<any[][]>}
- */
-export async function getTopTasks(targetLang: string, query: any): Promise<any[][]>{
-	return backendGet(EndpointGetTopTasks(targetLang, JSON.stringify(query)), false)
-}
-
-/** Check whether a task is available. SHOULD ONLY BE USED WHEN OFFLINE.
- * @param {string} targetLang
- * @param {string} docId
- */
-export async function isTaskCached(targetLang: string, docId: string){
-	try {
-		await fetch(
-			config.backend + EndpointGetTask(targetLang, docId),
-			{method: 'Head', cache:'force-cache'}
-		);
-		return true
-	} catch (_) {
-		return false
-	}
-}
-    
 
 /**
  * EITHER docId or contextParagraphs should be specified, if both are present, contextParagraphs will be prioritized.
@@ -407,7 +338,7 @@ export async function backendGet(path: string, authRequired: boolean=true) {
 		goto('/login')
 		return Promise.reject('Not logged in.')
 	}
-	const response = await fetch(config.backend + path, authRequired ? {headers: {Authorization: `Bearer ${pb.authStore.token}`}, cache: navigator.onLine ? 'default' : 'force-cache'} : undefined)
+	const response = await fetch(PUBLIC_POCKETBASE_URL + path, authRequired ? {headers: {Authorization: `Bearer ${pb.authStore.token}`}, cache: navigator.onLine ? 'default' : 'force-cache'} : undefined)
 	if (!response.ok) {
 		if (response.status == 401) {
 			goto('/login')
@@ -416,38 +347,6 @@ export async function backendGet(path: string, authRequired: boolean=true) {
 		throw new Error('Get error.' + await response.text())
 	}
 	return await response.json()
-}
-
-
-/**
- * @param {string} path
- * @param {Object} payload
- * @param {boolean} [authRequired] whether this endpoint requires authorization token
- */
-export async function backendPost(path: string, payload: object, authRequired: boolean=true) {
-	if (authRequired && !pb.authStore.isValid) {
-		goto('/login')
-		return Promise.reject('Not logged in.')
-	}
-    const response = await fetch(config.backend + path, {
-        method: 'POST',
-        headers: authRequired ? {
-			Authorization: `Bearer ${pb.authStore.token}`,
-            'Content-Type': 'application/json',
-        } : {
-			'Content-Type': 'application/json',
-		},
-        body: JSON.stringify(payload),
-    });
-
-    if (!response.ok) {
-		if (response.status == 401) {
-			goto('/login')
-			return Promise.reject('Invalid auth.')
-		}
-        throw new Error('Post error: ' + await response.text());
-    }
-    return await response.json();
 }
 
 // Feedback
@@ -468,7 +367,7 @@ function subscribeUserToPush() {
 		.then(registration => {
 			const subscribeOptions = {
 				userVisibleOnly: true,
-				applicationServerKey: config.webpush_public_key,
+				applicationServerKey: PUBLIC_WEBPUSH_PUBLIC_KEY,
 			};
 			return registration.pushManager.subscribe(subscribeOptions);
 		})

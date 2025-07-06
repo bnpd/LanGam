@@ -1,6 +1,6 @@
 /// <reference types="@sveltejs/kit" />
 import { build, files, version } from '$service-worker';
-import config from './config.js';
+import { PUBLIC_POCKETBASE_URL } from '$env/static/public';
 
 
 // Create a unique cache name for this deployment
@@ -49,7 +49,7 @@ self.addEventListener('fetch', (event) => {
 	// ignore POST requests etc
 	if (
 		event.request.method !== 'GET'
-		|| url.origin === config.backend
+		|| url.origin === PUBLIC_POCKETBASE_URL
 	) return;
 
 	async function respond() {

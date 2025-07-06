@@ -1,6 +1,5 @@
 <script lang="ts" defer>
     import '../global.css';
-	import config from '../../config';
 	import TitleWithBackgroundImageComponent from '$lib/components/TitleWithBackgroundImageComponent.svelte';
 	import NavbarComponent from '$lib/components/NavbarComponent.svelte';
 	import { isGrammarHighlightingOn, srShowGenus, srShowIPA, ttsSpeed } from '$lib/stores';
@@ -10,6 +9,7 @@
     import { isLoggedIn } from '$lib/components/backend';
 	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
+	import { PUBLIC_POCKETBASE_URL } from '$env/static/public';
 
 onMount(() => {
 // Check if the user is logged in
@@ -25,7 +25,7 @@ if (!isLoggedIn()) {
 <svelte:head>
     <title>Options - LanGam CYOA - language learning "choose you own adventure" game</title>
     <meta name="description" content='Options for LanGam CYOA - language learning "choose you own adventure" game.'>
-    <link rel="preconnect" href={config.pocketbase}>
+    <link rel="preconnect" href={PUBLIC_POCKETBASE_URL}>
 </svelte:head>
 
 <TitleWithBackgroundImageComponent>Options</TitleWithBackgroundImageComponent>
