@@ -33,12 +33,7 @@
     // }
     // Instead, use values from $page.data
     $: fallbackGameId = $page.data?.gameId;
-    $: anonLang = {
-        id: $page.data?.lang.id,
-        shortcode: $page.data?.lang.shortcode,
-        name: $page.data?.lang.name,
-        learnable: true
-    };
+    $: anonLang = $page.data?.lang;
 
     function GET_ANON_PLAYER(gameId: string){return {
         "collectionId": $page.data?.collectionId,

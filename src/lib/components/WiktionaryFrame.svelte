@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { pushState } from "$app/navigation";
+	import { targetLang } from "$lib/stores";
     import { onMount } from 'svelte';
 	import { createEventDispatcher } from 'svelte';
 
@@ -46,7 +47,7 @@
                 <link rel="stylesheet" href="https://www.wiktionary.org/w/load.php?lang=en&amp;modules=ext.gadget.LanguagesAndScripts%2CPalette%2CSite&amp;only=styles&amp;skin=minerva">
                 <link rel="stylesheet" href="https://www.wiktionary.org/w/load.php?lang=en&amp;modules=site.styles&amp;only=styles&amp;skin=minerva">
             </head>
-            <body class="mediawiki ltr sitedir-ltr mw-hide-empty-elt ns-0 ns-subject mw-editable page-tle rootpage-tle stable issues-group-B skin-minerva action-view skin--responsive mw-mf-amc-disabled mw-mf minerva-animations-ready">
+            <body data-language="${$targetLang.nameEN}" class="mediawiki ltr sitedir-ltr mw-hide-empty-elt ns-0 ns-subject mw-editable page-tle rootpage-tle stable issues-group-B skin-minerva action-view skin--responsive mw-mf-amc-disabled mw-mf minerva-animations-ready">
                 <div id="mw-mf-viewport">
                     <div id="mw-mf-page-center">
                         <main class="mw-body">
