@@ -147,7 +147,6 @@
         await statsClosedPromise
 
         $currentTask = undefined
-        solutionText = ''
         $loadingTask = true
 
         try {
