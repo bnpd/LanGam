@@ -2,7 +2,7 @@
     import { onMount } from 'svelte';
     import ReaderComponent from './ReaderComponent.svelte';
     import { completeLevel, getLevel, getPlayer, getPlayerLevel, getUserLang, updatePlayer } from './backend';
-    import { username, nativeLang, targetLang, isSoundOn, currentTask, failedWords, currentlyScrolledParagraphIndex, loadingTask, gameChatHistory, player, chatOutcome, currentGameId, inlineChatHistory, morphHighlightFilter, currentTaskNParagraphs, simplificationLevel } from '$lib/stores';
+    import { username, targetLang, isSoundOn, currentTask, failedWords, currentlyScrolledParagraphIndex, loadingTask, gameChatHistory, player, chatOutcome, currentGameId, inlineChatHistory, morphHighlightFilter, currentTaskNParagraphs, simplificationLevel } from '$lib/stores';
 	import { goto } from '$app/navigation';
 	import Toast from './Toast.svelte';
 	import ChatComponent from './ChatComponent.svelte';
@@ -49,7 +49,6 @@
         "user_lang": null
     }}
 
-    let solutionText = ''
     let toast: string | undefined;
     let textRejectToast: string | undefined;
     let readerComponent: ReaderComponent;
@@ -73,7 +72,6 @@
             //goto('/signup')
             $player = GET_ANON_PLAYER($currentGameId ?? new URLSearchParams(window.location.search).get('gameId') ?? fallbackGameId)
             $targetLang = anonLang
-            $nativeLang = 'en'
             await prevTask($player.level); 
             initChatHistory();
             return
@@ -187,7 +185,6 @@
         doc.docId = level.seq_id
         if (doc) $loadingTask = false;
         $currentTask = doc
-        solutionText = doc?.title?.translations[$nativeLang] + '\n\n' + doc?.text?.translations[$nativeLang]
         $currentlyScrolledParagraphIndex = 0
         showGameChatSuggestions = false
         grammarChapter = level.expand?.grammar
@@ -213,9 +210,6 @@
         
         if (doc) $loadingTask = false;
         $currentTask = doc
-        
-        solutionText = doc?.title?.translations[$nativeLang] + '\n\n' + doc?.text?.translations[$nativeLang]
-
 
         if (!restoreScrollPosition) {            
             $currentlyScrolledParagraphIndex = 0
@@ -271,7 +265,7 @@
         <WebPushSubscription>Notify me about new levels!</WebPushSubscription>
     </div>
 {:else}
-    <ReaderComponent solutionText={solutionText} srWords={new Set()} bind:this={readerComponent}>
+    <ReaderComponent srWords={new Set()} bind:this={readerComponent}>
         <span slot="afterTask" hidden={!$currentTask}>{#if $gameChatHistory?.length}<ChatComponent readerComponent={readerComponent} inline={true} chatBoxTitle="Twoja odpowiedź 🤙" chatHistory={gameChatHistory} srWords={new Set()} isGame={true} showGameChatSuggestions={showGameChatSuggestions}/>{/if}</span>
         <span slot="afterSolution">{#if $gameChatHistory?.length}<ChatComponent readerComponent={readerComponent} inline={true} chatBoxTitle={undefined} chatHistory={gameChatHistory} translationLang='en' isGame={true}/>{/if}</span>
     </ReaderComponent>

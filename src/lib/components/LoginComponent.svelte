@@ -1,7 +1,7 @@
 <script lang="ts" defer>
     import { getGamesByLang, getLang, getLangById, login, loginWithGoogle, newUserLang, signup } from '$lib/components/backend';
     import { goto } from '$app/navigation';
-	import { failedWords, inlineChatHistory, nativeLang, reviews, targetLang, username } from '$lib/stores';
+	import { failedWords, inlineChatHistory, reviews, targetLang, nativeLang, username } from '$lib/stores';
 	import { ClientResponseError } from 'pocketbase';
 	import TitleWithBackgroundImageComponent from './TitleWithBackgroundImageComponent.svelte';
 	import { onMount } from 'svelte';
@@ -21,7 +21,6 @@
   
     async function onSubmit(_event: SubmitEvent) {
         const formDataEntries = new FormData(formElement);
-        let nl = formDataEntries.get('native_lang')?.toString() || ''
         
         if (isSignup && formDataEntries.get('password') !== formDataEntries.get('passwordConfirm')) {
             showValidationError('password', "Passwords do not match", 1500);
@@ -36,18 +35,27 @@
             if (isSignup) {
                 await signup(
                     formDataEntries.get('email')?.toString()!,
-                    formDataEntries.get('password')?.toString()!,
-                    nl
+                    formDataEntries.get('password')?.toString()!
                 )
             }
             let user_obj = (await login(formDataEntries.get('email')?.toString()!, formDataEntries.get('password')?.toString()!)).record
-            if (user_obj.id != $username) {
+            if (user_obj.id != $username) { // switched user
                 $failedWords = new Set()
                 $reviews = []
                 $inlineChatHistory = []
                 $username = user_obj.id
+                if (user_obj.native_lang) {
+                    getLangById(user_obj.native_lang).then(lang => {
+                        $nativeLang = lang.nameEN
+                    })
+                } else {
+                    $nativeLang = undefined
+                }
+            } else if (!$nativeLang && user_obj.native_lang) { // same user, but his lang preference was lost
+                getLangById(user_obj.native_lang).then(lang => {
+                    $nativeLang = lang.nameEN
+                })
             }
-            $nativeLang = nl || (await getLangById(user_obj.native_lang)).shortcode
             $targetLang = isSignup ? (await newUserLang(PUBLIC_LANG)).lang : await getLang(PUBLIC_LANG)
 
             try {umami.track((isSignup ? 'Signup' : 'Login'), {id: $username, method: 'password'})} catch (_undef) {}
@@ -72,21 +80,30 @@
             showValidationError('acceptConditions', "This is required.", 1500);
             return;
         }
-        let nl = formDataEntries.get('native_lang')?.toString() || ''
         try {
             loading = true
 
-            let oauthResult = await loginWithGoogle((await getLang(nl)).id)
+            let oauthResult = await loginWithGoogle()
 
             isSignup = oauthResult.meta!.isNew
             let user_obj = oauthResult.record
-            if (user_obj.id != $username) {
+            if (user_obj.id != $username) { // switched user
                 $failedWords = new Set()
                 $reviews = []
                 $inlineChatHistory = []
                 $username = user_obj.id
+                if (user_obj.native_lang) {
+                    getLangById(user_obj.native_lang).then(lang => {
+                        $nativeLang = lang.nameEN
+                    })
+                } else {
+                    $nativeLang = undefined
+                }
+            } else if (!$nativeLang && user_obj.native_lang) { // same user, but his lang preference was lost
+                getLangById(user_obj.native_lang).then(lang => {
+                    $nativeLang = lang.nameEN
+                })
             }
-            $nativeLang = nl || (await getLangById(user_obj.native_lang)).shortcode
             $targetLang = isSignup ? (await newUserLang(PUBLIC_LANG)).lang : await getLang(PUBLIC_LANG)
 
             try {umami.track((isSignup ? 'Signup' : 'Login'), {id: $username, method: 'google'})} catch (_undef) {}
@@ -106,13 +123,8 @@
             mailEl?.reportValidity();
             setTimeout(() => { // reset to possibly valid validity
                 mailEl?.setCustomValidity('');
-            }, duration);        
+            }, duration);
     }
-
-    // function getDatalistOptions() {
-    //     const options = (document.getElementById('languages') as HTMLDataListElement)?.options;
-    //     return Array.from(options).map(option => option.value);
-    // }
 </script>
 
 <style>
@@ -144,69 +156,6 @@
                     <br>
                     <input type="password" name="passwordConfirm" placeholder="Confirm Password" autocomplete="new-password" required minlength="8"/><br>
                 {/if}
-                <input type="text" list="languages" name="native_lang" placeholder="See translations in:" autocomplete="language" id="native_lang" required/><br>
-                <datalist id="languages">
-                    <option value="en">English</option>
-                    <option value="th">Thai</option>
-                    <option value="pl">Polish</option>
-                    <!--<option value="de">German</option>
-                    <option value="fr">French</option>
-                    <option value="es">Spanish</option>
-                    <option value="it">Italian</option>
-                    <option value="pt">Portuguese</option>
-                    <option value="ru">Russian</option>
-                    <option value="zh">Chinese</option>
-                    <option value="ja">Japanese</option>
-                    <option value="ko">Korean</option>
-                    <option value="ar">Arabic</option>
-                    <option value="hi">Hindi</option>
-                    <option value="bn">Bengali</option>
-                    <option value="tr">Turkish</option>
-                    <option value="vi">Vietnamese</option>
-                    <option value="id">Indonesian</option>
-                    <option value="nl">Dutch</option>
-                    <option value="sv">Swedish</option>
-                    <option value="no">Norwegian</option>
-                    <option value="fi">Finnish</option>
-                    <option value="da">Danish</option>
-                    <option value="hu">Hungarian</option>
-                    <option value="cs">Czech</option>
-                    <option value="ro">Romanian</option>
-                    <option value="el">Greek</option>
-                    <option value="bg">Bulgarian</option>
-                    <option value="uk">Ukrainian</option>
-                    <option value="he">Hebrew</option>
-                    <option value="fa">Persian</option>
-                    <option value="ur">Urdu</option>
-                    <option value="sw">Swahili</option>
-                    <option value="tl">Tagalog</option>
-                    <option value="ms">Malay</option>
-                    <option value="ta">Tamil</option>
-                    <option value="te">Telugu</option>
-                    <option value="ml">Malayalam</option>
-                    <option value="kn">Kannada</option>
-                    <option value="gu">Gujarati</option>
-                    <option value="pa">Punjabi</option>
-                    <option value="mr">Marathi</option>
-                    <option value="bn">Bengali</option>
-                    <option value="si">Sinhala</option>
-                    <option value="my">Burmese</option>
-                    <option value="km">Khmer</option>
-                    <option value="lo">Lao</option>
-                    <option value="mn">Mongolian</option>
-                    <option value="hy">Armenian</option>
-                    <option value="az">Azerbaijani</option>
-                    <option value="kk">Kazakh</option>
-                    <option value="uz">Uzbek</option>
-                    <option value="tg">Tajik</option>
-                    <option value="ky">Kyrgyz</option>
-                    <option value="tk">Turkmen</option>
-                    <option value="ps">Pashto</option>
-                    <option value="sd">Sindhi</option>
-                    <option value="ne">Nepali</option>
-                    <option value="as">Assamese</option>
-                    <option value="or">Odia</option>-->
-                </datalist>
                 <div style="width: 190px; margin: auto;">
                     <input type="checkbox" name="acceptConditions" id="acceptConditions">
                     <label for="acceptConditions">I accept the <a href="/terms">Terms of Use</a> and the <a href="/privacy">Privacy Policy</a>.</label>

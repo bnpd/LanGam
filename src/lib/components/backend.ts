@@ -36,18 +36,19 @@ export async function login(user: string, password: string) {
 }
 
 
-export async function loginWithGoogle(native_lang: string) {
-	return pb.collection('users').authWithOAuth2({ provider: 'google', createData: {native_lang: native_lang} });
+export async function loginWithGoogle() {
+	return pb.collection('users').authWithOAuth2({ provider: 'google' });
 }
 
 
 /**
  * @param {string} email
  * @param {string} password
- * @param {string} native_lang
  */
-export async function signup(email: string, password: string, native_lang: string) {
-	return pb.send('/signup', {method: 'POST', body: {email: email, password: password, native_lang: native_lang}})
+export async function signup(email: string, password: string) {
+	let resPromise = pb.collection('users').create({email: email, password: password, passwordConfirm: password})
+	//pb.collection('users').requestVerification(email).catch(err=>console.error(err))
+	return resPromise
 }
 
 
@@ -129,6 +130,14 @@ export async function getUserLang(user: string, targetLangId: string){
  */
 export async function getLang(shortcode: string){
 	return pb.collection('langs').getFirstListItem(`shortcode = "${shortcode.toLowerCase()}"`)
+}
+
+/**
+ * Get all available languages
+ * @returns {Promise<any[]>} Array of language objects
+ */
+export async function getAllLanguages(){
+	return pb.collection('langs').getFullList()
 }
 
 /**
@@ -308,6 +317,22 @@ export async function refreshPlayer(playerId: string) {
  */
 export async function updatePlayer(player: any) {
 	return pb.collection('players').update(player.id, player)
+}
+
+/**
+ * Update the current user in the backend
+ * @param {{ [x: string]: any; }} changedData
+ * @return {Promise<RecordModel>} The updated user record
+ */
+export async function updateUser(changedData: { [x: string]: any; }): Promise<RecordModel> {
+	let user = getUserData()
+	if (!user) {
+		throw new Error('User not logged in.')
+	}
+	for (const [property, value] of Object.entries(changedData)) {
+		user[property] = value
+	}
+	return pb.collection('users').update(user.id, user)
 }
     
 

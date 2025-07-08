@@ -1,7 +1,8 @@
 <script lang="ts" defer>
-  import { currentTask, currentlyScrolledParagraphIndex, loadingTask } from '../stores';
-	import { afterUpdate, tick } from "svelte";
+  import { currentTask, currentlyScrolledParagraphIndex, loadingTask, nativeLang, targetLang } from '../stores';
+	import { afterUpdate, tick, onMount } from "svelte";
 	import TaskComponent from './TaskComponent.svelte';
+	import { getLang, updateUser, getAllLanguages } from './backend';
 
   enum FIELD {TASK, SOLUTION}
 
@@ -16,11 +17,10 @@
   let scrollRestored = false
 
   let solutionShown: boolean = false
-  export let solutionText: string
   export let srWords: Set<String> | undefined
 
   $: if($currentTask) onTaskReset()
-  $: if(solutionText) setSolution(solutionText)
+  $: if($nativeLang) onNativeLangChosen()
   afterUpdate(async () => {
     await tick();    
     taskAndChatParagraphs = divTask?.querySelectorAll('p, h1, h2, h3, h4, h5, h6, h7')
@@ -28,10 +28,12 @@
     if (!scrollRestored     
       && taskAndChatParagraphs?.length > 0 
       && taskAndChatParagraphs?.length >= $currentlyScrolledParagraphIndex 
-      && solutionAndChatParagraphs?.length > 0
-      && solutionAndChatParagraphs?.length >= $currentlyScrolledParagraphIndex
+      && (!$nativeLang || (solutionAndChatParagraphs?.length > 0
+      && solutionAndChatParagraphs?.length >= $currentlyScrolledParagraphIndex))
     ) {      
       scrollRestored = true
+      console.log('scroll restored');
+      
       // on first time we added all paragraphs, restore scroll position      
       scrollToParagraph(FIELD.TASK, Math.max($currentlyScrolledParagraphIndex - 1, 0))
       scrollToParagraph(FIELD.SOLUTION, Math.max($currentlyScrolledParagraphIndex - 1, 0))
@@ -160,10 +162,18 @@
   async function onTaskReset() {
     if (divTask) divTask.scrollTop = 0
     solutionShown = false
-    // solutionField is synced automatically
+    if ($nativeLang) {
+      setSolution($currentTask?.title?.translations[$nativeLang] + '\n\n' + $currentTask?.text?.translations[$nativeLang])
+    }
   }
 
-
+  async function onNativeLangChosen() {
+    getLang($nativeLang).then(lang => {
+        updateUser({ native_lang: lang.id });  // async in backend, just to save for next login
+    });
+    setSolution($currentTask?.title?.translations[$nativeLang] + '\n\n' + $currentTask?.text?.translations[$nativeLang])
+    solutionShown = true
+  }
 
 	async function onShowSolution(event: MouseEvent & { currentTarget: EventTarget & HTMLButtonElement; }) {
     solutionShown = true
@@ -187,6 +197,20 @@
       <div>
         <slot name="afterSolution" />
       </div>
+    </div>
+  {:else if !$nativeLang && solutionShown}
+    <div class="setting">
+      <label for="nativeLang">Choose a language</label>&nbsp;&nbsp;
+      <select name="nativeLang" id="nativeLang" autocomplete="language" bind:value={$nativeLang}>
+        <option value={undefined}></option>
+        {#await getAllLanguages() then langs}
+          {#each langs as lang}
+              {#if lang.native && lang.shortcode !== $targetLang?.shortcode}
+                  <option value={lang.shortcode}>{lang.nameEN}</option>
+              {/if}
+          {/each}
+        {/await}
+      </select>
     </div>
   {:else}
     <div style:height="var(--button-height)"/>

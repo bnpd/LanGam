@@ -81,9 +81,9 @@
 {#if dueWords?.length}
     {@const card = dueWords[0]}
     <div class="card" style="line-height: 2em;">
-        <BadgeComponent text={(card.reversed ? $targetLang.shortcode : $nativeLang).toUpperCase()}/>&nbsp;{card.reversed ? card.word : card.meaning} {#if showSolution && card.reversed && card.genus && $srShowGenus}&nbsp;&nbsp;<em>{card.genus}</em>{/if} <br>
+        <BadgeComponent text={(card.reversed ? $targetLang.shortcode : $nativeLang ?? 'meaning').toUpperCase()}/>&nbsp;{card.reversed ? card.word : card.meaning} {#if showSolution && card.reversed && card.genus && $srShowGenus}&nbsp;&nbsp;<em>{card.genus}</em>{/if} <br>
         <hr>
-        <BadgeComponent text={(card.reversed ? $nativeLang : $targetLang.shortcode).toUpperCase()}/>&nbsp;
+        <BadgeComponent text={(card.reversed ? $nativeLang ?? 'meaning' : $targetLang.shortcode).toUpperCase()}/>&nbsp;
         <span class:hidden={!showSolution}>
             {card.reversed ? card.meaning : card.word} {#if !card.reversed && card.genus && $srShowGenus}&nbsp;&nbsp;<em>{card.genus}</em>{/if} <br>
             {#if card.notes}

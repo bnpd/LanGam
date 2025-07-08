@@ -2,14 +2,22 @@
     import '../global.css';
 	import TitleWithBackgroundImageComponent from '$lib/components/TitleWithBackgroundImageComponent.svelte';
 	import NavbarComponent from '$lib/components/NavbarComponent.svelte';
-	import { isGrammarHighlightingOn, srShowGenus, srShowIPA, ttsSpeed } from '$lib/stores';
+	import { isGrammarHighlightingOn, nativeLang, srShowGenus, srShowIPA, targetLang, ttsSpeed } from '$lib/stores';
 	import AccountDeletionComponent from '$lib/components/AccountDeletionComponent.svelte';
-	import { getUserData } from '$lib/components/backend';
+	import { getLang, getUserData, updateUser } from '$lib/components/backend';
 	import FeedbackComponent from '$lib/components/FeedbackComponent.svelte';
     import { isLoggedIn } from '$lib/components/backend';
 	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
 	import { PUBLIC_POCKETBASE_URL } from '$env/static/public';
+    import { page } from '$app/stores';
+
+$: if ($nativeLang) {
+    getLang($nativeLang).then(lang => {
+        updateUser({ native_lang: lang.id });
+    });
+}
+
 
 onMount(() => {
 // Check if the user is logged in
@@ -37,6 +45,16 @@ if (!isLoggedIn()) {
             <input type="email" name="email" id="email" disabled value={getUserData()?.email}>
         </div>
         <div class="setting">
+            <label for="nativeLang">Native Language</label>&nbsp;&nbsp;
+            <select name="nativeLang" id="nativeLang" autocomplete="language" placeholder="Used for translations" bind:value={$nativeLang}>
+                {#each $page.data?.languages ?? [] as lang}
+                    {#if lang.native && lang.shortcode !== $targetLang?.shortcode}
+                        <option value={lang.shortcode}>{lang.nameEN}</option>
+                    {/if}
+                {/each}
+            </select>
+        </div>
+        <div class="setting">
             <AccountDeletionComponent />
             <button on:click={()=>{localStorage.clear(); window.location.replace('/login')}}>Log Out</button>
         </div>
@@ -47,7 +65,7 @@ if (!isLoggedIn()) {
             <label for="ttsSpeed">Speech Output Pace</label>
             <span class="slider">
                 <label for="ttsSpeed">{$ttsSpeed}</label>
-                <input type="range" name="ttsSpeed" id="ttsSpeed" min=0.25 max=1.5 step=0.125 list="ttsSpeedValues" bind:value={$ttsSpeed} on:input={e=>{onInput(e.currentTarget)}}>
+                <input type="range" name="ttsSpeed" id="ttsSpeed" min=0.25 max=1.5 step=0.125 list="ttsSpeedValues" bind:value={$ttsSpeed}>
             </span>
         </div>
     </div>
@@ -76,7 +94,7 @@ if (!isLoggedIn()) {
             Contact: ben@langam.app
         </div>
         
-        <a href="https://blog.langam.app">LanGam Blog</a><br>
+        <!--<a href="https://blog.langam.app">LanGam Blog</a><br>-->
         <a href="/terms">Terms</a><br>
         <a href="/privacy">Privacy Policy</a>
     </div>
