@@ -1,6 +1,8 @@
 import type { PageLoad } from './$types';
-import { getLang, getGamesByLang } from '$lib/components/backend';
+import { getLang, getGamesByLang, getLevel } from '$lib/components/backend';
 import { PUBLIC_LANG } from '$env/static/public';
+import { simplificationLevel } from '$lib/stores';
+import DocumentC from '$lib/DocumentC';
 
 export const prerender = true;
 
@@ -29,12 +31,15 @@ export const load: PageLoad = async () => {
         throw new Error(`No games found for language: ${langShortcode}`);
     }
 
+    const firstLevelParagraphs = DocumentC.fromJson((await getLevel(game.id, 1, '_simple'))['level']).makeTask();
+
     const gameId = game.id;
     const collectionId = game.collectionId;
 
     return {
         gameId,
         collectionId,
-        lang
+        lang,
+        firstLevelParagraphs
     };
 };

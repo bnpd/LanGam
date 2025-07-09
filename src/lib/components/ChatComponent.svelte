@@ -1,5 +1,5 @@
 <script lang="ts" defer>
-	import { chatOutcome, currentlyScrolledParagraphIndex, currentTask, currentTaskNParagraphs, failedWords, nativeLang, player, targetLang, username } from "$lib/stores";
+	import { chatOutcome, currentlyScrolledParagraphIndex, currentTask, currentTaskNParagraphs, dictionaryToken, nativeLang, player, targetLang, username } from "$lib/stores";
 	import { tick } from "svelte";
 	import BadgeComponent from "./BadgeComponent.svelte";
 	import type ReaderComponent from "./ReaderComponent.svelte";
@@ -14,10 +14,9 @@
     const OTHER_ERROR_RESPONSE = 'Cannot connect, please try again'
     
     /**
-     * @type {string | undefined}
+     * @type {{word: string, lemma?: string} | undefined}
      */
-    $: lastFailed = Array.from($failedWords).at(-1);
-    $: lastFailedLemma = lastFailed ? findLemma(lastFailed) : undefined
+    $: lastFailed = $dictionaryToken ? $dictionaryToken : lastFailed;
     $: if (typeof document !== 'undefined' && !inline) {            
             let mainContent = document?.getElementById('contentbox')
             if (mainContent) {
@@ -286,13 +285,13 @@
                     How is the past tense formed?
                 </button>
                 {#if lastFailed}
-                    {#if lastFailedLemma && lastFailedLemma !== lastFailed}
+                    {#if lastFailed.lemma && lastFailed.lemma !== lastFailed}
                         <button class="promptSuggestion" on:click={onClickChatSuggestion} disabled={loading}>
-                            Why is it {lastFailed} and not {lastFailedLemma} here?
+                            Why is it "{lastFailed.word}" and not "{lastFailed.lemma}" here?
                         </button>
                     {/if}
                     <button class="promptSuggestion" on:click={onClickChatSuggestion} disabled={loading}>
-                        Why is {lastFailed} used here?
+                        Why is "{lastFailed.word}" used here?
                     </button>
                 {/if}
             </div>

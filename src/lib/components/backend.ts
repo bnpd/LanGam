@@ -2,7 +2,7 @@
 import { goto } from '$app/navigation';
 import { PUBLIC_POCKETBASE_URL, PUBLIC_WEBPUSH_PUBLIC_KEY } from '$env/static/public';
 import { VocabCard } from '$lib/fsrs.js';
-import DocumentC from '../DocumentC.js'
+import DocumentC from '$lib/DocumentC'
 import PocketBase, { type RecordModel } from 'pocketbase';
 
 // PocketBase

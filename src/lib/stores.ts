@@ -9,12 +9,11 @@ export const nativeLang = createPersistentStore('native_lang', null);
 export const loadingTask: Writable<boolean> = writable()
 
 /* Study Component Stores */
-export const isSoundOn = createPersistentStore('isSoundOn', true);
+export const isSoundOn = createPersistentStore('isSoundOn', false);
 export const isGrammarHighlightingOn = createPersistentStore('isGrammarHighlightingOn', true);
 export const ttsSpeed = createPersistentStore('ttsSpeed', 0.8);
 export const reviews = createPersistentStore('reviews', []);
 export const reviewDocIds = createPersistentStore('reviewOrder', []);
-export const failedWords = createPersistentStore('failedWords', new Set());
 export const currentTask = createPersistentStore('currentTask', null);
 export const simplificationLevel = createPersistentStore('simplificationLevel', '_simple');
 export const currentlyScrolledParagraphIndex = createPersistentStore('currentScrolledParagraphIndex', 0);

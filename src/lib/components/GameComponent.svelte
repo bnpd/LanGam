@@ -2,7 +2,7 @@
     import { onMount } from 'svelte';
     import ReaderComponent from './ReaderComponent.svelte';
     import { completeLevel, getLevel, getPlayer, getPlayerLevel, getUserLang, updatePlayer } from './backend';
-    import { username, targetLang, isSoundOn, currentTask, failedWords, currentlyScrolledParagraphIndex, loadingTask, gameChatHistory, player, chatOutcome, currentGameId, inlineChatHistory, morphHighlightFilter, currentTaskNParagraphs, simplificationLevel } from '$lib/stores';
+    import { username, targetLang, currentTask, currentlyScrolledParagraphIndex, loadingTask, gameChatHistory, player, chatOutcome, currentGameId, inlineChatHistory, morphHighlightFilter, currentTaskNParagraphs, simplificationLevel } from '$lib/stores';
 	import { goto } from '$app/navigation';
 	import Toast from './Toast.svelte';
 	import ChatComponent from './ChatComponent.svelte';
@@ -91,7 +91,7 @@
             }
         }
                 
-        if ($failedWords.size > 0 || $gameChatHistory.length > 1 || $inlineChatHistory.length > 1) {
+        if ($gameChatHistory.length > 1 || $inlineChatHistory.length > 1) {
             // we have a saved state from last session to restore
             if(!$currentGameId) { // but it doesn't belong to a game, so redirect
                 const urlGameId = new URLSearchParams(window.location.search).get('gameId')
@@ -100,20 +100,6 @@
             }
 
             await nextTask(true);
-
-            // click words, which will add them to $failedWords and mark them on the page
-            // sound off while doing this
-            const savedSoundSetting = $isSoundOn
-            $isSoundOn = false
-            const targetFailedWords = structuredClone($failedWords);
-            $failedWords.clear()
-            for (const word of targetFailedWords) { // mark words that were marked in last session
-                let el = document.getElementsByClassName('span-'+word)[0] // we only click the first one, it will mark all of them
-                if (el) {
-                    (el as HTMLSpanElement).click()
-                }
-            }
-            $isSoundOn = savedSoundSetting
 
             redirectedDoc = new URLSearchParams(window.location.search).get('redirectedDoc')
 
@@ -308,7 +294,6 @@
 </div>
 <Toast message={toast} textReject={textRejectToast} onReject={() => {
     $currentGameId = undefined;
-    $failedWords = new Set();
     $gameChatHistory = [];
     goto('/read?doc='+redirectedDoc);
 }}/>

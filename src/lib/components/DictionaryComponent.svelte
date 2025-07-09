@@ -7,6 +7,8 @@
 	import { addSrWord } from "./backend";
 	import WiktionaryFrame from "./WiktionaryFrame.svelte";
 	import Toast from "./Toast.svelte";
+	import TtsComponent from "./TtsComponent.svelte";
+	import DocumentC from "$lib/DocumentC";
 
     const ERROR_MSG_NOT_LOGGED_IN = 'To save cards, please create an account.'
 
@@ -34,11 +36,13 @@
     let wordAdded: boolean = false
     let dictionaryCurrentWord: string | undefined
     let inputDictionaryCurrentWord: HTMLInputElement
+    let trySpeak: ((str: string) => void) | undefined
     $: if ($dictionaryToken) onTokenChanged()
     $: if (dictionaryCurrentWord) onWordChanged()
     async function onTokenChanged(){ // this might cause problems
         dictionaryCurrentWord = $dictionaryToken!.word
         try {umami.track('Dictionary opened')} catch (_undef) {}
+        //if (trySpeak) trySpeak(dictionaryCurrentWord)
     }
 
     function onWordChanged() {
@@ -110,6 +114,7 @@
 <Popup on:closed={onClose} isOpen={$dictionaryToken !== undefined} onPopstate={onPopstate} outsideclose={false}>
     <div id="dictionary-container">
         <h2>
+            <TtsComponent text={DocumentC.partialDocument($dictionaryToken?.word, $targetLang, {}, {})} bind:trySpeak={trySpeak}/>
             <form 
                 id="formDictionaryCurrentWord"
                 on:click={async e => {

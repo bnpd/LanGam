@@ -5,7 +5,6 @@
     const NON_CLICKABLE_POS_IDS = new Set([-1, 97, 99, 101]) // added -1 for whitespace
 
     export let token: {word: string, pos: number, lemma_: string, morph?: string};
-    //$: isFailed = $failedWords?.has(token?.word);
     export let isSrWord: boolean = false;
     $: isClickable = !NON_CLICKABLE_POS_IDS.has(token?.pos);
 

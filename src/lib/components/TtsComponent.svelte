@@ -3,7 +3,7 @@
 	import { isSoundOn, targetLang, ttsSpeed } from "$lib/stores";
 	import { onMount } from "svelte";
 
-    export let text: DocumentC
+    export let text: DocumentC | undefined = undefined
     let voice: SpeechSynthesisVoice
     let currentlySpeaking = false // tbh this is not set back to false when speaking is done
     $: currentIcon = currentlySpeaking ? '🔊' : $isSoundOn ? '🔉' : '🔈'
@@ -15,6 +15,9 @@
         }
         if (speechSynthesis?.getVoices()?.length) {
             setVoice()  // if we were too slow and the voice has already been set before speechSynthesis.onvoiceschanged = setVoice, just call setVoice immediately
+        }
+        if (text && voice && speechSynthesis && $isSoundOn){
+            trySpeakAssignedText()
         }
     })
     
@@ -31,6 +34,10 @@
     }
 
     export function trySpeakAssignedText() {
+        if (!text) {
+            console.warn('TTS: No text assigned to speak')
+            return
+        }
         trySpeak(((text.title ? text.title.text + '\n' : '') + text.text.text).replace(/\xa0/g, '').replaceAll('#', '')) // remove nbsp just in case its a problem, and remove hashtags
     }
 
@@ -72,6 +79,6 @@
     }
 </style>
 
-{#if voice && speechSynthesis}
+{#if text && voice && speechSynthesis}
     <button id="btnSound" on:click={onSoundClick} class="tts-button" data-umami-event="TTS Toggle">{currentIcon}</button>
 {/if}
