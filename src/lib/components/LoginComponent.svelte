@@ -10,7 +10,6 @@
   
     export let isSignup: boolean
     let loading: boolean
-    let loginWithGoogleMode = false
     let formElement: HTMLFormElement
 
     onMount(()=>{
@@ -74,11 +73,6 @@
     }
   
     async function onLoginWithGoogle() {
-        const formDataEntries = new FormData(formElement);
-        if (isSignup && !formDataEntries.get('acceptConditions')) {
-            showValidationError('acceptConditions', "This is required.", 1500);
-            return;
-        }
         try {
             loading = true
 
@@ -144,35 +138,27 @@
 <div style="text-align: center">
     <div class="card" style="--padding-card: 10%; margin-left: 5vw; margin-right: 5vw;">
         <form on:submit|preventDefault={onSubmit} bind:this={formElement}>
-            {#if !isSignup || !loginWithGoogleMode}
                 <input type="email" name="email" placeholder="Email" autocomplete="email" id="email" required />
                 <br>
                 <input type="password" name="password" placeholder="Password" autocomplete="new-password" id="password" required minlength="8"/>
-            {/if}
             {#if isSignup}
-                {#if !loginWithGoogleMode}
-                    <br>
-                    <input type="password" name="passwordConfirm" placeholder="Confirm Password" autocomplete="new-password" required minlength="8"/><br>
-                {/if}
+                <br>
+                <input type="password" name="passwordConfirm" placeholder="Confirm Password" autocomplete="new-password" required minlength="8"/><br>
                 <div style="width: 190px; margin: auto;">
                     <input type="checkbox" name="acceptConditions" id="acceptConditions">
                     <label for="acceptConditions">I accept the <a href="/terms">Terms of Use</a> and the <a href="/privacy">Privacy Policy</a>.</label>
                 </div>
             {/if}
             <br>
-            {#if isSignup && loginWithGoogleMode}
-                <SignInWithGoogleButton on:click={onLoginWithGoogle}/>
-            {:else}
-                <input class="loginButton" type="submit" value={isSignup ? "Register 🪄" : "Login 🪄"} disabled={loading}>
-            {/if}
+            <input class="loginButton" type="submit" value={isSignup ? "Register 🪄" : "Login 🪄"} disabled={loading}>
             {#if loading}
                 <div class:loading/>
             {/if}
         </form>
     </div>
-    {#if isSignup && !loginWithGoogleMode}
+    {#if isSignup}
         <div style="margin: 4%;">or</div>
-        <SignInWithGoogleButton on:click={() => loginWithGoogleMode = true}/>
+        <SignInWithGoogleButton on:click={onLoginWithGoogle}/>
     {:else if !isSignup}
         <div style="margin: 4%;">or</div>
         <SignInWithGoogleButton on:click={onLoginWithGoogle}/>
