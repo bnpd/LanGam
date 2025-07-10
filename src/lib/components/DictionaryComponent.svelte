@@ -52,7 +52,7 @@
         formVisible = false
         successMessage = undefined
         formError = undefined
-        const freqIndex = $freqList?.[dictionaryCurrentWord!]?.freq
+        const freqIndex = $freqList?.[dictionaryCurrentWord!]?.i
         freq = freqIndex < 2000 ? 'vital' : 
                 freqIndex < 5000 ? 'basic' :
                 freqIndex < 10000 ? 'common' :
