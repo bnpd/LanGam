@@ -147,7 +147,7 @@ export async function getAllLanguages(){
  * @param {string | undefined} targetLang
  * @param {string | undefined} docId
  * @param {string | undefined} contextParagraphs
- * @returns {Promise<{correction: DocumentC | undefined, response: DocumentC}>} This document will have only the key text.text defined unless docId and targetLang were given as inputs //TODO: add a parameter inline to this function and the backend endpoint instead of this assumption
+ * @returns {Promise<{correction: DocumentC | undefined, response: DocumentC}>} This document will have only the key text.text defined unless docId and targetLang were given as inputs
  */
 export async function sendChat(chatHistory: { role: string; content: string; }[], isInline: boolean, targetLang: string | undefined=undefined, docId: string | undefined=undefined, contextParagraphs: string | undefined=undefined): Promise<{ correction: DocumentC | undefined; response: DocumentC; }> {
 	const chatHistoryText = JSON.stringify(chatHistory.slice(-MAX_CHAT_HISTORY_LENGTH))
@@ -341,7 +341,7 @@ export async function updateUser(changedData: { [x: string]: any; }): Promise<Re
  * @param {{role: string;content: string;}[]} chatHistory
  * @param {string} playerId
  * @param {Number} levelSeqId
- * @returns {Promise<{end_conversation: boolean;outcome: string;correction: DocumentC | undefined;response: DocumentC;}>} This document will have only the key text.text defined unless docId and targetLang were given as inputs //TODO: add a parameter inline to this function and the backend endpoint instead of this assumption
+ * @returns {Promise<{end_conversation: boolean;outcome: string;correction: DocumentC | undefined;response: DocumentC;}>} This document will have only the key text.text defined unless docId and targetLang were given as inputs
  */
 export async function sendGameChat(chatHistory: { role: string; content: string; }[], playerId: string, levelSeqId: number): Promise<{ end_conversation: boolean; outcome: string; correction: DocumentC | undefined; response: DocumentC; }> {
 	const chatHistoryText = JSON.stringify(chatHistory.slice(-MAX_CHAT_HISTORY_LENGTH))

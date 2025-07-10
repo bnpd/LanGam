@@ -231,7 +231,7 @@
         bottom: 100%;
     }
 
-    .inline .card { /* TODO: only for inline (probably use in html instead )*/
+    .inline .card {
         background-color: var(--body-background-color);
         box-shadow: var(--box-shadow-light);
     }

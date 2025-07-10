@@ -45,14 +45,14 @@
                 $username = user_obj.id
                 if (user_obj.native_lang) {
                     getLangById(user_obj.native_lang).then(lang => {
-                        $nativeLang = lang.nameEN
+                        $nativeLang = lang.shortcode
                     })
                 } else {
                     $nativeLang = undefined
                 }
             } else if (!$nativeLang && user_obj.native_lang) { // same user, but his lang preference was lost
                 getLangById(user_obj.native_lang).then(lang => {
-                    $nativeLang = lang.nameEN
+                    $nativeLang = lang.shortcode
                 })
             }
             $targetLang = isSignup ? (await newUserLang(PUBLIC_LANG)).lang : await getLang(PUBLIC_LANG)
@@ -92,14 +92,14 @@
                 $username = user_obj.id
                 if (user_obj.native_lang) {
                     getLangById(user_obj.native_lang).then(lang => {
-                        $nativeLang = lang.nameEN
+                        $nativeLang = lang.shortcode
                     })
                 } else {
                     $nativeLang = undefined
                 }
             } else if (!$nativeLang && user_obj.native_lang) { // same user, but his lang preference was lost
                 getLangById(user_obj.native_lang).then(lang => {
-                    $nativeLang = lang.nameEN
+                    $nativeLang = lang.shortcode
                 })
             }
             $targetLang = isSignup ? (await newUserLang(PUBLIC_LANG)).lang : await getLang(PUBLIC_LANG)
