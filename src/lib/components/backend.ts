@@ -72,7 +72,7 @@ export async function getLangById(langId: string) {
 
 
 export function getUserData() {
-	return pb.authStore?.model
+	return pb.authStore?.record
 }
 
 
