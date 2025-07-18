@@ -57,7 +57,7 @@
         const allVoices = speechSynthesis.getVoices()
         if (allVoices?.length) {
             const separator = allVoices[0].lang.includes('-') ? '-' : '_'
-            let voices_in_lang = allVoices.filter(voice=>{return voice.lang.split(separator)[0].toLowerCase()===$targetLang.shortcode.toLowerCase()})
+            let voices_in_lang = allVoices.filter(voice=>{return voice.lang.split(separator)[0].toLowerCase()===$targetLang.id})
             if (voices_in_lang.length) {
                 voice = voices_in_lang[0]
             }

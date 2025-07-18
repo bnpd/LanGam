@@ -53,12 +53,12 @@ export async function signup(email: string, password: string) {
 
 
 /**
- * @param {string} targetLangShortcode
+ * @param {string} targetLang
  * @returns Promise<{targetLang: any, lang: any}>
  */
-export async function newUserLang(targetLangShortcode: string) {
+export async function newUserLang(targetLang: string) {
 	return pb.send(`/new_user_lang`, {method: 'POST', body: {
-            'langShortcode': targetLangShortcode.toLowerCase()
+            'lang': targetLang.toLowerCase()
         }})
 }
 
@@ -123,13 +123,6 @@ function EndpointGameChat(chatHistoryString: string, playerId: string, levelSeqI
  */
 export async function getUserLang(user: string, targetLangId: string){
 	return pb.collection('user_langs').getFirstListItem(`user = "${user}" && target_lang = "${targetLangId}"`)
-}
-
-/**
- * @param {string} shortcode
- */
-export async function getLang(shortcode: string){
-	return pb.collection('langs').getFirstListItem(`shortcode = "${shortcode.toLowerCase()}"`)
 }
 
 /**

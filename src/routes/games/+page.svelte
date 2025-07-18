@@ -13,7 +13,7 @@
   let games: any[]
 
   onMount(async () => {
-    if (!$username || !$targetLang?.shortcode || !$targetLang?.id) {
+    if (!$username || !$targetLang?.id) {
         goto('/signup')
         return
     }

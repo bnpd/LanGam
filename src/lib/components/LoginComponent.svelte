@@ -1,5 +1,5 @@
 <script lang="ts" defer>
-    import { getGamesByLang, getLang, getLangById, login, loginWithGoogle, newUserLang, signup } from '$lib/components/backend';
+    import { getGamesByLang, getLangById, login, loginWithGoogle, newUserLang, signup } from '$lib/components/backend';
     import { goto } from '$app/navigation';
 	import { inlineChatHistory, reviews, targetLang, nativeLang, username } from '$lib/stores';
 	import { ClientResponseError } from 'pocketbase';
@@ -43,18 +43,14 @@
                 $inlineChatHistory = []
                 $username = user_obj.id
                 if (user_obj.native_lang) {
-                    getLangById(user_obj.native_lang).then(lang => {
-                        $nativeLang = lang.shortcode
-                    })
+                    $nativeLang = user_obj.native_lang
                 } else {
                     $nativeLang = undefined
                 }
             } else if (!$nativeLang && user_obj.native_lang) { // same user, but his lang preference was lost
-                getLangById(user_obj.native_lang).then(lang => {
-                    $nativeLang = lang.shortcode
-                })
+                $nativeLang = user_obj.native_lang
             }
-            $targetLang = isSignup ? (await newUserLang(PUBLIC_LANG)).lang : await getLang(PUBLIC_LANG)
+            $targetLang = isSignup ? (await newUserLang(PUBLIC_LANG)).lang : await getLangById(PUBLIC_LANG)
 
             try {umami.track((isSignup ? 'Signup' : 'Login'), {id: $username, method: 'password'})} catch (_undef) {}
             let advanceLevelAfterSignup = new URLSearchParams(window.location.search).get('advanceLevelAfterSignup')
@@ -85,18 +81,14 @@
                 $inlineChatHistory = []
                 $username = user_obj.id
                 if (user_obj.native_lang) {
-                    getLangById(user_obj.native_lang).then(lang => {
-                        $nativeLang = lang.shortcode
-                    })
+                    $nativeLang = user_obj.native_lang
                 } else {
                     $nativeLang = undefined
                 }
             } else if (!$nativeLang && user_obj.native_lang) { // same user, but his lang preference was lost
-                getLangById(user_obj.native_lang).then(lang => {
-                    $nativeLang = lang.shortcode
-                })
+                $nativeLang = user_obj.native_lang
             }
-            $targetLang = isSignup ? (await newUserLang(PUBLIC_LANG)).lang : await getLang(PUBLIC_LANG)
+            $targetLang = isSignup ? (await newUserLang(PUBLIC_LANG)).lang : await getLangById(PUBLIC_LANG)
 
             try {umami.track((isSignup ? 'Signup' : 'Login'), {id: $username, method: 'google'})} catch (_undef) {}
             let advanceLevelAfterSignup = new URLSearchParams(window.location.search).get('advanceLevelAfterSignup')

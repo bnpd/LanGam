@@ -23,15 +23,7 @@
     const UNKNOWN_POS = 0
     const STUDIED_POS = new Set([UNKNOWN_POS, 84, 86, 92, 93, 100])
     const TRACKED_POS = new Set([...STUDIED_POS, 85, 87, 89, 90, 91, 94, 95, 98])
-    // Remove hardcoded fallback IDs
-    // const FALLBACK_GAME_ID = '4sdspc36rwuf05e'
-    // const ANON_LANG = {
-    //     id: 'mmgox8wdjtvp7uw',
-    //     shortcode: 'PL',
-    //     name: 'Polish',
-    //     learnable: true
-    // }
-    // Instead, use values from $page.data
+
     $: fallbackGameId = $page.data?.gameId;
     $: anonLang = $page.data?.lang;
 

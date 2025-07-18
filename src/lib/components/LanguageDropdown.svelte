@@ -15,8 +15,8 @@
         isOpen = !isOpen;
     }
 
-    function selectLanguage(shortcode: string) {
-        value = shortcode;
+    function selectLanguage(langId: string) {
+        value = langId;
         isOpen = false;
         selectedOption?.focus();
     }
@@ -61,7 +61,7 @@
     }
 
     // Get the display name for the selected language
-    $: selectedLanguage = languages.find(lang => lang.shortcode === value);
+    $: selectedLanguage = languages.find(lang => lang.id === value);
     $: displayValue = selectedLanguage ? selectedLanguage.name_en : (value || placeholder);
 </script>
 
@@ -89,10 +89,10 @@
                 <button
                     type="button"
                     class="dropdown-option"
-                    class:selected={language.shortcode === value}
+                    class:selected={language.id === value}
                     role="option"
-                    aria-selected={language.shortcode === value}
-                    on:click={() => selectLanguage(language.shortcode)}
+                    aria-selected={language.id === value}
+                    on:click={() => selectLanguage(language.id)}
                     on:keydown={handleKeydown}
                 >
                     {language.name_en}

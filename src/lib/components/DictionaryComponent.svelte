@@ -80,7 +80,7 @@
 
     onMount(async () => {
         if (!$freqList) {
-            const response = await fetch(`/freqLists/${$targetLang.shortcode}.json`);
+            const response = await fetch(`/freqLists/${$targetLang.id}.json`);
             $freqList = await response.json();
         }
     })

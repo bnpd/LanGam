@@ -4,7 +4,7 @@
 	import NavbarComponent from '$lib/components/NavbarComponent.svelte';
 	import { isGrammarHighlightingOn, nativeLang, srShowGenus, srShowIPA, targetLang, ttsSpeed } from '$lib/stores';
 	import AccountDeletionComponent from '$lib/components/AccountDeletionComponent.svelte';
-	import { getLang, getUserData, updateUser } from '$lib/components/backend';
+	import { getUserData, updateUser } from '$lib/components/backend';
 	import FeedbackComponent from '$lib/components/FeedbackComponent.svelte';
     import { isLoggedIn } from '$lib/components/backend';
 	import { onMount } from 'svelte';
@@ -12,11 +12,7 @@
 	import { PUBLIC_POCKETBASE_URL } from '$env/static/public';
     import { page } from '$app/stores';
 
-$: if ($nativeLang) {
-    getLang($nativeLang).then(lang => {
-        updateUser({ native_lang: lang.id });
-    });
-}
+$: if ($nativeLang) updateUser({ native_lang: $nativeLang });
 
 
 onMount(() => {
@@ -48,8 +44,8 @@ if (!isLoggedIn()) {
             <label for="nativeLang">Native Language</label>&nbsp;&nbsp;
             <select name="nativeLang" id="nativeLang" autocomplete="language" placeholder="Used for translations" bind:value={$nativeLang}>
                 {#each $page.data?.languages ?? [] as lang}
-                    {#if lang.native && lang.shortcode !== $targetLang?.shortcode}
-                        <option value={lang.shortcode}>{lang.nameEN}</option>
+                    {#if lang.native && lang.id !== $targetLang?.id}
+                        <option value={lang.id}>{lang.nameEN}</option>
                     {/if}
                 {/each}
             </select>

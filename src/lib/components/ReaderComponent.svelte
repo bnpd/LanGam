@@ -2,7 +2,7 @@
   import { currentTask, currentlyScrolledParagraphIndex, loadingTask, nativeLang, targetLang } from '../stores';
 	import { afterUpdate, tick, onMount } from "svelte";
 	import TaskComponent from './TaskComponent.svelte';
-	import { getLang, updateUser, getAllLanguages } from './backend';
+	import { updateUser, getAllLanguages } from './backend';
 
   enum FIELD {TASK, SOLUTION}
 
@@ -168,9 +168,7 @@
   }
 
   async function onNativeLangChosen() {
-    getLang($nativeLang).then(lang => {
-        updateUser({ native_lang: lang.id });  // async in backend, just to save for next login
-    });
+    updateUser({ native_lang: $nativeLang });  // async in backend, just to save for next login
     setSolution($currentTask?.title?.translations[$nativeLang] + '\n\n' + $currentTask?.text?.translations[$nativeLang])
     solutionShown = true
   }
@@ -205,8 +203,8 @@
         <option value={undefined}></option>
         {#await getAllLanguages() then langs}
           {#each langs as lang}
-              {#if lang.native && lang.shortcode !== $targetLang?.shortcode}
-                  <option value={lang.shortcode}>{lang.nameEN}</option>
+              {#if lang.native && lang.id !== $targetLang?.id}
+                  <option value={lang.id}>{lang.nameEN}</option>
               {/if}
           {/each}
         {/await}
