@@ -400,12 +400,7 @@ function subscribeUserToPush() {
  * @returns {Promise<any>} The created game object.
  */
 export async function createGame(game: { name: string; lang: string; img: string; public: boolean }): Promise<any> {
-	console.log(game);
-	
-  return pb.send('/new_game', {
-    method: 'POST',
-    body: game,
-  });
+  return pb.collection('games').create(game);
 }
 
 /**
