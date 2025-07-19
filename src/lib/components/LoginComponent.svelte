@@ -50,7 +50,7 @@
             } else if (!$nativeLang && user_obj.native_lang) { // same user, but his lang preference was lost
                 $nativeLang = user_obj.native_lang
             }
-            $targetLang = isSignup ? (await newUserLang(PUBLIC_LANG)).lang : await getLangById(PUBLIC_LANG)
+            $targetLang = isSignup ? (await newUserLang(PUBLIC_LANG)).expand.target_lang : await getLangById(PUBLIC_LANG)
 
             try {umami.track((isSignup ? 'Signup' : 'Login'), {id: $username, method: 'password'})} catch (_undef) {}
             let advanceLevelAfterSignup = new URLSearchParams(window.location.search).get('advanceLevelAfterSignup')
@@ -88,7 +88,7 @@
             } else if (!$nativeLang && user_obj.native_lang) { // same user, but his lang preference was lost
                 $nativeLang = user_obj.native_lang
             }
-            $targetLang = isSignup ? (await newUserLang(PUBLIC_LANG)).lang : await getLangById(PUBLIC_LANG)
+            $targetLang = isSignup ? (await newUserLang(PUBLIC_LANG)).expand.target_lang : await getLangById(PUBLIC_LANG)
 
             try {umami.track((isSignup ? 'Signup' : 'Login'), {id: $username, method: 'google'})} catch (_undef) {}
             let advanceLevelAfterSignup = new URLSearchParams(window.location.search).get('advanceLevelAfterSignup')

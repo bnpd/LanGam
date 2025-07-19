@@ -52,14 +52,14 @@ export async function signup(email: string, password: string) {
 }
 
 
-/**
- * @param {string} targetLang
- * @returns Promise<{targetLang: any, lang: any}>
- */
-export async function newUserLang(targetLang: string) {
-	return pb.send(`/new_user_lang`, {method: 'POST', body: {
-            'lang': targetLang.toLowerCase()
-        }})
+export async function newUserLang(targetLang: string): Promise<{expand: {target_lang: any}}> {
+	if (!pb.authStore.isValid || !pb.authStore.record) {
+		throw new Error('User not logged in.');
+	}
+	return pb.collection('user_langs').create({
+		'target_lang': targetLang.toLowerCase(),
+		'user': pb.authStore.record.id
+	}, {expand: 'target_lang'})
 }
 
 
