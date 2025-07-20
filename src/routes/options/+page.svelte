@@ -1,15 +1,19 @@
 <script lang="ts" defer>
     import '../global.css';
-	import config from '../../config';
 	import TitleWithBackgroundImageComponent from '$lib/components/TitleWithBackgroundImageComponent.svelte';
 	import NavbarComponent from '$lib/components/NavbarComponent.svelte';
-	import { isGrammarHighlightingOn, srShowGenus, srShowIPA, ttsSpeed } from '$lib/stores';
+	import { isGrammarHighlightingOn, nativeLang, srShowGenus, srShowIPA, targetLang, ttsSpeed } from '$lib/stores';
 	import AccountDeletionComponent from '$lib/components/AccountDeletionComponent.svelte';
-	import { getUserData } from '$lib/components/backend';
+	import { getUserData, updateUser } from '$lib/components/backend';
 	import FeedbackComponent from '$lib/components/FeedbackComponent.svelte';
     import { isLoggedIn } from '$lib/components/backend';
 	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
+	import { PUBLIC_POCKETBASE_URL } from '$env/static/public';
+    import { page } from '$app/stores';
+
+$: if ($nativeLang) updateUser({ native_lang: $nativeLang });
+
 
 onMount(() => {
 // Check if the user is logged in
@@ -25,7 +29,7 @@ if (!isLoggedIn()) {
 <svelte:head>
     <title>Options - LanGam CYOA - language learning "choose you own adventure" game</title>
     <meta name="description" content='Options for LanGam CYOA - language learning "choose you own adventure" game.'>
-    <link rel="preconnect" href={config.pocketbase}>
+    <link rel="preconnect" href={PUBLIC_POCKETBASE_URL}>
 </svelte:head>
 
 <TitleWithBackgroundImageComponent>Options</TitleWithBackgroundImageComponent>
@@ -35,6 +39,16 @@ if (!isLoggedIn()) {
         <div class="setting">
             <label for="email">Email</label>&nbsp;&nbsp;
             <input type="email" name="email" id="email" disabled value={getUserData()?.email}>
+        </div>
+        <div class="setting">
+            <label for="nativeLang">Native Language</label>&nbsp;&nbsp;
+            <select name="nativeLang" id="nativeLang" autocomplete="language" placeholder="Used for translations" bind:value={$nativeLang}>
+                {#each $page.data?.languages ?? [] as lang}
+                    {#if lang.native && lang.id !== $targetLang?.id}
+                        <option value={lang.id}>{lang.nameEN}</option>
+                    {/if}
+                {/each}
+            </select>
         </div>
         <div class="setting">
             <AccountDeletionComponent />
@@ -47,7 +61,7 @@ if (!isLoggedIn()) {
             <label for="ttsSpeed">Speech Output Pace</label>
             <span class="slider">
                 <label for="ttsSpeed">{$ttsSpeed}</label>
-                <input type="range" name="ttsSpeed" id="ttsSpeed" min=0.25 max=1.5 step=0.125 list="ttsSpeedValues" bind:value={$ttsSpeed} on:input={e=>{onInput(e.currentTarget)}}>
+                <input type="range" name="ttsSpeed" id="ttsSpeed" min=0.25 max=1.5 step=0.125 list="ttsSpeedValues" bind:value={$ttsSpeed}>
             </span>
         </div>
     </div>
@@ -76,7 +90,7 @@ if (!isLoggedIn()) {
             Contact: ben@langam.app
         </div>
         
-        <a href="https://blog.langam.app">LanGam Blog</a><br>
+        <!--<a href="https://blog.langam.app">LanGam Blog</a><br>-->
         <a href="/terms">Terms</a><br>
         <a href="/privacy">Privacy Policy</a>
     </div>

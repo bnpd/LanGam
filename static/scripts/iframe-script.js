@@ -1,4 +1,4 @@
-let language = 'Polish' // $targetLang.nameEN
+let language = document?.body?.dataset?.language; // Get language from body data attribute set by WiktionaryFrame as data-language attr
 const FOOTER_HTML = `
 <div class="post-content footer-content">
     <div class="minerva-footer-logo"><img src="https://www.wiktionary.org/static/images/mobile/copyright/wiktionary-wordmark-en.svg" alt="Wiktionary" width="107" height="19" style="width: 6.6875em; height: 1.1875em;"></div>

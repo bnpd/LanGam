@@ -1,15 +1,23 @@
 'use strict';
 import { goto } from '$app/navigation';
+import { PUBLIC_POCKETBASE_URL, PUBLIC_WEBPUSH_PUBLIC_KEY } from '$env/static/public';
 import { VocabCard } from '$lib/fsrs.js';
-import config from '../../config.js';
-import DocumentC from '../DocumentC.js'
+import DocumentC from '$lib/DocumentC'
 import PocketBase, { type RecordModel } from 'pocketbase';
 
 // PocketBase
-const pb = new PocketBase(config.pocketbase)
+const pb = new PocketBase(PUBLIC_POCKETBASE_URL)
 const MAX_CHAT_HISTORY_LENGTH = 20
 const MAX_CHAT_HISTORY_CHARS = 20000
 
+
+export function getTargetLangFromSubdomain(hostname: string | undefined = undefined): string {
+	let tl = (hostname ?? location?.host).split('.')[0]
+	if (tl?.length != 2) {
+		tl = 'en'
+	}
+	return tl
+}
 
 /**
  * Check if the user is logged in
@@ -28,30 +36,30 @@ export async function login(user: string, password: string) {
 }
 
 
-export async function loginWithGoogle(native_lang: string) {
-	return pb.collection('users').authWithOAuth2({ provider: 'google', createData: {native_lang: native_lang} });
+export async function loginWithGoogle() {
+	return pb.collection('users').authWithOAuth2({ provider: 'google' });
 }
 
 
 /**
  * @param {string} email
  * @param {string} password
- * @param {string} native_lang
  */
-export async function signup(email: string, password: string, native_lang: string) {
-	return pb.send('/signup', {method: 'POST', body: {email: email, password: password, native_lang: native_lang}})
+export async function signup(email: string, password: string) {
+	let resPromise = pb.collection('users').create({email: email, password: password, passwordConfirm: password})
+	//pb.collection('users').requestVerification(email).catch(err=>console.error(err))
+	return resPromise
 }
 
 
-/**
- * @param {string} targetLangShortcode
- * @returns Promise<{targetLang: any, lang: any}>
- */
-export async function newUserLang(targetLangShortcode: string) {
-	return pb.send(`/new_user_lang`, {method: 'POST', body: {
-            'langShortcode': targetLangShortcode
-        }})
-	//return backendPost(ENDPOINT_NEW_USER_LANG, {target_lang: targetLang}, true)
+export async function newUserLang(targetLang: string): Promise<{expand: {target_lang: any}}> {
+	if (!pb.authStore.isValid || !pb.authStore.record) {
+		throw new Error('User not logged in.');
+	}
+	return pb.collection('user_langs').create({
+		'target_lang': targetLang.toLowerCase(),
+		'user': pb.authStore.record.id
+	}, {expand: 'target_lang'})
 }
 
 
@@ -64,32 +72,9 @@ export async function getLangById(langId: string) {
 
 
 export function getUserData() {
-	return pb.authStore?.model
+	return pb.authStore?.record
 }
 
-
-// backend endpoint constants
-/**
- * @param {string} targetLang
- * @param {string} docId
- */
-function EndpointGetTask(targetLang: string, docId: string) {return `/task/${targetLang}/${docId}`;}
-/**
- * @param {string} targetLang
- * @param {string} filter
- */
-function EndpointGetTopTasks(targetLang: string, filter: string) {return `/top_tasks/${targetLang}?q=${filter}`;}
-/**
- * @param {string} targetLang
- */
-function EndpointGetDueTask(targetLang: string) {return `/due_task/${targetLang}`;}
-/**
- * @param {string} targetLang
- */
-/**
- * @param {string} targetLang
- */
-function EndpointReview(targetLang: string) {return `/review/${targetLang}`;}
 
 /**
  * Specify EITHER: 
@@ -132,19 +117,6 @@ function EndpointGameChat(chatHistoryString: string, playerId: string, levelSeqI
 	return `/chat_game?hist=${encodeURIComponent(chatHistoryString)}&playerId=${playerId}&seqId=${levelSeqId}`
 }
 
-
-/**
- * @param {string} targetLang
- * @param {string} docId
- * @param {string[]} failedTokens
- */
-export async function sendReview(targetLang: string, docId: string, failedTokens: string[]) {
-	const json = {docId: docId, failedTokens: failedTokens}
-	return backendPost(EndpointReview(targetLang), json)
-}
-
-  
-
 /**
  * @param {string} user
  * @param {string} targetLangId
@@ -154,51 +126,12 @@ export async function getUserLang(user: string, targetLangId: string){
 }
 
 /**
- * @param {string} shortcode
+ * Get all available languages
+ * @returns {Promise<any[]>} Array of language objects
  */
-export async function getLang(shortcode: string){
-	return pb.collection('langs').getFirstListItem(`shortcode = "${shortcode.toUpperCase()}"`)
+export async function getAllLanguages(){
+	return pb.collection('langs').getFullList()
 }
-
-/**
- * @param {string} targetLang
- * @param {string | null} [docId]
- */
-export async function getTask(targetLang: string, docId: string | null){
-	try { 
-		const responseJson = await backendGet(docId ? EndpointGetTask(targetLang, docId) : EndpointGetDueTask(targetLang)) 
-		return DocumentC.fromJson(responseJson)
-	} catch (error) {
-		console.error(error)
-		return Promise.reject(error as Error)
-	}
-}
-
-/**
- * @param {string} targetLang
- * @param {any} query
- * @returns {Promise<any[][]>}
- */
-export async function getTopTasks(targetLang: string, query: any): Promise<any[][]>{
-	return backendGet(EndpointGetTopTasks(targetLang, JSON.stringify(query)), false)
-}
-
-/** Check whether a task is available. SHOULD ONLY BE USED WHEN OFFLINE.
- * @param {string} targetLang
- * @param {string} docId
- */
-export async function isTaskCached(targetLang: string, docId: string){
-	try {
-		await fetch(
-			config.backend + EndpointGetTask(targetLang, docId),
-			{method: 'Head', cache:'force-cache'}
-		);
-		return true
-	} catch (_) {
-		return false
-	}
-}
-    
 
 /**
  * EITHER docId or contextParagraphs should be specified, if both are present, contextParagraphs will be prioritized.
@@ -207,7 +140,7 @@ export async function isTaskCached(targetLang: string, docId: string){
  * @param {string | undefined} targetLang
  * @param {string | undefined} docId
  * @param {string | undefined} contextParagraphs
- * @returns {Promise<{correction: DocumentC | undefined, response: DocumentC}>} This document will have only the key text.text defined unless docId and targetLang were given as inputs //TODO: add a parameter inline to this function and the backend endpoint instead of this assumption
+ * @returns {Promise<{correction: DocumentC | undefined, response: DocumentC}>} This document will have only the key text.text defined unless docId and targetLang were given as inputs
  */
 export async function sendChat(chatHistory: { role: string; content: string; }[], isInline: boolean, targetLang: string | undefined=undefined, docId: string | undefined=undefined, contextParagraphs: string | undefined=undefined): Promise<{ correction: DocumentC | undefined; response: DocumentC; }> {
 	const chatHistoryText = JSON.stringify(chatHistory.slice(-MAX_CHAT_HISTORY_LENGTH))
@@ -234,34 +167,19 @@ export async function sendTutorChat(chatHistory: { role: string; content: string
 	return DocumentC.fromJson(response)
 }
 
-export async function getLevel(gameId: string, seqId: number, simplificationLevel?: string): Promise<RecordModel> {
-	const level = await pb.collection('levels').getFirstListItem(`game="${gameId}" && seq_id=${seqId}`, {expand: 'grammar'})
-
-	// move the desired simplification to default .text/title/question keys, unless simplificationLevel == ''
-	if (simplificationLevel?.length && level.level[`text${simplificationLevel}`]?.text?.length) {
-		level.level.title = level.level[`title${simplificationLevel}`]
-		level.level.text = level.level[`text${simplificationLevel}`]
-		level.level.question = level.level[`question${simplificationLevel}`]
-	}
-	console.log(level);
-	
-	return level
+export async function getLevel(gameId: string, seqId: number, nativeLanguage?: string, desiredSimplificationLevel?: string): Promise<{level: RecordModel, translations: RecordModel[], actualSimplificationLevel: string}> {
+	return pb.send('/level_with_translations_and_grammar', {query: {gameId, seqId, nativeLanguage, simplificationLevel: desiredSimplificationLevel}})
 }
 
 /**
  * @param {string} playerId
  */
-export async function getPlayerLevel(playerId: string, simplificationLevel?: string): Promise<RecordModel> {	
-	const level = await pb.send(`/player_level/${playerId}`, {})
-	// move the desired simplification to default .text/title/question keys, unless simplificationLevel == ''
-	if (simplificationLevel?.length && level.level[`text${simplificationLevel}`]?.text?.length) {
-		level.level.title = level.level[`title${simplificationLevel}`]
-		level.level.text = level.level[`text${simplificationLevel}`]
-		level.level.question = level.level[`question${simplificationLevel}`]
-	}
-	console.log(level);
-	
-	return level
+export async function getPlayerLevel(playerId: string, nativeLanguage?: string, desiredSimplificationLevel?: string): Promise<{level: RecordModel, translations: RecordModel[], actualSimplificationLevel: string}> {
+	return pb.send(`/player_level/${playerId}`, {query: {simplificationLevel: desiredSimplificationLevel, nativeLanguage}})
+}
+
+export async function getTranslations(levelId: string, targetLang: string, actualSimplificationLevel: string = ''): Promise<RecordModel[]> {
+	return pb.collection('translations').getFullList({filter: `level = "${levelId}" && lang = "${targetLang}" && simplification = "${actualSimplificationLevel}"`})
 }
 
 /**
@@ -378,6 +296,22 @@ export async function refreshPlayer(playerId: string) {
 export async function updatePlayer(player: any) {
 	return pb.collection('players').update(player.id, player)
 }
+
+/**
+ * Update the current user in the backend
+ * @param {{ [x: string]: any; }} changedData
+ * @return {Promise<RecordModel>} The updated user record
+ */
+export async function updateUser(changedData: { [x: string]: any; }): Promise<RecordModel> {
+	let user = getUserData()
+	if (!user) {
+		throw new Error('User not logged in.')
+	}
+	for (const [property, value] of Object.entries(changedData)) {
+		user[property] = value
+	}
+	return pb.collection('users').update(user.id, user)
+}
     
 
 /**
@@ -385,7 +319,7 @@ export async function updatePlayer(player: any) {
  * @param {{role: string;content: string;}[]} chatHistory
  * @param {string} playerId
  * @param {Number} levelSeqId
- * @returns {Promise<{end_conversation: boolean;outcome: string;correction: DocumentC | undefined;response: DocumentC;}>} This document will have only the key text.text defined unless docId and targetLang were given as inputs //TODO: add a parameter inline to this function and the backend endpoint instead of this assumption
+ * @returns {Promise<{end_conversation: boolean;outcome: string;correction: DocumentC | undefined;response: DocumentC;}>} This document will have only the key text.text defined unless docId and targetLang were given as inputs
  */
 export async function sendGameChat(chatHistory: { role: string; content: string; }[], playerId: string, levelSeqId: number): Promise<{ end_conversation: boolean; outcome: string; correction: DocumentC | undefined; response: DocumentC; }> {
 	const chatHistoryText = JSON.stringify(chatHistory.slice(-MAX_CHAT_HISTORY_LENGTH))
@@ -407,7 +341,7 @@ export async function backendGet(path: string, authRequired: boolean=true) {
 		goto('/login')
 		return Promise.reject('Not logged in.')
 	}
-	const response = await fetch(config.backend + path, authRequired ? {headers: {Authorization: `Bearer ${pb.authStore.token}`}, cache: navigator.onLine ? 'default' : 'force-cache'} : undefined)
+	const response = await fetch(PUBLIC_POCKETBASE_URL + path, authRequired ? {headers: {Authorization: `Bearer ${pb.authStore.token}`}, cache: navigator.onLine ? 'default' : 'force-cache'} : undefined)
 	if (!response.ok) {
 		if (response.status == 401) {
 			goto('/login')
@@ -416,38 +350,6 @@ export async function backendGet(path: string, authRequired: boolean=true) {
 		throw new Error('Get error.' + await response.text())
 	}
 	return await response.json()
-}
-
-
-/**
- * @param {string} path
- * @param {Object} payload
- * @param {boolean} [authRequired] whether this endpoint requires authorization token
- */
-export async function backendPost(path: string, payload: object, authRequired: boolean=true) {
-	if (authRequired && !pb.authStore.isValid) {
-		goto('/login')
-		return Promise.reject('Not logged in.')
-	}
-    const response = await fetch(config.backend + path, {
-        method: 'POST',
-        headers: authRequired ? {
-			Authorization: `Bearer ${pb.authStore.token}`,
-            'Content-Type': 'application/json',
-        } : {
-			'Content-Type': 'application/json',
-		},
-        body: JSON.stringify(payload),
-    });
-
-    if (!response.ok) {
-		if (response.status == 401) {
-			goto('/login')
-			return Promise.reject('Invalid auth.')
-		}
-        throw new Error('Post error: ' + await response.text());
-    }
-    return await response.json();
 }
 
 // Feedback
@@ -468,7 +370,7 @@ function subscribeUserToPush() {
 		.then(registration => {
 			const subscribeOptions = {
 				userVisibleOnly: true,
-				applicationServerKey: config.webpush_public_key,
+				applicationServerKey: PUBLIC_WEBPUSH_PUBLIC_KEY,
 			};
 			return registration.pushManager.subscribe(subscribeOptions);
 		})
@@ -483,12 +385,7 @@ function subscribeUserToPush() {
  * @returns {Promise<any>} The created game object.
  */
 export async function createGame(game: { name: string; lang: string; img: string; public: boolean }): Promise<any> {
-	console.log(game);
-	
-  return pb.send('/new_game', {
-    method: 'POST',
-    body: game,
-  });
+  return pb.collection('games').create(game);
 }
 
 /**

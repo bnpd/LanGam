@@ -1,5 +1,5 @@
 <script lang="ts" defer>
-	import { chatOutcome, currentlyScrolledParagraphIndex, currentTask, currentTaskNParagraphs, failedWords, nativeLang, player, targetLang, username } from "$lib/stores";
+	import { chatOutcome, currentlyScrolledParagraphIndex, currentTask, currentTaskNParagraphs, dictionaryToken, nativeLang, player, targetLang, username } from "$lib/stores";
 	import { tick } from "svelte";
 	import BadgeComponent from "./BadgeComponent.svelte";
 	import type ReaderComponent from "./ReaderComponent.svelte";
@@ -14,10 +14,9 @@
     const OTHER_ERROR_RESPONSE = 'Cannot connect, please try again'
     
     /**
-     * @type {string | undefined}
+     * @type {{word: string, lemma?: string} | undefined}
      */
-    $: lastFailed = Array.from($failedWords).at(-1);
-    $: lastFailedLemma = lastFailed ? findLemma(lastFailed) : undefined
+    $: lastFailed = $dictionaryToken ? $dictionaryToken : lastFailed;
     $: if (typeof document !== 'undefined' && !inline) {            
             let mainContent = document?.getElementById('contentbox')
             if (mainContent) {
@@ -81,7 +80,7 @@
             throw new Error("Empty chat submitted");
         }
         loading = true
-        const newMessage = {role: 'user', content: DocumentC.partialDocument(chatPrompt, $targetLang.shortcode, undefined, undefined)}
+        const newMessage = {role: 'user', content: DocumentC.partialDocument(chatPrompt, $targetLang.id, undefined, undefined)}
         let new_history = $chatHistory
         try {
             let responseMsg
@@ -97,7 +96,7 @@
                 } else {
                     ({correction, response} = 
                         partialContext ? await sendChat(messageHistoryForChatGpt($chatHistory.concat([newMessage])), inline, undefined, undefined, readerComponent.getVisibleParagraphs())
-                                       : await sendChat(messageHistoryForChatGpt($chatHistory.concat([newMessage])), inline, $targetLang.shortcode, $currentTask.docId, undefined));
+                                       : await sendChat(messageHistoryForChatGpt($chatHistory.concat([newMessage])), inline, $targetLang.id, $currentTask.docId, undefined));
                 }
                 if (correction) {
                     newMessage.content = correction // replace user's message with corrected message
@@ -105,7 +104,7 @@
                         newMessage.role = 'correction'
                     }
                 }
-                (newMessage.content.text.translations ||= {})[$nativeLang] = chatPrompt // replace translation by user's (wrong) message
+                newMessage.content.text.translation = chatPrompt // replace translation by user's (wrong) message
                 responseMsg = {role: 'assistant', content: response};
             } else {
                 let response = DocumentC.partialDocument(ANON_RESPONSE, $nativeLang, undefined, undefined)
@@ -232,7 +231,7 @@
         bottom: 100%;
     }
 
-    .inline .card { /* TODO: only for inline (probably use in html instead )*/
+    .inline .card {
         background-color: var(--body-background-color);
         box-shadow: var(--box-shadow-light);
     }
@@ -264,8 +263,8 @@
                             {:else}
                                 <p class="chatMessage">{msg.content.text.text.trim()}</p>
                             {/if}
-                        {:else if msg.content.text?.translations?.[translationLang]}
-                            <p class="chatMessage">{msg.content.text.translations[translationLang].trim()}</p>
+                        {:else if msg.content.text?.translation}
+                            <p class="chatMessage">{msg.content.text.translation.trim()}</p>
                         {/if}
                     </div>
                 {:else if msg.role === 'internal' && i == $chatHistory.length-1}
@@ -286,13 +285,13 @@
                     How is the past tense formed?
                 </button>
                 {#if lastFailed}
-                    {#if lastFailedLemma && lastFailedLemma !== lastFailed}
+                    {#if lastFailed.lemma && lastFailed.lemma !== lastFailed}
                         <button class="promptSuggestion" on:click={onClickChatSuggestion} disabled={loading}>
-                            Why is it {lastFailed} and not {lastFailedLemma} here?
+                            Why is it "{lastFailed.word}" and not "{lastFailed.lemma}" here?
                         </button>
                     {/if}
                     <button class="promptSuggestion" on:click={onClickChatSuggestion} disabled={loading}>
-                        Why is {lastFailed} used here?
+                        Why is "{lastFailed.word}" used here?
                     </button>
                 {/if}
             </div>

@@ -9,14 +9,15 @@ export const nativeLang = createPersistentStore('native_lang', null);
 export const loadingTask: Writable<boolean> = writable()
 
 /* Study Component Stores */
-export const isSoundOn = createPersistentStore('isSoundOn', true);
+export const isSoundOn = createPersistentStore('isSoundOn', false);
 export const isGrammarHighlightingOn = createPersistentStore('isGrammarHighlightingOn', true);
 export const ttsSpeed = createPersistentStore('ttsSpeed', 0.8);
 export const reviews = createPersistentStore('reviews', []);
 export const reviewDocIds = createPersistentStore('reviewOrder', []);
-export const failedWords = createPersistentStore('failedWords', new Set());
 export const currentTask = createPersistentStore('currentTask', null);
-export const simplificationLevel = createPersistentStore('simplificationLevel', '_simple');
+export const currentSolution = createPersistentStore('currentSolution', null);
+export const desiredSimplificationLevel = createPersistentStore('desiredSimplificationLevel', '_simple');
+export const actualSimplificationLevel = createPersistentStore('actualSimplificationLevel', null);
 export const currentlyScrolledParagraphIndex = createPersistentStore('currentScrolledParagraphIndex', 0);
 export const currentTaskNParagraphs: Writable<number> = writable();
 export const currentGameId = createPersistentStore('currentGameId', null); // Duplicate from $player.game but this one is used for keeping track of whether saved state belongs to a game or a text. Should be undefined if saved state belongs to a text.
@@ -66,7 +67,7 @@ function createPersistentStore(key: string, initialValue: any): Writable<any> {
             store.subscribe((value) => {
                 if (value instanceof Array && value.length > 0 && value[0] instanceof Set) {            
                     localStorage.setItem(key, JSON.stringify(value.map(el => Array.from(el)))); 
-                } else {
+                } else if (value != null) {
                     localStorage.setItem(key, JSON.stringify(value));
                 }
             });

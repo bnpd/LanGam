@@ -1,0 +1,24 @@
+services:
+- type: web
+  name: langam-uat-EN
+  runtime: static
+  repo: https://github.com/bnpd/LanGam
+  branch: svelte
+  envVars:
+  - key: .env
+    sync: false
+  buildCommand: npm install && npm run build
+  staticPublishPath: build
+  autoDeployTrigger: commit
+- type: web
+  name: langam-uat-PL
+  runtime: static
+  repo: https://github.com/bnpd/LanGam
+  branch: svelte
+  envVars:
+  - key: .env
+    sync: false
+  buildCommand: npm install && npm run build
+  staticPublishPath: build
+  autoDeployTrigger: commit
+version: "1"

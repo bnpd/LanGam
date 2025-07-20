@@ -1,19 +1,19 @@
 <script lang="ts" defer>
   import '../global.css'
-  import config from '$lib/../config.js';
 	import { onMount } from 'svelte';
 	import { getGamesByLang } from '$lib/components/backend';
 	import { error } from '@sveltejs/kit';
 	import { targetLang, username } from '$lib/stores';
 	import TitleWithBackgroundImageComponent from '$lib/components/TitleWithBackgroundImageComponent.svelte';
 	import { goto } from '$app/navigation';
+	import { PUBLIC_POCKETBASE_URL } from '$env/static/public';
 
   let FALLBACK_IMAGE = '/images/illustrations/placeholder.avif'
 
   let games: any[]
 
   onMount(async () => {
-    if (!$username || !$targetLang?.shortcode || !$targetLang?.id) {
+    if (!$username || !$targetLang?.id) {
         goto('/signup')
         return
     }
@@ -26,7 +26,7 @@
 <svelte:head>
 	<title>Games - LanGam CYOA - language learning "choose you own adventure" game</title>
   <meta name="description" content="Games - learn languages like play.">
-  <link rel="preconnect" href={config.pocketbase}>
+  <link rel="preconnect" href={PUBLIC_POCKETBASE_URL}>
 </svelte:head>
 
 {#if games}

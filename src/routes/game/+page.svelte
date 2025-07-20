@@ -1,6 +1,5 @@
 <script lang="ts" defer>
 	import '../global.css';
-	import config from '../../config';
 	import { username, targetLang } from '$lib/stores';
 	import { goto } from '$app/navigation';
 	import { onMount } from 'svelte';
@@ -11,6 +10,7 @@
 	import BadgeComponent from '$lib/components/BadgeComponent.svelte';
 	import { getDue } from '$lib/components/backend';
 	import HelpPopup from '$lib/components/HelpPopup.svelte';
+	import { PUBLIC_POCKETBASE_URL } from '$env/static/public';
 
 	let dueWords: any[];
 
@@ -38,7 +38,7 @@
 <svelte:head>
 	<title>LanGam CYOA - language learning "choose you own adventure" game</title>
 	<meta name="description" content="Learn languages like play." />
-	<link rel="preconnect" href={config.pocketbase} />
+	<link rel="preconnect" href={PUBLIC_POCKETBASE_URL} />
 
 	<!-- Proper representation of site name in google search results -->
 	<script type="application/ld+json">
