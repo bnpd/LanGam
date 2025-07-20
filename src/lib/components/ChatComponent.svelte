@@ -104,7 +104,7 @@
                         newMessage.role = 'correction'
                     }
                 }
-                (newMessage.content.text.translations ||= {})[$nativeLang] = chatPrompt // replace translation by user's (wrong) message
+                newMessage.content.text.translation = chatPrompt // replace translation by user's (wrong) message
                 responseMsg = {role: 'assistant', content: response};
             } else {
                 let response = DocumentC.partialDocument(ANON_RESPONSE, $nativeLang, undefined, undefined)
@@ -263,8 +263,8 @@
                             {:else}
                                 <p class="chatMessage">{msg.content.text.text.trim()}</p>
                             {/if}
-                        {:else if msg.content.text?.translations?.[translationLang]}
-                            <p class="chatMessage">{msg.content.text.translations[translationLang].trim()}</p>
+                        {:else if msg.content.text?.translation}
+                            <p class="chatMessage">{msg.content.text.translation.trim()}</p>
                         {/if}
                     </div>
                 {:else if msg.role === 'internal' && i == $chatHistory.length-1}

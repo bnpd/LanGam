@@ -3,36 +3,30 @@ class DocumentC {
     docId: number;
     title: any;
     text: any;
-    content_type: string;
-    topic: string;
-    difficulty: number;
     question: any;
     img: string;
-    constructor(docId: number, title: any, text: any, content_type: string, topic: string, difficulty: number, question: any, img: string) {
+    constructor(docId: number, title: any, text: any, question: any, img: string) {
         this.docId = docId
         this.title = title;
         this.text = text;
-        this.content_type = content_type;
-        this.topic = topic;
-        this.difficulty = difficulty;
         this.question = question;
         this.img = img;
     }
-    static partialDocument(text: string, lang: string, translations: { (lang: string): string; }, tokens: { (index: number): { word: string; pos: number; lemma_: string; }; }) {
+    static partialDocument(text: string, lang: string, translation: string | undefined, tokens: { (index: number): { word: string; pos: number; lemma_: string; }; }) {
         return new DocumentC(undefined, undefined, {
-            lang: lang,
-            text: text,
-            translations: translations,
-            tokens: tokens
-        }, undefined, undefined, undefined, undefined, undefined)
+            lang,
+            text,
+            translation,
+            tokens
+        }, undefined, undefined)
     }
 
     /**
-     * @param {{ docId: number; title: any; text: any; content_type: string; topic: string; difficulty: number; question: any; img: string; }} json
+     * @param {{ docId: number; title: any; text: any; question: any; img: string; }} json
      */
-    static fromJson(json: { docId: number; title: any; text: any; content_type: string; topic: string; difficulty: number; question: any; img: string; }) {
-        const { docId, title, text, content_type, topic, difficulty, question, img } = json;
-        return new DocumentC(docId, title, text, content_type, topic, difficulty, question, img);
+    static fromJson(json: { docId: number; title: any; text: any; question: any; img: string; }) {
+        const { docId, title, text, question, img } = json;
+        return new DocumentC(docId, title, text, question, img);
     }
 
     makeTask() {

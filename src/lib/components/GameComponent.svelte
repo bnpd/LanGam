@@ -2,7 +2,7 @@
     import { onMount } from 'svelte';
     import ReaderComponent from './ReaderComponent.svelte';
     import { completeLevel, getLevel, getPlayer, getPlayerLevel, getUserLang, updatePlayer } from './backend';
-    import { username, targetLang, currentTask, currentlyScrolledParagraphIndex, loadingTask, gameChatHistory, player, chatOutcome, currentGameId, inlineChatHistory, morphHighlightFilter, currentTaskNParagraphs, simplificationLevel } from '$lib/stores';
+    import { username, targetLang, currentTask, currentSolution, currentlyScrolledParagraphIndex, loadingTask, gameChatHistory, player, chatOutcome, currentGameId, inlineChatHistory, morphHighlightFilter, currentTaskNParagraphs, desiredSimplificationLevel, actualSimplificationLevel, nativeLang } from '$lib/stores';
 	import { goto } from '$app/navigation';
 	import Toast from './Toast.svelte';
 	import ChatComponent from './ChatComponent.svelte';
@@ -15,8 +15,6 @@
 	import Popup from './Popup.svelte';
     import { page } from '$app/stores';
 
-    const TOAST_REDIRECTED_SAVED_TASK = "Your selected text has been queued cause you have a saved game level."
-    const TEXT_REJECT_SAVED_TASK = "Discard saved"
     const DEFAULT_CONGRATS_MESSAGE = 'Well done, keep up the pace!'
     const DEFAULT_CONGRATS_TITLE = 'Level complete 🙌'
 
@@ -42,14 +40,12 @@
     }}
 
     let toast: string | undefined;
-    let textRejectToast: string | undefined;
     let readerComponent: ReaderComponent;
     let nNewForms: number | undefined;
     let congratsTitle: string | undefined;
     let congratsMessage: string | undefined;
     let statsClosedPromise: Promise<boolean>;
     let statsClosedPromiseResolve: Function;
-    let redirectedDoc: string | null
     let showGameChatSuggestions: boolean = false;
     let grammarChapter: { title_en: string; text_en: string; } | undefined
     let showTutorChat: boolean = false
@@ -83,26 +79,7 @@
             }
         }
                 
-        if ($gameChatHistory.length > 1 || $inlineChatHistory.length > 1) {
-            // we have a saved state from last session to restore
-            if(!$currentGameId) { // but it doesn't belong to a game, so redirect
-                const urlGameId = new URLSearchParams(window.location.search).get('gameId')
-                goto('/read' + (urlGameId ? `?redirectedGame=${urlGameId}` : ''));
-                return
-            }
-
-            await nextTask(true);
-
-            redirectedDoc = new URLSearchParams(window.location.search).get('redirectedDoc')
-
-            if (redirectedDoc) {
-                toast = TOAST_REDIRECTED_SAVED_TASK;
-                textRejectToast = TEXT_REJECT_SAVED_TASK
-            }
-        } else {
-            await nextTask(); 
-            initChatHistory();
-        }
+        await nextTask();
     })
 
     async function onAnswbtnClick(outcome: string) {
@@ -140,8 +117,6 @@
         }
         
         await nextTask() // IMPROVEMENT: we could even pre-fetch the next task while stats popup is shown
-        initChatHistory()
-
     }
 
     async function onLevelBackbtnClick() {
@@ -151,45 +126,53 @@
         $player.powers = $player.level_history[prevLevelSeqId].powers
         updatePlayer($player) // this can just happen async (if it fails it would give room for cheating/frustration though)
         await prevTask(prevLevelSeqId)
-        initChatHistory()
     }
 
     async function prevTask(seqId: number) { // like next task but only with the things necessary when moving back to previous level where we already know seqId
         finishedGame = false
         $loadingTask = true
-        const level = await getLevel($player.game, seqId, $simplificationLevel)
-        let doc = level?.['level']
-        doc.docId = level.seq_id
-        if (doc) $loadingTask = false;
-        $currentTask = doc
+        const {level, translations, actualSimplificationLevel} = await getLevel($player.game, seqId, $nativeLang, $desiredSimplificationLevel)
+        $actualSimplificationLevel = actualSimplificationLevel
+        level.docId = level.seq_id
+        if (level) $loadingTask = false;
+        $currentTask = level
+        if (translations) $currentSolution = translations.find(t => t.field === 'title')?.text + '\n\n' + translations.find(t => t.field === 'text')?.text
         $currentlyScrolledParagraphIndex = 0
         showGameChatSuggestions = false
         grammarChapter = level.expand?.grammar
         $morphHighlightFilter = level.expand?.grammar?.morphHighlightFilter
+        initChatHistory(translations?.find(t => t.field === 'question')?.text)
     }
 
-    async function nextTask(restoreScrollPosition: boolean = false){
-        let level
+    async function nextTask(){
+        let level, translations
         try {
-            level = await getPlayerLevel($player.id, $simplificationLevel)
-        } catch (error) {            
+            let res = await getPlayerLevel($player.id, $nativeLang, $desiredSimplificationLevel)
+            level = res.level
+            translations = res.translations
+            $actualSimplificationLevel = res.actualSimplificationLevel
+        } catch (error) {
             if (error.status == 404) {
                 finishedGame = true
                 $loadingTask = false
                 return
             }
             toast = "Cannot connect to the internet."
+            return
         }
         $player.level = level.seq_id
 
-        let doc = level?.['level']
-        doc.docId = level.seq_id
+        level.docId = level.seq_id
         
-        if (doc) $loadingTask = false;
-        $currentTask = doc
+        if (level) $loadingTask = false;
+        $currentTask = level
+        if (translations) $currentSolution = translations.find(t => t.field === 'title')?.text + '\n\n' + translations.find(t => t.field === 'text')?.text
 
-        if (!restoreScrollPosition) {            
+        if ($gameChatHistory.length > 1 || $inlineChatHistory.length > 1) {         
+            // we have a saved state from last session to restore
             $currentlyScrolledParagraphIndex = 0
+        } else {
+            initChatHistory(translations?.find(t => t.field === 'question')?.text)
         }
         showGameChatSuggestions = false
 
@@ -205,7 +188,7 @@
                 })
                 if (!user_lang?.seen_words) return
                 const prev_seen_words = new Set(Object.keys(user_lang.seen_words))
-                let new_forms = new Set(Object.values(doc?.title?.tokens).concat(Object.values(doc?.text?.tokens).concat(Object.values(doc?.question?.tokens)))
+                let new_forms = new Set(Object.values(level?.title?.tokens).concat(Object.values(level?.text?.tokens).concat(Object.values(level?.question?.tokens)))
                                 .filter((tok: any) => TRACKED_POS.has(tok.pos))
                                 .map((tok: any) => tok.lemma_))
                 new_forms = new_forms.difference(prev_seen_words)            
@@ -214,8 +197,8 @@
         }, 5000);
     }
 
-    function initChatHistory() {
-        $gameChatHistory = $currentTask?.question?.text ? [{role: 'assistant', content: DocumentC.partialDocument($currentTask?.question?.text, $currentTask?.lang, $currentTask?.question?.translations, $currentTask?.question?.tokens)}] : [];
+    function initChatHistory(firstMsgTranslation: string | undefined = undefined) {
+        $gameChatHistory = $currentTask?.question?.text ? [{role: 'assistant', content: DocumentC.partialDocument($currentTask?.question?.text, $currentTask?.lang, firstMsgTranslation, $currentTask?.question?.tokens)}] : [];
         $chatOutcome = !($gameChatHistory?.length) ? 'default' : null // if AI is NOT starting a chat with us, chatOutcome = default so that forward button is enabled
     }
 
@@ -244,7 +227,7 @@
 {:else}
     <ReaderComponent srWords={new Set()} bind:this={readerComponent}>
         <span slot="afterTask" hidden={!$currentTask}>{#if $gameChatHistory?.length}<ChatComponent readerComponent={readerComponent} inline={true} chatBoxTitle="Twoja odpowiedź 🤙" chatHistory={gameChatHistory} srWords={new Set()} isGame={true} showGameChatSuggestions={showGameChatSuggestions}/>{/if}</span>
-        <span slot="afterSolution">{#if $gameChatHistory?.length}<ChatComponent readerComponent={readerComponent} inline={true} chatBoxTitle={undefined} chatHistory={gameChatHistory} translationLang='en' isGame={true}/>{/if}</span>
+        <span slot="afterSolution">{#if $gameChatHistory?.length}<ChatComponent readerComponent={readerComponent} inline={true} chatBoxTitle={undefined} chatHistory={gameChatHistory} translationLang={$nativeLang} isGame={true}/>{/if}</span>
     </ReaderComponent>
 {/if}
 <div style="text-align: center;">
@@ -284,11 +267,6 @@
 <div hidden={!showTutorChat}>
     <ChatComponent bind:chatFocussed={showTutorChat} readerComponent={readerComponent} inline={false} chatBoxTitle="AI tutor - ask me anything ✨"/>
 </div>
-<Toast message={toast} textReject={textRejectToast} onReject={() => {
-    $currentGameId = undefined;
-    $gameChatHistory = [];
-    goto('/read?doc='+redirectedDoc);
-}}/>
 <Toast bind:message={lockedLevelToast}/>
 <SuccessPopup 
     bind:title={congratsTitle} 

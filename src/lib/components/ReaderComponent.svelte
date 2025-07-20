@@ -1,8 +1,8 @@
 <script lang="ts" defer>
-  import { currentTask, currentlyScrolledParagraphIndex, loadingTask, nativeLang, targetLang } from '../stores';
-	import { afterUpdate, tick, onMount } from "svelte";
+  import { currentSolution, currentTask, gameChatHistory, currentlyScrolledParagraphIndex, loadingTask, nativeLang, targetLang, actualSimplificationLevel } from '../stores';
+	import { afterUpdate, tick } from "svelte";
 	import TaskComponent from './TaskComponent.svelte';
-	import { updateUser, getAllLanguages } from './backend';
+	import { updateUser, getAllLanguages, getTranslations } from './backend';
 
   enum FIELD {TASK, SOLUTION}
 
@@ -20,6 +20,7 @@
   export let srWords: Set<String> | undefined
 
   $: if($currentTask) onTaskReset()
+  $: if($currentSolution) setSolution($currentSolution)
   $: if($nativeLang) onNativeLangChosen()
   afterUpdate(async () => {
     await tick();    
@@ -162,14 +163,13 @@
   async function onTaskReset() {
     if (divTask) divTask.scrollTop = 0
     solutionShown = false
-    if ($nativeLang) {
-      setSolution($currentTask?.title?.translations[$nativeLang] + '\n\n' + $currentTask?.text?.translations[$nativeLang])
-    }
   }
 
   async function onNativeLangChosen() {
+    let translations = await getTranslations($currentTask?.id, $nativeLang, $actualSimplificationLevel);
+    $currentSolution = translations.find(t => t.field === 'title')?.text + '\n\n' + translations.find(t => t.field === 'text')?.text
+    if ($gameChatHistory?.length) $gameChatHistory[0].content.text.translation = translations.find(t => t.field === 'question')?.text
     updateUser({ native_lang: $nativeLang });  // async in backend, just to save for next login
-    setSolution($currentTask?.title?.translations[$nativeLang] + '\n\n' + $currentTask?.text?.translations[$nativeLang])
     solutionShown = true
   }
 

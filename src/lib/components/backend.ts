@@ -167,34 +167,19 @@ export async function sendTutorChat(chatHistory: { role: string; content: string
 	return DocumentC.fromJson(response)
 }
 
-export async function getLevel(gameId: string, seqId: number, simplificationLevel?: string): Promise<RecordModel> {
-	const level = await pb.collection('levels').getFirstListItem(`game="${gameId}" && seq_id=${seqId}`, {expand: 'grammar'})
-
-	// move the desired simplification to default .text/title/question keys, unless simplificationLevel == ''
-	if (simplificationLevel?.length && level.level[`text${simplificationLevel}`]?.text?.length) {
-		level.level.title = level.level[`title${simplificationLevel}`]
-		level.level.text = level.level[`text${simplificationLevel}`]
-		level.level.question = level.level[`question${simplificationLevel}`]
-	}
-	console.log(level);
-	
-	return level
+export async function getLevel(gameId: string, seqId: number, nativeLanguage?: string, desiredSimplificationLevel?: string): Promise<{level: RecordModel, translations: RecordModel[], actualSimplificationLevel: string}> {
+	return pb.send('/level_with_translations_and_grammar', {query: {gameId, seqId, nativeLanguage, simplificationLevel: desiredSimplificationLevel}})
 }
 
 /**
  * @param {string} playerId
  */
-export async function getPlayerLevel(playerId: string, simplificationLevel?: string): Promise<RecordModel> {	
-	const level = await pb.send(`/player_level/${playerId}`, {})
-	// move the desired simplification to default .text/title/question keys, unless simplificationLevel == ''
-	if (simplificationLevel?.length && level.level[`text${simplificationLevel}`]?.text?.length) {
-		level.level.title = level.level[`title${simplificationLevel}`]
-		level.level.text = level.level[`text${simplificationLevel}`]
-		level.level.question = level.level[`question${simplificationLevel}`]
-	}
-	console.log(level);
-	
-	return level
+export async function getPlayerLevel(playerId: string, nativeLanguage?: string, desiredSimplificationLevel?: string): Promise<{level: RecordModel, translations: RecordModel[], actualSimplificationLevel: string}> {
+	return pb.send(`/player_level/${playerId}`, {query: {simplificationLevel: desiredSimplificationLevel, nativeLanguage}})
+}
+
+export async function getTranslations(levelId: string, targetLang: string, actualSimplificationLevel: string = ''): Promise<RecordModel[]> {
+	return pb.collection('translations').getFullList({filter: `level = "${levelId}" && lang = "${targetLang}" && simplification = "${actualSimplificationLevel}"`})
 }
 
 /**

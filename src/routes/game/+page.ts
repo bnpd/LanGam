@@ -23,7 +23,7 @@ export const load: PageLoad = async () => {
         throw new Error(`No games found for language: ${langId}`);
     }
 
-    const firstLevelParagraphs = DocumentC.fromJson((await getLevel(game.id, 1, '_simple'))['level']).makeTask();
+    const firstLevelParagraphs = DocumentC.fromJson(await getLevel(game.id, 1, langId, '_simple') as any).makeTask();
 
     const gameId = game.id;
     const collectionId = game.collectionId;
