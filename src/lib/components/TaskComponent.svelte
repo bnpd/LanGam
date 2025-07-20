@@ -15,9 +15,6 @@
     function onNewTask(doc: DocumentC) {
         let resParas = DocumentC.fromJson(doc).makeTask()
 
-        console.log(resParas);
-        
-        
         if (task.title) { // if it is an acutal level, not just a chat bubble which doesn't have title, set task length
             $currentTaskNParagraphs = resParas.length
         }        
