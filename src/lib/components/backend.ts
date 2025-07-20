@@ -10,15 +10,6 @@ const pb = new PocketBase(PUBLIC_POCKETBASE_URL)
 const MAX_CHAT_HISTORY_LENGTH = 20
 const MAX_CHAT_HISTORY_CHARS = 20000
 
-
-export function getTargetLangFromSubdomain(hostname: string | undefined = undefined): string {
-	let tl = (hostname ?? location?.host).split('.')[0]
-	if (tl?.length != 2) {
-		tl = 'en'
-	}
-	return tl
-}
-
 /**
  * Check if the user is logged in
  * @returns {boolean} True if the user is logged in, false otherwise
