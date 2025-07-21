@@ -1,6 +1,6 @@
 services:
 - type: web
-  name: langam-uat-EN
+  name: langam-prod-EN
   runtime: static
   repo: https://github.com/bnpd/LanGam
   branch: svelte
@@ -11,7 +11,7 @@ services:
   staticPublishPath: build
   autoDeployTrigger: commit
 - type: web
-  name: langam-uat-PL
+  name: langam-prod-PL
   runtime: static
   repo: https://github.com/bnpd/LanGam
   branch: svelte
