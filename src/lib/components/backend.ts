@@ -104,8 +104,8 @@ function EndpointTutorChat(chatHistoryText: string, contextParagraphs: string) {
  * @param {number} levelSeqId
  * @param {string} playerId
  */
-function EndpointGameChat(chatHistoryString: string, playerId: string, levelSeqId: number) {
-	return `/chat_game?hist=${encodeURIComponent(chatHistoryString)}&playerId=${playerId}&seqId=${levelSeqId}`
+function EndpointGameChat(chatHistoryString: string, playerId: string) {
+	return `/chat_game?hist=${encodeURIComponent(chatHistoryString)}&playerId=${playerId}`
 }
 
 /**
@@ -293,12 +293,12 @@ export async function updateUser(changedData: { [x: string]: any; }): Promise<Re
  * @param {Number} levelSeqId
  * @returns {Promise<{end_conversation: boolean;outcome: string;correction: DocumentC | undefined;response: DocumentC;}>} This document will have only the key text.text defined unless docId and targetLang were given as inputs
  */
-export async function sendGameChat(chatHistory: { role: string; content: string; }[], playerId: string, levelSeqId: number): Promise<{ end_conversation: boolean; outcome: string; correction: DocumentC | undefined; response: DocumentC; }> {
+export async function sendGameChat(chatHistory: { role: string; content: string; }[], playerId: string): Promise<{ end_conversation: boolean; outcome: string; correction: DocumentC | undefined; response: DocumentC; }> {
 	const chatHistoryText = JSON.stringify(chatHistory.slice(-MAX_CHAT_HISTORY_LENGTH))
 	if (chatHistoryText.length > MAX_CHAT_HISTORY_CHARS) {
 		throw new Error("Chat history too long.");		
 	}
-	let {correction_of_learner_message, response, end_conversation, outcome} = await pb.send(EndpointGameChat(chatHistoryText, playerId, levelSeqId), {})
+	let {correction_of_learner_message, response, end_conversation, outcome} = await pb.send(EndpointGameChat(chatHistoryText, playerId), {})
 	return {end_conversation: end_conversation, outcome: outcome, correction: correction_of_learner_message ? DocumentC.fromJson(correction_of_learner_message) : undefined, response: DocumentC.fromJson(response)}
 }
 

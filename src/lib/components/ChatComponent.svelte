@@ -83,7 +83,7 @@
             let response
             if (inline) {
                 let end_conversation, outcome
-                ({end_conversation, outcome, correction, response} = await sendGameChat(messageHistoryForChatGpt($chatHistory.concat([newMessage])), $player.id, $player.level));
+                ({end_conversation, outcome, correction, response} = await sendGameChat(messageHistoryForChatGpt($chatHistory.concat([newMessage])), $player.id));
                 $chatOutcome = end_conversation ? outcome : null
             } else {
                 response = await sendTutorChat(messageHistoryForChatGpt($chatHistory.concat([newMessage])), readerComponent.getVisibleParagraphs())                    
