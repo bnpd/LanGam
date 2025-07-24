@@ -209,11 +209,12 @@ export async function getOwnGames(): Promise<any[]> {
 }
 
 /**
- * Get current user's player for the specified game
+ * Get/Create current user's player for the specified game
  * @param {string} gameId
+ * @param {{ [x: string]: any; }} [playerCreateData] - Optional player data to send to the backend. Only stats, powers, level and level_history are used.
  */
-export async function getPlayer(gameId: string) {
-	return pb.send(`/user_player/${gameId}`, {})
+export async function getPlayer(gameId: string, playerCreateData?: { [x: string]: any; }): Promise<RecordModel> {
+	return pb.send(`/user_player/${gameId}`, { method: 'POST', body: playerCreateData ? {playerCreateData} : undefined })
 }
 
 /**

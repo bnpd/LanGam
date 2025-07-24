@@ -72,7 +72,7 @@
                 return
             }
 
-            $player = await getPlayer($currentGameId)
+            $player = await getPlayer($currentGameId, $player)
         }
                 
         await nextTask();
@@ -181,7 +181,7 @@
         grammarChapter = level.expand?.grammar
         $morphHighlightFilter = level.expand?.grammar?.morphHighlightFilter
         
-        if ($player.level_history.order.length > 1) {
+        if (!username && $player.level_history?.order.length > 1) {
             // player advanced two levels, time to consider signing up
             showSignupPrompt = true
             try {umami.track('Signup Prompt shown')} catch (_undef) {}
