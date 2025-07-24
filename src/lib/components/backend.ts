@@ -1,5 +1,4 @@
 'use strict';
-import { goto } from '$app/navigation';
 import { PUBLIC_POCKETBASE_URL, PUBLIC_WEBPUSH_PUBLIC_KEY } from '$env/static/public';
 import { VocabCard } from '$lib/fsrs.js';
 import DocumentC from '$lib/DocumentC'
@@ -9,6 +8,7 @@ import PocketBase, { type RecordModel } from 'pocketbase';
 const pb = new PocketBase(PUBLIC_POCKETBASE_URL)
 const MAX_CHAT_HISTORY_LENGTH = 20
 const MAX_CHAT_HISTORY_CHARS = 20000
+
 
 /**
  * Check if the user is logged in
@@ -68,47 +68,6 @@ export function getUserData() {
 
 
 /**
- * Specify EITHER: 
- * isInline=true + docId+targetLang or
- * isInline=false + (docId+targetLang OR contextParagraphs)
- * @param {string} chatHistoryString
- * @param {boolean} isInline
- * @param {string | undefined} targetLang
- * @param {string | undefined} docId
- * @param {string | undefined} contextParagraphs
- */
-function EndpointChat(chatHistoryString: string, isInline: boolean, targetLang: string | undefined=undefined, docId: string | undefined=undefined, contextParagraphs: string | undefined=undefined) {
-	if (isInline && !(docId && targetLang)) throw new Error('EndpointChat: Incompatible parameters: isInline without docId+targetLang')
-	if (docId && targetLang && contextParagraphs) throw new Error('EndpointChat: Incompatible parameters: docId+targetLang+contextParagraphs')
-	let tutorParams = '';
-	if (contextParagraphs) {
-		tutorParams = `&ctx=${encodeURIComponent(contextParagraphs)}`;
-	} else if (docId && targetLang) {
-		tutorParams = `&docId=${docId}&targetLang=${targetLang}`;
-	}
-	return isInline
-		? `/chat_tandem?hist=${encodeURIComponent(chatHistoryString)}` + (`&docId=${docId}&targetLang=${targetLang}`)
-		: `/chat_tutor?hist=${encodeURIComponent(chatHistoryString)}` + tutorParams;
-}
-
-/**
- * @param {string} chatHistoryText
- * @param {string} contextParagraphs
- */
-function EndpointTutorChat(chatHistoryText: string, contextParagraphs: string) {
-	return `/chat_tutor?hist=${encodeURIComponent(chatHistoryText)}&ctx=${contextParagraphs}`
-}
-
-/**
- * @param {string} chatHistoryString
- * @param {number} levelSeqId
- * @param {string} playerId
- */
-function EndpointGameChat(chatHistoryString: string, playerId: string) {
-	return `/chat_game?hist=${encodeURIComponent(chatHistoryString)}&playerId=${playerId}`
-}
-
-/**
  * @param {string} user
  * @param {string} targetLangId
  */
@@ -116,11 +75,7 @@ export async function getUserLang(user: string, targetLangId: string){
 	return pb.collection('user_langs').getFirstListItem(`user = "${user}" && target_lang = "${targetLangId}"`)
 }
 
-/**
- * Get all available languages
- * @returns {Promise<any[]>} Array of language objects
- */
-export async function getAllLanguages(){
+export async function getAllLanguages(): Promise<RecordModel[]> {
 	return pb.collection('langs').getFullList()
 }
 
@@ -135,7 +90,7 @@ export async function sendTutorChat(chatHistory: { role: string; content: string
 	if (chatHistoryText.length > MAX_CHAT_HISTORY_CHARS) {
 		throw new Error("Chat history too long.");		
 	}
-	let {response} = await pb.send(EndpointTutorChat(chatHistoryText, contextParagraphs), {})
+	let {response} = await pb.send('chat_tutor', {query: {hist: chatHistoryText, ctx: contextParagraphs}})
 	return DocumentC.fromJson(response)
 }
 
@@ -298,7 +253,7 @@ export async function sendGameChat(chatHistory: { role: string; content: string;
 	if (chatHistoryText.length > MAX_CHAT_HISTORY_CHARS) {
 		throw new Error("Chat history too long.");		
 	}
-	let {correction_of_learner_message, response, end_conversation, outcome} = await pb.send(EndpointGameChat(chatHistoryText, playerId), {})
+	let {correction_of_learner_message, response, end_conversation, outcome} = await pb.send('chat_game', {query: {hist: chatHistoryText, playerId: playerId}})
 	return {end_conversation: end_conversation, outcome: outcome, correction: correction_of_learner_message ? DocumentC.fromJson(correction_of_learner_message) : undefined, response: DocumentC.fromJson(response)}
 }
 
