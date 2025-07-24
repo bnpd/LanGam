@@ -125,25 +125,6 @@ export async function getAllLanguages(){
 }
 
 /**
- * EITHER docId or contextParagraphs should be specified, if both are present, contextParagraphs will be prioritized.
- * @param {{role: string;content: string;}[]} chatHistory
- * @param {boolean} isInline
- * @param {string | undefined} targetLang
- * @param {string | undefined} docId
- * @param {string | undefined} contextParagraphs
- * @returns {Promise<{correction: DocumentC | undefined, response: DocumentC}>} This document will have only the key text.text defined unless docId and targetLang were given as inputs
- */
-export async function sendChat(chatHistory: { role: string; content: string; }[], isInline: boolean, targetLang: string | undefined=undefined, docId: string | undefined=undefined, contextParagraphs: string | undefined=undefined): Promise<{ correction: DocumentC | undefined; response: DocumentC; }> {
-	const chatHistoryText = JSON.stringify(chatHistory.slice(-MAX_CHAT_HISTORY_LENGTH))
-	if (chatHistoryText.length > MAX_CHAT_HISTORY_CHARS) {
-		throw new Error("Chat history too long.");		
-	}
-	let {correction_of_learner_message, response} = await backendGet(EndpointChat(chatHistoryText, isInline, targetLang, docId, contextParagraphs))
-	return {correction: correction_of_learner_message ? DocumentC.fromJson(correction_of_learner_message) : undefined, response: DocumentC.fromJson(response)}
-}
-    
-
-/**
  * Versatile chat, envisioned to be used in the user's native language to ask the tutor about a confusion
  * @param {{role: string;content: string;}[]} chatHistory
  * @param {string} contextParagraphs
@@ -319,28 +300,6 @@ export async function sendGameChat(chatHistory: { role: string; content: string;
 	}
 	let {correction_of_learner_message, response, end_conversation, outcome} = await pb.send(EndpointGameChat(chatHistoryText, playerId, levelSeqId), {})
 	return {end_conversation: end_conversation, outcome: outcome, correction: correction_of_learner_message ? DocumentC.fromJson(correction_of_learner_message) : undefined, response: DocumentC.fromJson(response)}
-}
-
-
-// lowlevel python backend communication
-/**
- * @param {string} path
- * @param {boolean} [authRequired] whether this endpoint requires authorization token
- */
-export async function backendGet(path: string, authRequired: boolean=true) {
-	if (authRequired && !pb.authStore.isValid) {
-		goto('/login')
-		return Promise.reject('Not logged in.')
-	}
-	const response = await fetch(PUBLIC_POCKETBASE_URL + path, authRequired ? {headers: {Authorization: `Bearer ${pb.authStore.token}`}, cache: navigator.onLine ? 'default' : 'force-cache'} : undefined)
-	if (!response.ok) {
-		if (response.status == 401) {
-			goto('/login')
-			return Promise.reject('Invalid auth.')
-		}
-		throw new Error('Get error.' + await response.text())
-	}
-	return await response.json()
 }
 
 // Feedback
