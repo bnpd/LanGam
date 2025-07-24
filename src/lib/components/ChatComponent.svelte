@@ -3,7 +3,7 @@
 	import { tick } from "svelte";
 	import BadgeComponent from "./BadgeComponent.svelte";
 	import type ReaderComponent from "./ReaderComponent.svelte";
-	import { sendChat, sendGameChat, sendTutorChat } from "./backend";
+	import { sendGameChat, sendGameChatAnon, sendTutorChat } from "./backend";
 	import { writable, type Writable } from "svelte/store";
 	import TaskComponent from "./TaskComponent.svelte";
 	import DocumentC from "$lib/DocumentC";
@@ -82,9 +82,12 @@
             let correction
             let response
             if (inline) {
-                let end_conversation, outcome
-                ({end_conversation, outcome, correction, response} = await sendGameChat(messageHistoryForChatGpt($chatHistory.concat([newMessage])), $player.id));
+                let end_conversation, outcome, updatedPlayerMaybe
+                ({end_conversation, outcome, correction, response, player: updatedPlayerMaybe} = 
+                    $username ? await sendGameChat(messageHistoryForChatGpt($chatHistory.concat([newMessage])), $player.id)
+                    : await sendGameChatAnon(messageHistoryForChatGpt($chatHistory.concat([newMessage])), $player));
                 $chatOutcome = end_conversation ? outcome : null
+                if (updatedPlayerMaybe) $player = updatedPlayerMaybe
             } else {
                 response = await sendTutorChat(messageHistoryForChatGpt($chatHistory.concat([newMessage])), readerComponent.getVisibleParagraphs())                    
             }

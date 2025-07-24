@@ -110,14 +110,22 @@ export async function getTranslations(levelId: string, targetLang: string, actua
 }
 
 /**
- * @param {string} playerId
- * @param {number} seqId
- * @param {string} outcome
  * @returns {Promise<any>} The updated player
  */
 export async function completeLevel(playerId: string, seqId: number, outcome: string): Promise<any> {
 	return pb.send(`/complete_level`, {method: 'POST', body: {
 		playerId: playerId, 
+		seqId: seqId, 
+		outcome: outcome
+	}}).then(res => res.player)
+}
+
+/**
+ * @returns {Promise<any>} The updated player
+ */
+export async function completeLevelAnon(player: any, seqId: number, outcome: string): Promise<any> {
+	return pb.send(`/complete_level_anon`, {method: 'POST', body: {
+		player: player, 
 		seqId: seqId, 
 		outcome: outcome
 	}}).then(res => res.player)
@@ -242,20 +250,29 @@ export async function updateUser(changedData: { [x: string]: any; }): Promise<Re
     
 
 /**
- * Send chat in game mode
- * @param {{role: string;content: string;}[]} chatHistory
- * @param {string} playerId
- * @param {Number} levelSeqId
- * @returns {Promise<{end_conversation: boolean;outcome: string;correction: DocumentC | undefined;response: DocumentC;}>} This document will have only the key text.text defined unless docId and targetLang were given as inputs
+ * Send chat in game mode with player logged in
  */
-export async function sendGameChat(chatHistory: { role: string; content: string; }[], playerId: string): Promise<{ end_conversation: boolean; outcome: string; correction: DocumentC | undefined; response: DocumentC; }> {
+export async function sendGameChat(chatHistory: { role: string; content: string; }[], playerId: string): Promise<{ end_conversation: boolean; outcome: string; correction: DocumentC | undefined; response: DocumentC; player: RecordModel | undefined; }> {
 	const chatHistoryText = JSON.stringify(chatHistory.slice(-MAX_CHAT_HISTORY_LENGTH))
 	if (chatHistoryText.length > MAX_CHAT_HISTORY_CHARS) {
 		throw new Error("Chat history too long.");		
 	}
-	let {correction_of_learner_message, response, end_conversation, outcome} = await pb.send('chat_game', {query: {hist: chatHistoryText, playerId: playerId}})
-	return {end_conversation: end_conversation, outcome: outcome, correction: correction_of_learner_message ? DocumentC.fromJson(correction_of_learner_message) : undefined, response: DocumentC.fromJson(response)}
+	let {correction_of_learner_message, response, end_conversation, outcome, player: updatedPlayer} = await pb.send('chat_game', {query: {hist: chatHistoryText, playerId: playerId}})
+	return {end_conversation, outcome, correction: correction_of_learner_message ? DocumentC.fromJson(correction_of_learner_message) : undefined, response: DocumentC.fromJson(response), player: updatedPlayer}
 }
+
+/**
+ * Send chat in game mode without player logged in
+ */
+export async function sendGameChatAnon(chatHistory: { role: string; content: string; }[], player: Object): Promise<{ end_conversation: boolean; outcome: string; correction: DocumentC | undefined; response: DocumentC; player: RecordModel | undefined; }> {
+	const chatHistoryText = JSON.stringify(chatHistory.slice(-MAX_CHAT_HISTORY_LENGTH))
+	if (chatHistoryText.length > MAX_CHAT_HISTORY_CHARS) {
+		throw new Error("Chat history too long.");		
+	}
+	let {correction_of_learner_message, response, end_conversation, outcome, player: updatedPlayer} = await pb.send('/chat_game_anon', {query: {hist: chatHistoryText, player}})
+	return {end_conversation, outcome, correction: correction_of_learner_message ? DocumentC.fromJson(correction_of_learner_message) : undefined, response: DocumentC.fromJson(response), player: updatedPlayer}
+}
+
 
 // Feedback
 /**

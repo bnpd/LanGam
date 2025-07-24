@@ -1,5 +1,5 @@
 <script lang="ts" defer>
-  import { currentSolution, currentTask, gameChatHistory, currentlyScrolledParagraphIndex, loadingTask, nativeLang, targetLang, actualSimplificationLevel } from '../stores';
+  import { currentSolution, currentTask, gameChatHistory, currentlyScrolledParagraphIndex, loadingTask, nativeLang, targetLang, actualSimplificationLevel, username } from '../stores';
 	import { afterUpdate, tick } from "svelte";
 	import TaskComponent from './TaskComponent.svelte';
 	import { updateUser, getAllLanguages, getTranslations } from './backend';
@@ -169,7 +169,7 @@
     let translations = await getTranslations($currentTask?.id, $nativeLang, $actualSimplificationLevel);
     $currentSolution = translations.find(t => t.field === 'title')?.text + '\n\n' + translations.find(t => t.field === 'text')?.text
     if ($gameChatHistory?.length) $gameChatHistory[0].content.text.translation = translations.find(t => t.field === 'question')?.text
-    updateUser({ native_lang: $nativeLang });  // async in backend, just to save for next login
+    if ($username) updateUser({ native_lang: $nativeLang });  // async in backend, just to save for next login
     solutionShown = true
   }
 

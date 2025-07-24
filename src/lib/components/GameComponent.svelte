@@ -1,8 +1,8 @@
 <script lang="ts" defer>
     import { onMount } from 'svelte';
     import ReaderComponent from './ReaderComponent.svelte';
-    import { completeLevel, getLevel, getPlayer, getPlayerLevel, getUserLang, updatePlayer } from './backend';
-    import { username, targetLang, currentTask, currentSolution, currentlyScrolledParagraphIndex, loadingTask, gameChatHistory, player, chatOutcome, currentGameId, inlineChatHistory, morphHighlightFilter, currentTaskNParagraphs, desiredSimplificationLevel, actualSimplificationLevel, nativeLang } from '$lib/stores';
+    import { completeLevel, completeLevelAnon, getLevel, getPlayer, getPlayerLevel, getUserLang, updatePlayer } from './backend';
+    import { username, targetLang, currentTask, currentSolution, currentlyScrolledParagraphIndex, loadingTask, gameChatHistory, player, chatOutcome, currentGameId, morphHighlightFilter, currentTaskNParagraphs, desiredSimplificationLevel, actualSimplificationLevel, nativeLang } from '$lib/stores';
 	import { goto } from '$app/navigation';
 	import Toast from './Toast.svelte';
 	import ChatComponent from './ChatComponent.svelte';
@@ -56,17 +56,16 @@
     $: if($currentlyScrolledParagraphIndex >= $currentTaskNParagraphs-1) try {umami.track('Scroll 100%')} catch (_undef) {}
 
     onMount(async () => {
-        if (!$username) { // new user, not logged in -> trial mode
+        if (!$username && !$player) { // new user, not logged in -> trial mode
             //goto('/signup')
             $player = GET_ANON_PLAYER($currentGameId ?? new URLSearchParams(window.location.search).get('gameId') ?? fallbackGameId)
             $targetLang = anonLang
-            await prevTask($player.level); 
-            initChatHistory();
+            await prevTask($player.level);
             return
-        } 
+        }
         
-        // user is logged in
-        if (!$player?.id) { // but does not have a player for this game yet
+        if ($username && !$player?.id) { // user is logged in, but does not have a player for this game yet
+            // load gameId from URL if not set
             $currentGameId = $currentGameId ?? new URLSearchParams(window.location.search).get('gameId')
             if (!$currentGameId) {
                 goto('/games')
@@ -74,9 +73,6 @@
             }
 
             $player = await getPlayer($currentGameId)
-            if ($player.level == 1 && new URLSearchParams(window.location.search).get('advanceLevelAfterSignup') == 'true') {
-                $player = await completeLevel($player.id, $player.level, 'default')
-            }
         }
                 
         await nextTask();
@@ -88,13 +84,15 @@
             statsClosedPromiseResolve = resolve
         })
 
-        if (!$username) {
-            showSignupPrompt = true
-            try {umami.track('Signup Prompt shown')} catch (_undef) {}
-            return
+        let completeLevelPromise
+        if ($player.level == $currentTask.docId) { // player needs to be leveled up
+            completeLevelPromise = $username ? 
+                completeLevel($player.id, $currentTask.docId, outcome)
+                : completeLevelAnon($player, $currentTask.docId, outcome)
+        } else { // player has alrready been leveled up by chat, just resolve the promise
+            completeLevelPromise = Promise.resolve($player)
         }
 
-        let completeLevelPromise = completeLevel($player.id, $currentTask.docId, outcome)
         
         congratsMessage = $currentTask?.outcomes?.[outcome]?.text ?? DEFAULT_CONGRATS_MESSAGE
         congratsTitle = $currentTask?.outcomes?.[outcome]?.title ?? DEFAULT_CONGRATS_TITLE
@@ -103,6 +101,7 @@
 
         $currentTask = undefined
         $loadingTask = true
+        $gameChatHistory = []
 
         try {
             $player = await completeLevelPromise
@@ -120,11 +119,12 @@
     }
 
     async function onLevelBackbtnClick() {
+        speechSynthesis?.cancel()
         let prevLevelSeqId = $player.level_history.order.pop()
         $player.level = prevLevelSeqId
         $player.stats = $player.level_history[prevLevelSeqId].stats
         $player.powers = $player.level_history[prevLevelSeqId].powers
-        updatePlayer($player) // this can just happen async (if it fails it would give room for cheating/frustration though)
+        if ($username) updatePlayer($player) // this can just happen async (if it fails it would give room for cheating/frustration though)
         await prevTask(prevLevelSeqId)
     }
 
@@ -147,7 +147,9 @@
     async function nextTask(){
         let level, translations
         try {
-            let res = await getPlayerLevel($player.id, $nativeLang, $desiredSimplificationLevel)
+            let res = $username ?
+              await getPlayerLevel($player.id, $nativeLang, $desiredSimplificationLevel)
+            : await getLevel(fallbackGameId, $player.level, $nativeLang, $desiredSimplificationLevel);
             level = res.level
             translations = res.translations
             $actualSimplificationLevel = res.actualSimplificationLevel
@@ -168,7 +170,7 @@
         $currentTask = level
         if (translations) $currentSolution = translations.find(t => t.field === 'title')?.text + '\n\n' + translations.find(t => t.field === 'text')?.text
 
-        if ($gameChatHistory.length > 1 || $inlineChatHistory.length > 1) {         
+        if ($gameChatHistory.length > 1) {         
             // we have a saved state from last session to restore
             $currentlyScrolledParagraphIndex = 0
         } else {
@@ -178,6 +180,13 @@
 
         grammarChapter = level.expand?.grammar
         $morphHighlightFilter = level.expand?.grammar?.morphHighlightFilter
+        
+        if ($player.level_history.order.length > 1) {
+            // player advanced two levels, time to consider signing up
+            showSignupPrompt = true
+            try {umami.track('Signup Prompt shown')} catch (_undef) {}
+            return
+        }
 
         // the following calculation of new word count runs async in the background if the player stays for more than 5 seconds on the level
         const docIdBeforeMaybeNavigateToDifferentLevel = $currentTask?.docId
@@ -226,8 +235,8 @@
     </div>
 {:else}
     <ReaderComponent srWords={new Set()} bind:this={readerComponent}>
-        <span slot="afterTask" hidden={!$currentTask}>{#if $gameChatHistory?.length}<ChatComponent readerComponent={readerComponent} inline={true} chatBoxTitle="Twoja odpowiedź 🤙" chatHistory={gameChatHistory} srWords={new Set()} isGame={true} showGameChatSuggestions={showGameChatSuggestions}/>{/if}</span>
-        <span slot="afterSolution">{#if $gameChatHistory?.length}<ChatComponent readerComponent={readerComponent} inline={true} chatBoxTitle={undefined} chatHistory={gameChatHistory} translationLang={$nativeLang} isGame={true}/>{/if}</span>
+        <span slot="afterTask" hidden={!$currentTask}>{#if $gameChatHistory?.length}<ChatComponent readerComponent={readerComponent} inline={true} chatBoxTitle="Twoja odpowiedź 🤙" chatHistory={gameChatHistory} srWords={new Set()} showGameChatSuggestions={showGameChatSuggestions}/>{/if}</span>
+        <span slot="afterSolution">{#if $gameChatHistory?.length}<ChatComponent readerComponent={readerComponent} inline={true} chatBoxTitle={undefined} chatHistory={gameChatHistory} translationLang={$nativeLang}/>{/if}</span>
     </ReaderComponent>
 {/if}
 <div style="text-align: center;">
@@ -274,9 +283,9 @@
     footnote={nNewForms ? `You just encountered ${nNewForms} new words!\n` : ''} 
     onClose={statsClosedPromiseResolve}
 />
-<Popup closeButtonText="I'm not done reading" bind:isOpen={showSignupPrompt} on:closed={() => {try {umami.track('Signup Prompt dismissed')} catch (_undef) {}}}>
-    <h1>Thanks for trying the first chapter</h1>
-	<p style="line-height: 200%; margin-bottom: 0.4em">📂 Save your progress!<br>Create a free account now.</p>
-    <button on:click={()=>goto('/signup?advanceLevelAfterSignup=true')} class="highlighted" data-umami-event="Signup Prompt accepted">Sign up to continue</button>
+<Popup closeButtonText="Later" bind:isOpen={showSignupPrompt} on:closed={() => {try {umami.track('Signup Prompt dismissed')} catch (_undef) {}}}>
+    <h1>📂 Save your progress!</h1>
+	<p style="line-height: 200%; margin-bottom: 0.4em">Create a free account now.</p>
+    <button on:click={()=>goto('/signup')} class="highlighted" data-umami-event="Signup Prompt accepted">Sign up</button>
 </Popup>
 <DictionaryComponent/>
