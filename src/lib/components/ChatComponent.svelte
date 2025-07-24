@@ -9,7 +9,6 @@
 	import DocumentC from "$lib/DocumentC";
 	import Toast from "./Toast.svelte";
 
-    const ANON_RESPONSE = 'Sign in to gain access to AI tutoring' //'AI cannot help with the Drnuk language yet - but sign up to get help with Polish.'
     const MAX_LENGTH_RESPONSE = "This chat has reached it's maximum length. Try chatting about another text."
     const OTHER_ERROR_RESPONSE = 'Cannot connect, please try again'
     
@@ -33,7 +32,6 @@
     export let chatHistory: Writable<{role: string, content: DocumentC}[]> = new writable([]);
     export let translationLang: string = 'original'
     export let srWords: Set<string> | undefined = undefined
-    export let isGame: boolean = false
     export let showGameChatSuggestions: boolean = true
     export let chatFocussed: boolean = false;
     let chatPrompt: string = ''
@@ -58,24 +56,20 @@
 
     function onClickChatSuggestion(e: Event) {
         chatPrompt = (e.currentTarget as HTMLButtonElement).innerText
-        submitChat(true)
+        submitChat()
         iChat?.focus()
     }
 
     function onSubmitChatField(e: Event) {        
         if (chatPrompt.length) {
-            submitChat(false)
+            submitChat()
             iChat?.focus()
         } else {
             iChat?.focus()
         }
     }
 
-    /**
-     * Submit a chat to backend
-     * @param partialContext whether to only send the currently visible paragraphs as context or whole doc (identified by docId). If global isGame is true, no context is sent.
-     */
-    async function submitChat(partialContext: boolean) {
+    async function submitChat() {
         if (!chatPrompt?.trim()?.length) {
             throw new Error("Empty chat submitted");
         }
@@ -84,32 +78,25 @@
         let new_history = $chatHistory
         try {
             let responseMsg
-            if ($username) {
-                let correction
-                let response
-                if (isGame) {
-                    let end_conversation, outcome
-                    ({end_conversation, outcome, correction, response} = await sendGameChat(messageHistoryForChatGpt($chatHistory.concat([newMessage])), $player.id, $player.level));
-                    $chatOutcome = end_conversation ? outcome : null
-                } else if (!inline) {
-                    response = await sendTutorChat(messageHistoryForChatGpt($chatHistory.concat([newMessage])), readerComponent.getVisibleParagraphs())                    
-                } else {
-                    ({correction, response} = 
-                        partialContext ? await sendChat(messageHistoryForChatGpt($chatHistory.concat([newMessage])), inline, undefined, undefined, readerComponent.getVisibleParagraphs())
-                                       : await sendChat(messageHistoryForChatGpt($chatHistory.concat([newMessage])), inline, $targetLang.id, $currentTask.docId, undefined));
-                }
-                if (correction) {
-                    newMessage.content = correction // replace user's message with corrected message
-                    if (isEdited(correction)) {
-                        newMessage.role = 'correction'
-                    }
-                }
-                newMessage.content.text.translation = chatPrompt // replace translation by user's (wrong) message
-                responseMsg = {role: 'assistant', content: response};
+
+            let correction
+            let response
+            if (inline) {
+                let end_conversation, outcome
+                ({end_conversation, outcome, correction, response} = await sendGameChat(messageHistoryForChatGpt($chatHistory.concat([newMessage])), $player.id, $player.level));
+                $chatOutcome = end_conversation ? outcome : null
             } else {
-                let response = DocumentC.partialDocument(ANON_RESPONSE, $nativeLang, undefined, undefined)
-                responseMsg = {role: 'assistant', content: response};
+                response = await sendTutorChat(messageHistoryForChatGpt($chatHistory.concat([newMessage])), readerComponent.getVisibleParagraphs())                    
             }
+            if (correction) {
+                newMessage.content = correction // replace user's message with corrected message
+                if (isEdited(correction)) {
+                    newMessage.role = 'correction'
+                }
+            }
+            newMessage.content.text.translation = chatPrompt // replace translation by user's (wrong) message
+            responseMsg = {role: 'assistant', content: response};
+
             new_history.push(newMessage) // we only push user prompt now cause we don't want it here if connection error
             new_history.push(responseMsg)
             chatPrompt = ''
@@ -151,7 +138,7 @@
     }
 
     function resetChat() {
-        if (isGame && inline) $chatOutcome = null
+        if (inline) $chatOutcome = null
         const firstNonAgentMsgIndex = $chatHistory.findIndex(msg => msg.role != 'assistant')
         $chatHistory = firstNonAgentMsgIndex == -1 ? $chatHistory : $chatHistory.slice(0, firstNonAgentMsgIndex)
     }
@@ -278,7 +265,7 @@
             <div class="card" class:loading/>
         {/if}
     </div>
-    {#if chatBoxTitle != undefined && (!$chatOutcome || !isGame)}
+    {#if chatBoxTitle != undefined && !$chatOutcome}
         {#if !inline}   
             <div class="promptSuggestions">
                 <button class="promptSuggestion" on:click={onClickChatSuggestion} disabled={loading}>
@@ -295,7 +282,7 @@
                     </button>
                 {/if}
             </div>
-        {:else if isGame && $currentTask?.suggested_replies?.length && showGameChatSuggestions}
+        {:else if $currentTask?.suggested_replies?.length && showGameChatSuggestions}
             <div class="promptSuggestions">
                 {#each $currentTask?.suggested_replies as suggestion}
                     <button class="promptSuggestion" on:click={onClickChatSuggestion} disabled={loading}>
@@ -305,7 +292,7 @@
             </div>
         {/if}
         <div id="chatInputContainer">
-            <div contenteditable id="iChat" data-placeholder={chatBoxTitle} bind:innerText={chatPrompt} bind:this={iChat} class:flash={isGame && $currentlyScrolledParagraphIndex >= $currentTaskNParagraphs-1}/>
+            <div contenteditable id="iChat" data-placeholder={chatBoxTitle} bind:innerText={chatPrompt} bind:this={iChat} class:flash={$currentlyScrolledParagraphIndex >= $currentTaskNParagraphs-1}/>
             {#if chatFocussed }
                 <button id="closeChat" on:click={() => {document?.activeElement?.blur()}} class="chat-circle-btn">x</button>  
             {:else if $chatHistory?.length > 1}
