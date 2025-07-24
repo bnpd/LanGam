@@ -1,7 +1,8 @@
 <script lang="ts" defer>
 import { onMount } from 'svelte';
 import { requestNotifications } from './backend';
-import { loadingTask } from '$lib/stores';
+import { loadingTask, username } from '$lib/stores';
+	import { goto } from '$app/navigation';
 
 let notificationPermission: NotificationPermission;
 let done = false;
@@ -13,10 +14,16 @@ onMount(async () => {
 </script>
 
 {#if notificationPermission === 'default'}
-  <button id="btnNotifications" on:click={() => requestNotifications().then(() => {
-    notificationPermission = Notification.permission; 
-    done = true
-  })}>
+  <button id="btnNotifications" on:click={() => {
+    if (!$username) {
+      goto('/signup')
+      return
+    }
+    requestNotifications().then(() => {
+      notificationPermission = Notification.permission; 
+      done = true
+    })}
+  }>
     <slot>Reminder</slot>
   </button>
 {/if}

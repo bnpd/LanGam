@@ -24,7 +24,6 @@ export const currentGameId = createPersistentStore('currentGameId', null); // Du
 export const morphHighlightFilter = createPersistentStore('morphHighlightFilter', "Case=Ins");
 
 /* Chat Component Stores */
-export const inlineChatHistory: Writable<{role: string, content: DocumentC}[]> = createPersistentStore('inlineChatHistory', []);
 export const gameChatHistory: Writable<{role: string, content: DocumentC}[]> = createPersistentStore('gameChatHistory', []);
 export const chatOutcome = createPersistentStore('chatOutcome', null);
 

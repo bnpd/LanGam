@@ -1,7 +1,7 @@
 <script lang="ts" defer>
     import { getGamesByLang, getLangById, login, loginWithGoogle, newUserLang, signup } from '$lib/components/backend';
     import { goto } from '$app/navigation';
-	import { inlineChatHistory, reviews, targetLang, nativeLang, username } from '$lib/stores';
+	import { reviews, targetLang, nativeLang, username } from '$lib/stores';
 	import { ClientResponseError } from 'pocketbase';
 	import TitleWithBackgroundImageComponent from './TitleWithBackgroundImageComponent.svelte';
 	import { onMount } from 'svelte';
@@ -40,7 +40,6 @@
             let user_obj = (await login(formDataEntries.get('email')?.toString()!, formDataEntries.get('password')?.toString()!)).record
             if (user_obj.id != $username) { // switched user
                 $reviews = []
-                $inlineChatHistory = []
                 $username = user_obj.id
                 if (user_obj.native_lang) {
                     $nativeLang = user_obj.native_lang
@@ -78,7 +77,6 @@
             let user_obj = oauthResult.record
             if (user_obj.id != $username) { // switched user
                 $reviews = []
-                $inlineChatHistory = []
                 $username = user_obj.id
                 if (user_obj.native_lang) {
                     $nativeLang = user_obj.native_lang

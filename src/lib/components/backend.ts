@@ -1,5 +1,4 @@
 'use strict';
-import { goto } from '$app/navigation';
 import { PUBLIC_POCKETBASE_URL, PUBLIC_WEBPUSH_PUBLIC_KEY } from '$env/static/public';
 import { VocabCard } from '$lib/fsrs.js';
 import DocumentC from '$lib/DocumentC'
@@ -10,14 +9,6 @@ const pb = new PocketBase(PUBLIC_POCKETBASE_URL)
 const MAX_CHAT_HISTORY_LENGTH = 20
 const MAX_CHAT_HISTORY_CHARS = 20000
 
-
-export function getTargetLangFromSubdomain(hostname: string | undefined = undefined): string {
-	let tl = (hostname ?? location?.host).split('.')[0]
-	if (tl?.length != 2) {
-		tl = 'en'
-	}
-	return tl
-}
 
 /**
  * Check if the user is logged in
@@ -77,47 +68,6 @@ export function getUserData() {
 
 
 /**
- * Specify EITHER: 
- * isInline=true + docId+targetLang or
- * isInline=false + (docId+targetLang OR contextParagraphs)
- * @param {string} chatHistoryString
- * @param {boolean} isInline
- * @param {string | undefined} targetLang
- * @param {string | undefined} docId
- * @param {string | undefined} contextParagraphs
- */
-function EndpointChat(chatHistoryString: string, isInline: boolean, targetLang: string | undefined=undefined, docId: string | undefined=undefined, contextParagraphs: string | undefined=undefined) {
-	if (isInline && !(docId && targetLang)) throw new Error('EndpointChat: Incompatible parameters: isInline without docId+targetLang')
-	if (docId && targetLang && contextParagraphs) throw new Error('EndpointChat: Incompatible parameters: docId+targetLang+contextParagraphs')
-	let tutorParams = '';
-	if (contextParagraphs) {
-		tutorParams = `&ctx=${encodeURIComponent(contextParagraphs)}`;
-	} else if (docId && targetLang) {
-		tutorParams = `&docId=${docId}&targetLang=${targetLang}`;
-	}
-	return isInline
-		? `/chat_tandem?hist=${encodeURIComponent(chatHistoryString)}` + (`&docId=${docId}&targetLang=${targetLang}`)
-		: `/chat_tutor?hist=${encodeURIComponent(chatHistoryString)}` + tutorParams;
-}
-
-/**
- * @param {string} chatHistoryText
- * @param {string} contextParagraphs
- */
-function EndpointTutorChat(chatHistoryText: string, contextParagraphs: string) {
-	return `/chat_tutor?hist=${encodeURIComponent(chatHistoryText)}&ctx=${contextParagraphs}`
-}
-
-/**
- * @param {string} chatHistoryString
- * @param {number} levelSeqId
- * @param {string} playerId
- */
-function EndpointGameChat(chatHistoryString: string, playerId: string, levelSeqId: number) {
-	return `/chat_game?hist=${encodeURIComponent(chatHistoryString)}&playerId=${playerId}&seqId=${levelSeqId}`
-}
-
-/**
  * @param {string} user
  * @param {string} targetLangId
  */
@@ -125,32 +75,9 @@ export async function getUserLang(user: string, targetLangId: string){
 	return pb.collection('user_langs').getFirstListItem(`user = "${user}" && target_lang = "${targetLangId}"`)
 }
 
-/**
- * Get all available languages
- * @returns {Promise<any[]>} Array of language objects
- */
-export async function getAllLanguages(){
+export async function getAllLanguages(): Promise<RecordModel[]> {
 	return pb.collection('langs').getFullList()
 }
-
-/**
- * EITHER docId or contextParagraphs should be specified, if both are present, contextParagraphs will be prioritized.
- * @param {{role: string;content: string;}[]} chatHistory
- * @param {boolean} isInline
- * @param {string | undefined} targetLang
- * @param {string | undefined} docId
- * @param {string | undefined} contextParagraphs
- * @returns {Promise<{correction: DocumentC | undefined, response: DocumentC}>} This document will have only the key text.text defined unless docId and targetLang were given as inputs
- */
-export async function sendChat(chatHistory: { role: string; content: string; }[], isInline: boolean, targetLang: string | undefined=undefined, docId: string | undefined=undefined, contextParagraphs: string | undefined=undefined): Promise<{ correction: DocumentC | undefined; response: DocumentC; }> {
-	const chatHistoryText = JSON.stringify(chatHistory.slice(-MAX_CHAT_HISTORY_LENGTH))
-	if (chatHistoryText.length > MAX_CHAT_HISTORY_CHARS) {
-		throw new Error("Chat history too long.");		
-	}
-	let {correction_of_learner_message, response} = await backendGet(EndpointChat(chatHistoryText, isInline, targetLang, docId, contextParagraphs))
-	return {correction: correction_of_learner_message ? DocumentC.fromJson(correction_of_learner_message) : undefined, response: DocumentC.fromJson(response)}
-}
-    
 
 /**
  * Versatile chat, envisioned to be used in the user's native language to ask the tutor about a confusion
@@ -163,7 +90,7 @@ export async function sendTutorChat(chatHistory: { role: string; content: string
 	if (chatHistoryText.length > MAX_CHAT_HISTORY_CHARS) {
 		throw new Error("Chat history too long.");		
 	}
-	let {response} = await pb.send(EndpointTutorChat(chatHistoryText, contextParagraphs), {})
+	let {response} = await pb.send('chat_tutor', {query: {hist: chatHistoryText, ctx: contextParagraphs}})
 	return DocumentC.fromJson(response)
 }
 
@@ -183,14 +110,22 @@ export async function getTranslations(levelId: string, targetLang: string, actua
 }
 
 /**
- * @param {string} playerId
- * @param {number} seqId
- * @param {string} outcome
  * @returns {Promise<any>} The updated player
  */
 export async function completeLevel(playerId: string, seqId: number, outcome: string): Promise<any> {
 	return pb.send(`/complete_level`, {method: 'POST', body: {
 		playerId: playerId, 
+		seqId: seqId, 
+		outcome: outcome
+	}}).then(res => res.player)
+}
+
+/**
+ * @returns {Promise<any>} The updated player
+ */
+export async function completeLevelAnon(player: any, seqId: number, outcome: string): Promise<any> {
+	return pb.send(`/complete_level_anon`, {method: 'POST', body: {
+		player: player, 
 		seqId: seqId, 
 		outcome: outcome
 	}}).then(res => res.player)
@@ -274,11 +209,12 @@ export async function getOwnGames(): Promise<any[]> {
 }
 
 /**
- * Get current user's player for the specified game
+ * Get/Create current user's player for the specified game
  * @param {string} gameId
+ * @param {{ [x: string]: any; }} [playerCreateData] - Optional player data to send to the backend. Only stats, powers, level and level_history are used.
  */
-export async function getPlayer(gameId: string) {
-	return pb.send(`/user_player/${gameId}`, {})
+export async function getPlayer(gameId: string, playerCreateData?: { [x: string]: any; }): Promise<RecordModel> {
+	return pb.send(`/user_player/${gameId}`, { method: 'POST', body: playerCreateData ? {playerCreateData} : undefined })
 }
 
 /**
@@ -315,42 +251,29 @@ export async function updateUser(changedData: { [x: string]: any; }): Promise<Re
     
 
 /**
- * Send chat in game mode
- * @param {{role: string;content: string;}[]} chatHistory
- * @param {string} playerId
- * @param {Number} levelSeqId
- * @returns {Promise<{end_conversation: boolean;outcome: string;correction: DocumentC | undefined;response: DocumentC;}>} This document will have only the key text.text defined unless docId and targetLang were given as inputs
+ * Send chat in game mode with player logged in
  */
-export async function sendGameChat(chatHistory: { role: string; content: string; }[], playerId: string, levelSeqId: number): Promise<{ end_conversation: boolean; outcome: string; correction: DocumentC | undefined; response: DocumentC; }> {
+export async function sendGameChat(chatHistory: { role: string; content: string; }[], playerId: string): Promise<{ end_conversation: boolean; outcome: string; correction: DocumentC | undefined; response: DocumentC; player: RecordModel | undefined; }> {
 	const chatHistoryText = JSON.stringify(chatHistory.slice(-MAX_CHAT_HISTORY_LENGTH))
 	if (chatHistoryText.length > MAX_CHAT_HISTORY_CHARS) {
 		throw new Error("Chat history too long.");		
 	}
-	let {correction_of_learner_message, response, end_conversation, outcome} = await pb.send(EndpointGameChat(chatHistoryText, playerId, levelSeqId), {})
-	return {end_conversation: end_conversation, outcome: outcome, correction: correction_of_learner_message ? DocumentC.fromJson(correction_of_learner_message) : undefined, response: DocumentC.fromJson(response)}
+	let {correction_of_learner_message, response, end_conversation, outcome, player: updatedPlayer} = await pb.send('chat_game', {query: {hist: chatHistoryText, playerId: playerId}})
+	return {end_conversation, outcome, correction: correction_of_learner_message ? DocumentC.fromJson(correction_of_learner_message) : undefined, response: DocumentC.fromJson(response), player: updatedPlayer}
 }
 
-
-// lowlevel python backend communication
 /**
- * @param {string} path
- * @param {boolean} [authRequired] whether this endpoint requires authorization token
+ * Send chat in game mode without player logged in
  */
-export async function backendGet(path: string, authRequired: boolean=true) {
-	if (authRequired && !pb.authStore.isValid) {
-		goto('/login')
-		return Promise.reject('Not logged in.')
+export async function sendGameChatAnon(chatHistory: { role: string; content: string; }[], player: Object): Promise<{ end_conversation: boolean; outcome: string; correction: DocumentC | undefined; response: DocumentC; player: RecordModel | undefined; }> {
+	const chatHistoryText = JSON.stringify(chatHistory.slice(-MAX_CHAT_HISTORY_LENGTH))
+	if (chatHistoryText.length > MAX_CHAT_HISTORY_CHARS) {
+		throw new Error("Chat history too long.");		
 	}
-	const response = await fetch(PUBLIC_POCKETBASE_URL + path, authRequired ? {headers: {Authorization: `Bearer ${pb.authStore.token}`}, cache: navigator.onLine ? 'default' : 'force-cache'} : undefined)
-	if (!response.ok) {
-		if (response.status == 401) {
-			goto('/login')
-			return Promise.reject('Invalid auth.')
-		}
-		throw new Error('Get error.' + await response.text())
-	}
-	return await response.json()
+	let {correction_of_learner_message, response, end_conversation, outcome, player: updatedPlayer} = await pb.send('/chat_game_anon', {query: {hist: chatHistoryText, player}})
+	return {end_conversation, outcome, correction: correction_of_learner_message ? DocumentC.fromJson(correction_of_learner_message) : undefined, response: DocumentC.fromJson(response), player: updatedPlayer}
 }
+
 
 // Feedback
 /**
