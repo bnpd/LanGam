@@ -22,7 +22,7 @@ services:
   staticPublishPath: build
   autoDeployTrigger: commit
 - type: web
-  name: langam-uat-DA
+  name: langam-prod-DA
   runtime: static
   repo: https://github.com/bnpd/LanGam
   branch: svelte
