@@ -197,7 +197,7 @@
       </div>
     </div>
   {:else if !$nativeLang && solutionShown}
-    <div class="setting">
+    <div class="setting input-container">
       <label for="nativeLang">Choose a language</label>&nbsp;&nbsp;
       <select name="nativeLang" id="nativeLang" autocomplete="language" bind:value={$nativeLang}>
         <option value={undefined}></option>
@@ -209,6 +209,7 @@
           {/each}
         {/await}
       </select>
+      <small style="opacity: 0.5;">Translations are machine-generated and may not be perfect.</small>
     </div>
   {:else}
     <div style:height="var(--button-height)"/>

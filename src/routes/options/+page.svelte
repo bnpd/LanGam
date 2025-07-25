@@ -36,11 +36,11 @@ if (!isLoggedIn()) {
 <div style="overflow-y: auto; border-radius: 1em;">
     <div class="card">
         <h4>Account</h4>
-        <div class="setting">
-            <label for="email">Email</label>&nbsp;&nbsp;
+        <div class="setting input-container">
+            <label for="email">Email</label>
             <input type="email" name="email" id="email" disabled value={getUserData()?.email}>
         </div>
-        <div class="setting">
+        <div class="setting input-container">
             <label for="nativeLang">Native Language</label>&nbsp;&nbsp;
             <select name="nativeLang" id="nativeLang" autocomplete="language" placeholder="Used for translations" bind:value={$nativeLang}>
                 {#each $page.data?.languages ?? [] as lang}

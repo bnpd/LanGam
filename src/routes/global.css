@@ -74,38 +74,46 @@ input[type="text"], input[type="email"], input[type="password"], input[type="num
   padding-left: 1em;
   border: none;
   border-radius: 1em;
-  background-color: aliceblue;
 }
 
 .card input[type="email"], .card input[type="password"], .card div[contenteditable], .card input[type="text"], .card input[type="number"], .card select, .card label:has(+div[contenteditable]), .card label:has(+select), .card label:has(+input[type="text"]), .card label:has(+input[type="email"]), .card label:has(+input[type="password"]), .card label:has(+input[type="number"]) {
     background-color: white;
 }
 
-form .input-container {
+.popup input[type="email"], .popup input[type="password"], .popup div[contenteditable], .popup input[type="text"], .popup input[type="number"], .popup select, .popup label:has(+div[contenteditable]), .popup label:has(+select), .popup label:has(+input[type="text"]), .popup label:has(+input[type="email"]), .popup label:has(+input[type="password"]), .popup label:has(+input[type="number"]) {
+  background-color: aliceblue;
+}
+
+.input-container {
   position: relative;
   margin-top: 1em;
   margin-bottom: 0.5em;
 }
 
-form label {
+.input-container label {
   font-size: x-small; 
   font-style: italic;
 }
 
-form label:has(+ div[contenteditable]), form label:has(+ select), form label:has(+ input[type="text"]), form label:has(+ input[type="email"]), form label:has(+ input[type="password"]), form label:has(+ input[type="number"]) {
+.input-container label:has(+ div[contenteditable]), .input-container label:has(+ select), .input-container label:has(+ input[type="text"]), .input-container label:has(+ input[type="email"]), .input-container label:has(+ input[type="password"]), .input-container label:has(+ input[type="number"]) {
   position: absolute;
   top: -0.5em; 
   left: 0; 
-  background-color: aliceblue; 
   padding: 0.4em 1.6em 0.4em 1.5em; 
   border-radius: 1em 1em 1em 0;
 }
+.input-container label:has(+ select) {
+  top: 1.2em;
+}
 
-form div[contenteditable], form select, form input[type="text"], form input[type="email"], form input[type="password"], form input[type="number"] {
-  padding: 0.8em;
+.input-container select, .input-container input[type="text"], .input-container input[type="email"], .input-container input[type="password"], .input-container input[type="number"] {
+  padding: 0.9em;
   font-size: 1em;
   width: 100%;
   box-sizing: border-box; 
+}
+.input-container div[contenteditable] {
+  padding: 0.8em;
 }
 
 /* Styling for dropdowns */
