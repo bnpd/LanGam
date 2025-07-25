@@ -265,10 +265,10 @@
                 {/if}
         {/each}
         {#if loading}
-            <div class="card" class:loading/>
+            <div class="card" style="height: 50px; width: 50px;" class:loading/>
         {/if}
     </div>
-    {#if chatBoxTitle != undefined && !$chatOutcome}
+    {#if chatBoxTitle != undefined && (!inline || !$chatOutcome)}
         {#if !inline}   
             <div class="promptSuggestions">
                 <button class="promptSuggestion" on:click={onClickChatSuggestion} disabled={loading}>

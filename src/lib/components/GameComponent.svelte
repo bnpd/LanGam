@@ -145,6 +145,8 @@
     }
 
     async function nextTask(){
+        console.log('nextTask', $player.level, $desiredSimplificationLevel, $nativeLang, $username);
+        
         let level, translations
         try {
             let res = $username ?
@@ -180,18 +182,17 @@
 
         grammarChapter = level.expand?.grammar
         $morphHighlightFilter = level.expand?.grammar?.morphHighlightFilter
-        
-        if (!username && $player.level_history?.order.length > 1) {
+
+        if (!$username && $player.level_history?.order.length % 2 === 0 && $player.level_history?.order.length > 0) { // show the signup prompt at third, fifth, etc. level
             // player advanced two levels, time to consider signing up
             showSignupPrompt = true
             try {umami.track('Signup Prompt shown')} catch (_undef) {}
-            return
         }
 
         // the following calculation of new word count runs async in the background if the player stays for more than 5 seconds on the level
         const docIdBeforeMaybeNavigateToDifferentLevel = $currentTask?.docId
         setTimeout(async () => {
-            if ($currentTask?.docId === docIdBeforeMaybeNavigateToDifferentLevel) {
+            if ($username && $currentTask?.docId === docIdBeforeMaybeNavigateToDifferentLevel) {
                 const user_lang = await getUserLang($username, $targetLang.id).catch(_offline => {
                     nNewForms = undefined
                 })
