@@ -318,6 +318,6 @@ export async function createGame(game: { name: string; lang: string; img: string
  */
 export async function createChapter(chapter: any): Promise<any> {
   console.log(chapter);
-  return pb.collection('levels').create({game: chapter.game, seq_id: chapter.seq_id, level: chapter});
+  return pb.collection('levels').create(chapter);
 }
 
