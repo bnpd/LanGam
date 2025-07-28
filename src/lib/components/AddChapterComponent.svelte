@@ -2,7 +2,7 @@
   import { goto } from '$app/navigation';
   import { page } from '$app/stores';
   import { onMount, tick } from 'svelte';
-  import { createChapter, getOwnGames, isLoggedIn } from './backend';
+  import { createChapter, getOwnGames, isLoggedIn, preprocessChapter, proofreadText } from './backend';
   import '../../routes/global.css';
   import TitleWithBackgroundImageComponent from './TitleWithBackgroundImageComponent.svelte';
 	import { text } from '@sveltejs/kit';
@@ -27,32 +27,10 @@
   let titleRef;
   let textRef;
   let questionRef;
+  let feedback: string | undefined;
 
   // Toggle for showing chat fields
   let showChat = false;
-
-  // Empty template for chapter structure
-  const emptyChapter = {
-    character: '',
-    game: '',
-    img: '',
-    outcomes: {},
-    question: {
-      lang: 'pl',
-      text: ''
-    },
-    seq_id: 0,
-    suggested_replies: [],
-    system_prompt: '',
-    text: {
-      lang: 'pl',
-      text: ''
-    },
-    title: {
-      lang: 'pl',
-      text: ''
-    }
-  };
 
   // References for suggested replies inputs
   let suggestedRepliesCount = 0;
@@ -335,19 +313,18 @@
 
     try {
       // Assemble the complete chapter object
-      const chapter = {
+      let chapter = {
         game: gameSelectRef.value,
         img: imgRef.value,
         outcomes: processedOutcomes,
         seq_id: seqIdRef.value,
         text: {
-          lang: 'pl',
-          text: textRef.innerHTML
+          text: textRef.innerHTML,
         },
         title: {
-          lang: 'pl',
-          text: titleRef.value
+          text: titleRef.value,
         }
+        // question:
       };
       
       // Only add chat-related fields if showChat is true
@@ -360,6 +337,8 @@
         chapter.system_prompt = systemPromptRef.innerHTML;
         chapter.suggested_replies = suggestedReplyRefs.filter(ref => ref).map(ref => ref.value);
       }
+
+      chapter = await preprocessChapter(chapter);
 
       // Submit the chapter
       const createdChapter = await createChapter(chapter);
@@ -376,6 +355,21 @@
       }
     }
   }
+
+
+	async function proofreadChapter() {
+    feedback = undefined;
+		const text = textRef.innerText.trim();
+    const title = titleRef.value.trim();
+    const question = questionRef?.innerText?.trim();
+    if (!text && !title) {
+      errorMessage = 'Text and title are required for proofreading.';
+      return;
+    }
+
+    // Call the backend proofreading function
+    feedback = await proofreadText(title + text ? '\n\n' + text : '' + question ? '\n\n' + question : '')
+	}
 </script>
 
 <TitleWithBackgroundImageComponent>Add Chapter</TitleWithBackgroundImageComponent>
@@ -539,9 +533,32 @@
     {#if showChat}
     <button type="button">Test Chat</button>
     {/if}
+    <button type="button" on:click={proofreadChapter}>Proofread</button>
     <button type="submit">Submit Chapter</button>
   </div>
 </form>
+{#if feedback}
+  <div class="feedback card">
+    <h4>Feedback</h4>
+    <thead>
+      <tr>
+        <th>Error</th>
+        <th>Correction</th>
+        <th>Justification</th>
+      </tr>
+    </thead>
+    {#each feedback.errors ?? [] as error}
+      <tbody>
+        <tr>
+          <td>{error.error}</td>
+          <td>{error.correction}</td>
+          <td>{error.justification}</td>
+        </tr>
+      </tbody>
+    {/each}
+    <!--<div>{feedback.correction ?? 'All good!'}</div>-->
+  </div>
+{/if}
 
 <style>
   .error-message {
@@ -559,6 +576,15 @@
   .input-error {
     border: 1px solid red !important;
     background-color: rgba(255, 0, 0, 0.05) !important;
+  }
+
+  .feedback {
+    position: fixed !important;
+    right: 1em;
+    top: 10em;
+    width: calc((100vw - 40em)/2 - 5em);
+    max-height: calc(100vh - 20em);
+    overflow-x: scroll;
   }
   
   

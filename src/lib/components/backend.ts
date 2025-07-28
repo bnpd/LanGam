@@ -1,5 +1,5 @@
 'use strict';
-import { PUBLIC_POCKETBASE_URL, PUBLIC_WEBPUSH_PUBLIC_KEY } from '$env/static/public';
+import { PUBLIC_NLP_SERVICE, PUBLIC_POCKETBASE_URL, PUBLIC_WEBPUSH_PUBLIC_KEY } from '$env/static/public';
 import { VocabCard } from '$lib/fsrs.js';
 import DocumentC from '$lib/DocumentC'
 import PocketBase, { type RecordModel } from 'pocketbase';
@@ -302,6 +302,9 @@ function subscribeUserToPush() {
 			});
 }
 
+
+/* Text admin endpoints */
+
 /**
  * Create a new game in PocketBase
  * @param {Object} game - The game object.
@@ -318,6 +321,28 @@ export async function createGame(game: { name: string; lang: string; img: string
  */
 export async function createChapter(chapter: any): Promise<any> {
   console.log(chapter);
-  return pb.collection('levels').create({game: chapter.game, seq_id: chapter.seq_id, level: chapter});
+  return pb.collection('levels').create(chapter);
 }
 
+/* Chapter preprocessing */
+
+export async function preprocessChapter(chapter: any): Promise<any> {
+	for (const key of ['text', 'title', 'question', 'text_simple', 'title_simple', 'question_simple', 'text_intermediate', 'title_intermediate', 'question_intermediate']) {
+		if (chapter[key]?.text?.trim()) {
+			chapter[key].tokens = await fetch(`${PUBLIC_NLP_SERVICE}/tokenize`, {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ text: chapter[key].text })
+			}).then(res => res.json());
+		}
+	}
+  return chapter;
+}
+
+export async function proofreadText(text: string): Promise<string> {
+  const response = await pb.send('/proofread', {
+	method: 'POST',
+	body: { text }
+  });
+  return response.feedback;
+}

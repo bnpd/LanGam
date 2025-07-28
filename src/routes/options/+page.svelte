@@ -65,23 +65,27 @@ if (!isLoggedIn()) {
             </span>
         </div>
     </div>
-    <div class="card">
-        <h4>Grammar</h4>
-        <div class="setting">
-            <input type="checkbox" name="isGrammarHighlightingOn" id="isGrammarHighlightingOn" bind:checked={$isGrammarHighlightingOn}>&nbsp;
-            <label for="isGrammarHighlightingOn">Highlight current grammar concept in the text</label>
+    {#if $targetLang?.grammarHelpAvailable}
+        <div class="card">
+            <h4>Grammar</h4>
+            <div class="setting">
+                <input type="checkbox" name="isGrammarHighlightingOn" id="isGrammarHighlightingOn" bind:checked={$isGrammarHighlightingOn}>&nbsp;
+                <label for="isGrammarHighlightingOn">Highlight current grammar concept in the text</label>
+            </div>
         </div>
-    </div>
+    {/if}
     <div class="card">
         <h4>Spaced Repetition</h4>
         <div class="setting">
             <input type="checkbox" name="srShowIPA" id="srShowIPA" bind:checked={$srShowIPA}>&nbsp;
             <label for="srShowIPA">Show pronunciation 🗣 on cards</label>
         </div>
-        <div class="setting">
-            <input type="checkbox" name="srShowGenus" id="srShowGenus" bind:checked={$srShowGenus}>&nbsp;
-            <label for="srShowGenus">Show noun's gender on cards</label>
-        </div>
+        {#if $targetLang?.hasGenus}
+            <div class="setting">
+                <input type="checkbox" name="srShowGenus" id="srShowGenus" bind:checked={$srShowGenus}>&nbsp;
+                <label for="srShowGenus">Show noun's gender on cards</label>
+            </div>
+        {/if}
     </div>
     <div class="card">
         <h4>About</h4>
@@ -110,9 +114,6 @@ if (!isLoggedIn()) {
 </datalist>
 
 <style>
-    hr {
-        margin: 1.5em 0;
-    }
     .setting {
         margin: 1.5em 0;
     }
