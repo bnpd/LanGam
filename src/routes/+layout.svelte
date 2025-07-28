@@ -5,5 +5,7 @@
 </script>
 
 <svelte:head>
-	<script async defer src={`${PUBLIC_UMAMI_URL}/script.js`} data-website-id={PUBLIC_UMAMI_WEBSITE_ID} integrity={PUBLIC_UMAMI_SCRIPT_INTEGRITY} crossorigin="anonymous"></script>
+	<script async defer src={`${PUBLIC_UMAMI_URL}script.js`} data-website-id={PUBLIC_UMAMI_WEBSITE_ID} integrity={PUBLIC_UMAMI_SCRIPT_INTEGRITY} crossorigin="anonymous"></script>
 </svelte:head>
+
+<slot default/>
