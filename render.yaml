@@ -3,7 +3,7 @@ services:
   name: langam-prod-EN
   runtime: static
   repo: https://github.com/bnpd/LanGam
-  branch: svelte
+  branch: master
   envVars:
   - key: .env
     sync: false
@@ -14,7 +14,7 @@ services:
   name: langam-prod-PL
   runtime: static
   repo: https://github.com/bnpd/LanGam
-  branch: svelte
+  branch: master
   envVars:
   - key: .env
     sync: false
@@ -25,7 +25,7 @@ services:
   name: langam-prod-DA
   runtime: static
   repo: https://github.com/bnpd/LanGam
-  branch: svelte
+  branch: master
   envVars:
   - key: .env
     sync: false
