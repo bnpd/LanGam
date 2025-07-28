@@ -73,14 +73,14 @@ async function loadVocabLists() {
 <SrComponent />
 {#if showAllWords}
   <div class="flex-row">
-    <!-- {#if Object.keys(scheduledTokens)?.length}    
+    <!-- {#if Object.keys(scheduledTokens ?? {}).length}    
       <div class="vocab-column">
         <h3>
           Spaced Repetition
-          <span>{Object.keys(scheduledTokens).length ? "("+Object.keys(scheduledTokens).length+" words)" : ""}</span>
+          <span>{"("+Object.keys(scheduledTokens ?? {}).length+" words)"}</span>
         </h3>
         <div>
-          {#each Object.keys(scheduledTokens) as key}
+          {#each Object.keys(scheduledTokens ?? {}) as key}
             <VocabListItem title={scheduledTokens[key].word} >
               <BadgeComponent text='AI' tooltip="Estimate when you are likely to forget it, according to Spaced Repetition science. We'll try to show it before that day."/>
               Due: {Math.min(9999, scheduledTokens[key]?.interval)}&nbsp;d
@@ -92,10 +92,10 @@ async function loadVocabLists() {
     <div class="vocab-column">
       <h3>
         Used in chat
-        <span>{Object.keys(usedTokens).length ? "("+Object.keys(usedTokens).length+" words)" : ""}</span>
+        <span>{"("+Object.keys(usedTokens ?? {}).length+" words)"}</span>
       </h3>
       <div>
-        {#each Object.keys(usedTokens) as key}
+        {#each Object.keys(usedTokens ?? {}) as key}
           <VocabListItem>
             {usedTokens[key].join(', ')}
           </VocabListItem>
@@ -105,10 +105,10 @@ async function loadVocabLists() {
     <div class="vocab-column">
       <h3>
         Seen
-        <span>{Object.keys(seenTokens).length ? "("+Object.keys(seenTokens).length+" families)" : ""}</span>
+        <span>{"("+Object.keys(seenTokens ?? {}).length+" families)"}</span>
       </h3>
       <div>
-        {#each Object.keys(seenTokens) as key}
+        {#each Object.keys(seenTokens ?? {}) as key}
           <VocabListItem>
             {seenTokens[key].join(', ')}
           </VocabListItem>
