@@ -7,6 +7,7 @@
 	import { onMount } from 'svelte';
 	import SignInWithGoogleButton from './SignInWithGoogleButton.svelte';
     import { PUBLIC_LANG } from '$env/static/public';
+    let umami: any; // Umami is initialized in the +layout.svelte from script tag
   
     export let isSignup: boolean
     let loading: boolean
@@ -51,7 +52,7 @@
             }
             $targetLang = isSignup ? (await newUserLang(PUBLIC_LANG)).expand.target_lang : await getLangById(PUBLIC_LANG)
 
-            try {umami.track((isSignup ? 'Signup' : 'Login'), {id: $username, method: 'password'})} catch (_undef) {}
+            umami?.track((isSignup ? 'Signup' : 'Login'), {id: $username, method: 'password'})
             let advanceLevelAfterSignup = new URLSearchParams(window.location.search).get('advanceLevelAfterSignup')
             goto('/game?gameId=' + (await getGamesByLang($targetLang.id))[0].id + (advanceLevelAfterSignup ? `&advanceLevelAfterSignup=${advanceLevelAfterSignup}` : ''))
         } catch (e) {
@@ -88,7 +89,7 @@
             }
             $targetLang = isSignup ? (await newUserLang(PUBLIC_LANG)).expand.target_lang : await getLangById(PUBLIC_LANG)
 
-            try {umami.track((isSignup ? 'Signup' : 'Login'), {id: $username, method: 'google'})} catch (_undef) {}
+            umami?.track((isSignup ? 'Signup' : 'Login'), {id: $username, method: 'google'})
             let advanceLevelAfterSignup = new URLSearchParams(window.location.search).get('advanceLevelAfterSignup')
             goto('/game?gameId=' + (await getGamesByLang($targetLang.id))[0].id + (advanceLevelAfterSignup ? `&advanceLevelAfterSignup=${advanceLevelAfterSignup}` : ''))
         } catch (e) {

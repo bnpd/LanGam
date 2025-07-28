@@ -1,7 +1,8 @@
-<script lang="ts">
+<script context="module" lang="ts">
 	import { PUBLIC_UMAMI_URL } from '$env/static/public';
 	import { PUBLIC_UMAMI_WEBSITE_ID } from '$env/static/public';
 	import { PUBLIC_UMAMI_SCRIPT_INTEGRITY } from '$env/static/public';
+	export declare const umami: any; 
 </script>
 
 <svelte:head>

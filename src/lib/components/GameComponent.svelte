@@ -14,6 +14,7 @@
 	import WebPushSubscription from './WebPushSubscription.svelte';
 	import Popup from './Popup.svelte';
     import { page } from '$app/stores';
+    let umami: any; // Umami is initialized in the +layout.svelte from script tag
 
     const DEFAULT_CONGRATS_MESSAGE = 'Well done, keep up the pace!'
     const DEFAULT_CONGRATS_TITLE = 'Level complete 🙌'
@@ -39,7 +40,6 @@
         "user_lang": null
     }}
 
-    let toast: string | undefined;
     let readerComponent: ReaderComponent;
     let nNewForms: number | undefined;
     let congratsTitle: string | undefined;
@@ -53,11 +53,10 @@
     let finishedGame = false
     let showSignupPrompt = false
 
-    $: if($currentlyScrolledParagraphIndex >= $currentTaskNParagraphs-1) try {umami.track('Scroll 100%')} catch (_undef) {}
+    $: if($currentlyScrolledParagraphIndex >= $currentTaskNParagraphs-1) umami?.track('Scroll 100%')
 
     onMount(async () => {
         if (!$username && !$player) { // new user, not logged in -> trial mode
-            //goto('/signup')
             $player = GET_ANON_PLAYER($currentGameId ?? new URLSearchParams(window.location.search).get('gameId') ?? fallbackGameId)
             $targetLang = anonLang
             await prevTask($player.level);
@@ -186,7 +185,7 @@
         if (!$username && $player.level_history?.order.length % 2 === 0 && $player.level_history?.order.length > 0) { // show the signup prompt at third, fifth, etc. level
             // player advanced two levels, time to consider signing up
             showSignupPrompt = true
-            try {umami.track('Signup Prompt shown')} catch (_undef) {}
+            umami?.track('Signup Prompt shown')
         }
 
         // the following calculation of new word count runs async in the background if the player stays for more than 5 seconds on the level
@@ -284,7 +283,7 @@
     footnote={nNewForms ? `You just encountered ${nNewForms} new words!\n` : ''} 
     onClose={statsClosedPromiseResolve}
 />
-<Popup closeButtonText="Later" bind:isOpen={showSignupPrompt} on:closed={() => {try {umami.track('Signup Prompt dismissed')} catch (_undef) {}}}>
+<Popup closeButtonText="Later" bind:isOpen={showSignupPrompt} on:closed={() => {umami?.track('Signup Prompt dismissed')}}>
     <h1>📂 Save your progress!</h1>
 	<p style="line-height: 200%; margin-bottom: 0.4em">Create a free account now.</p>
     <button on:click={()=>goto('/signup')} class="highlighted" data-umami-event="Signup Prompt accepted">Sign up</button>

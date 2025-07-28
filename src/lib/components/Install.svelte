@@ -1,17 +1,18 @@
 <script lang="ts" defer>
+    let umami: any; // Umami is initialized in the +layout.svelte from script tag
 
     let deferredPrompt: any;
   
     let installButtonVisible = false;
     
     async function handleInstallClick() {
-      try {umami.track('Install Button')} catch (_undef) {}
+      umami?.track('Install Button');
       if (deferredPrompt) {
         // Show the install prompt
         deferredPrompt.prompt();
         // Wait for the user's response
         const { outcome } = await deferredPrompt.userChoice;
-        try {umami.track(`Install ${outcome}`)} catch (_undef) {}
+        umami?.track(`Install ${outcome}`);
         // Clear the deferred prompt variable
         deferredPrompt = null;
         // Hide the install button after the prompt

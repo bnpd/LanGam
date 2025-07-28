@@ -1,7 +1,7 @@
 <script lang="ts" defer>
 	import Popup from "./Popup.svelte";
-	// let onClose: Function;
-	
+    let umami: any; // Umami is initialized in the +layout.svelte from script tag
+    
     let isOpen = false
 </script>
 <!-- svelte-ignore a11y-no-static-element-interactions -->
@@ -16,7 +16,7 @@
     }
 </style>
 
-<Popup bind:isOpen={isOpen} closeButtonText="Let's go!" on:closed={() => {try {umami.track('Help closed')} catch (_undef) {}}}>
+<Popup bind:isOpen={isOpen} closeButtonText="Let's go!" on:closed={() => {umami?.track('Help closed')}}>
     <div style="overflow-y: auto;">
         <h1 style="margin-bottom: 2vh;">You decide how the story unfolds</h1>
         <p>    

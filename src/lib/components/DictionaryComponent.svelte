@@ -9,6 +9,7 @@
 	import Toast from "./Toast.svelte";
 	import TtsComponent from "./TtsComponent.svelte";
 	import DocumentC from "$lib/DocumentC";
+    let umami: any; // Umami is initialized in the +layout.svelte from script tag
 
     const ERROR_MSG_NOT_LOGGED_IN = 'To save cards, please create an account.'
 
@@ -41,8 +42,7 @@
     $: if (dictionaryCurrentWord) onWordChanged()
     async function onTokenChanged(){ // this might cause problems
         dictionaryCurrentWord = $dictionaryToken!.word
-        try {umami.track('Dictionary opened')} catch (_undef) {}
-        //if (trySpeak) trySpeak(dictionaryCurrentWord)
+        umami?.track('Dictionary opened')
     }
 
     function onWordChanged() {

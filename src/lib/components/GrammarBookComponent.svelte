@@ -1,6 +1,7 @@
 <script lang="ts" defer>
 	import { grammarBookOpened } from "$lib/stores";
 	import Popup from "./Popup.svelte";
+    let umami: any; // Umami is initialized in the +layout.svelte from script tag
 
     export let content: {title_en: string, text_en: string}
     $: if (content && contentDiv) contentDiv.innerHTML = content.text_en
@@ -25,7 +26,7 @@
     }
 </style>
 
-<Popup closeButtonText="Done" bind:isOpen={isOpen} on:closed={()=> {$grammarBookOpened = true; try {umami.track('Grammar Book closed')} catch (_undef) {}}}>
+<Popup closeButtonText="Done" bind:isOpen={isOpen} on:closed={()=> {$grammarBookOpened = true; umami?.track('Grammar Book closed')}}>
     <div class="grammar-container">
         <h1>{content.title_en}</h1>
         {#if !$grammarBookOpened}

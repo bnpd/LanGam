@@ -1,3 +1,5 @@
+declare const umami: any; // imported from script tag
+
 export function setupGlobalErrorTracking() {
     if (typeof window === 'undefined') return; // Prevent SSR errors    
 
