@@ -2,7 +2,7 @@
     import '../global.css';
 	import TitleWithBackgroundImageComponent from '$lib/components/TitleWithBackgroundImageComponent.svelte';
 	import NavbarComponent from '$lib/components/NavbarComponent.svelte';
-	import { isGrammarHighlightingOn, nativeLang, srShowGenus, srShowIPA, targetLang, ttsSpeed } from '$lib/stores';
+	import { isGrammarHighlightingOn, nativeLang, srShowGenus, srShowIPA, ttsSpeed } from '$lib/stores';
 	import AccountDeletionComponent from '$lib/components/AccountDeletionComponent.svelte';
 	import { getUserData, updateUser } from '$lib/components/backend';
 	import FeedbackComponent from '$lib/components/FeedbackComponent.svelte';
@@ -44,7 +44,7 @@ if (!isLoggedIn()) {
             <label for="nativeLang">Native Language</label>&nbsp;&nbsp;
             <select name="nativeLang" id="nativeLang" autocomplete="language" placeholder="Used for translations" bind:value={$nativeLang}>
                 {#each $page.data?.languages ?? [] as lang}
-                    {#if lang.native && lang.id !== $targetLang?.id}
+                    {#if lang.native && lang.id !== $page.data?.targetLang?.id}
                         <option value={lang.id}>{lang.nameEN}</option>
                     {/if}
                 {/each}
@@ -65,7 +65,7 @@ if (!isLoggedIn()) {
             </span>
         </div>
     </div>
-    {#if $targetLang?.grammarHelpAvailable}
+    {#if $page.data?.targetLang?.grammarHelpAvailable}
         <div class="card">
             <h4>Grammar</h4>
             <div class="setting">
@@ -80,7 +80,7 @@ if (!isLoggedIn()) {
             <input type="checkbox" name="srShowIPA" id="srShowIPA" bind:checked={$srShowIPA}>&nbsp;
             <label for="srShowIPA">Show pronunciation 🗣 on cards</label>
         </div>
-        {#if $targetLang?.hasGenus}
+        {#if $page.data?.targetLang?.hasGenus}
             <div class="setting">
                 <input type="checkbox" name="srShowGenus" id="srShowGenus" bind:checked={$srShowGenus}>&nbsp;
                 <label for="srShowGenus">Show noun's gender on cards</label>

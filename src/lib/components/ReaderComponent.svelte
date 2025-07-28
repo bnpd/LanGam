@@ -1,8 +1,9 @@
 <script lang="ts" defer>
-  import { currentSolution, currentTask, gameChatHistory, currentlyScrolledParagraphIndex, loadingTask, nativeLang, targetLang, actualSimplificationLevel, username } from '../stores';
+  import { currentSolution, currentTask, gameChatHistory, currentlyScrolledParagraphIndex, loadingTask, nativeLang, actualSimplificationLevel, username } from '../stores';
 	import { afterUpdate, tick } from "svelte";
 	import TaskComponent from './TaskComponent.svelte';
 	import { updateUser, getAllLanguages, getTranslations } from './backend';
+  import { page } from '$app/stores';
 
   enum FIELD {TASK, SOLUTION}
 
@@ -203,7 +204,7 @@
         <option value={undefined}></option>
         {#await getAllLanguages() then langs}
           {#each langs as lang}
-              {#if lang.native && lang.id !== $targetLang?.id}
+              {#if lang.native && lang.id !== $page.data?.targetLang?.id}
                   <option value={lang.id}>{lang.nameEN}</option>
               {/if}
           {/each}

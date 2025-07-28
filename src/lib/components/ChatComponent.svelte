@@ -1,5 +1,5 @@
 <script lang="ts" defer>
-	import { chatOutcome, currentlyScrolledParagraphIndex, currentTask, currentTaskNParagraphs, dictionaryToken, nativeLang, player, targetLang, username } from "$lib/stores";
+	import { chatOutcome, currentlyScrolledParagraphIndex, currentTask, currentTaskNParagraphs, dictionaryToken, nativeLang, player, username } from "$lib/stores";
 	import { tick } from "svelte";
 	import BadgeComponent from "./BadgeComponent.svelte";
 	import type ReaderComponent from "./ReaderComponent.svelte";
@@ -8,6 +8,7 @@
 	import TaskComponent from "./TaskComponent.svelte";
 	import DocumentC from "$lib/DocumentC";
 	import Toast from "./Toast.svelte";
+    import { page } from '$app/stores';
 
     const MAX_LENGTH_RESPONSE = "This chat has reached it's maximum length. Try chatting about another text."
     const OTHER_ERROR_RESPONSE = 'Cannot connect, please try again'
@@ -74,7 +75,7 @@
             throw new Error("Empty chat submitted");
         }
         loading = true
-        const newMessage = {role: 'user', content: DocumentC.partialDocument(chatPrompt, $targetLang.id, undefined, undefined)}
+        const newMessage = {role: 'user', content: DocumentC.partialDocument(chatPrompt, $page.data?.targetLang.id, undefined, undefined)}
         let new_history = $chatHistory
         try {
             let responseMsg

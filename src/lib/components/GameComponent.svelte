@@ -2,7 +2,7 @@
     import { onMount } from 'svelte';
     import ReaderComponent from './ReaderComponent.svelte';
     import { completeLevel, completeLevelAnon, getLevel, getPlayer, getPlayerLevel, getUserLang, updatePlayer } from './backend';
-    import { username, targetLang, currentTask, currentSolution, currentlyScrolledParagraphIndex, loadingTask, gameChatHistory, player, chatOutcome, currentGameId, morphHighlightFilter, currentTaskNParagraphs, desiredSimplificationLevel, actualSimplificationLevel, nativeLang } from '$lib/stores';
+    import { username, currentTask, currentSolution, currentlyScrolledParagraphIndex, loadingTask, gameChatHistory, player, chatOutcome, currentGameId, morphHighlightFilter, currentTaskNParagraphs, desiredSimplificationLevel, actualSimplificationLevel, nativeLang } from '$lib/stores';
 	import { goto } from '$app/navigation';
 	import Toast from './Toast.svelte';
 	import ChatComponent from './ChatComponent.svelte';
@@ -24,7 +24,6 @@
     const TRACKED_POS = new Set([...STUDIED_POS, 85, 87, 89, 90, 91, 94, 95, 98])
 
     $: fallbackGameId = $page.data?.gameId;
-    $: anonLang = $page.data?.lang;
 
     function GET_ANON_PLAYER(gameId: string){return {
         "collectionId": $page.data?.collectionId,
@@ -58,18 +57,13 @@
     onMount(async () => {
         if (!$username && !$player) { // new user, not logged in -> trial mode
             $player = GET_ANON_PLAYER($currentGameId ?? new URLSearchParams(window.location.search).get('gameId') ?? fallbackGameId)
-            $targetLang = anonLang
             await prevTask($player.level);
             return
         }
         
         if ($username && !$player?.id) { // user is logged in, but does not have a player for this game yet
             // load gameId from URL if not set
-            $currentGameId = $currentGameId ?? new URLSearchParams(window.location.search).get('gameId')
-            if (!$currentGameId) {
-                goto('/games')
-                return
-            }
+            $currentGameId = $currentGameId ?? new URLSearchParams(window.location.search).get('gameId') ?? fallbackGameId
 
             $player = await getPlayer($currentGameId, $player)
         }
@@ -192,7 +186,7 @@
         const docIdBeforeMaybeNavigateToDifferentLevel = $currentTask?.docId
         setTimeout(async () => {
             if ($username && $currentTask?.docId === docIdBeforeMaybeNavigateToDifferentLevel) {
-                const user_lang = await getUserLang($username, $targetLang.id).catch(_offline => {
+                const user_lang = await getUserLang($username, $page.data?.targetLang.id).catch(_offline => {
                     nNewForms = undefined
                 })
                 if (!user_lang?.seen_words) return

@@ -3,22 +3,23 @@
 	import { onMount } from 'svelte';
 	import { getGamesByLang } from '$lib/components/backend';
 	import { error } from '@sveltejs/kit';
-	import { targetLang, username } from '$lib/stores';
+	import { username } from '$lib/stores';
 	import TitleWithBackgroundImageComponent from '$lib/components/TitleWithBackgroundImageComponent.svelte';
 	import { goto } from '$app/navigation';
 	import { PUBLIC_POCKETBASE_URL } from '$env/static/public';
+  import { page } from '$app/stores';
 
   let FALLBACK_IMAGE = '/images/illustrations/placeholder.avif'
 
   let games: any[]
 
   onMount(async () => {
-    if (!$username || !$targetLang?.id) {
+    if (!$username) {
         goto('/signup')
         return
     }
-    games = await getGamesByLang($targetLang.id)
-  
+    games = await getGamesByLang($page.data?.targetLang.id)
+
     if (!games) throw error(405);
   })
 </script>

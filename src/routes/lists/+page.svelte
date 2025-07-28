@@ -1,17 +1,18 @@
 <script lang="ts" defer>
-import { getUserLang } from "$lib/components/backend.js"
-import { targetLang, username } from '$lib/stores';
-import '../global.css';
-import './lists.css';
-	import TitleWithBackgroundImageComponent from "$lib/components/TitleWithBackgroundImageComponent.svelte";
-	import VocabListItem from "$lib/components/VocabListItem.svelte";
-	import NavbarComponent from "$lib/components/NavbarComponent.svelte";
-	import SrComponent from "$lib/components/SrComponent.svelte";
+  import { getUserLang } from "$lib/components/backend.js"
+  import { username } from '$lib/stores';
+  import '../global.css';
+  import './lists.css';
+  import TitleWithBackgroundImageComponent from "$lib/components/TitleWithBackgroundImageComponent.svelte";
+  import VocabListItem from "$lib/components/VocabListItem.svelte";
+  import NavbarComponent from "$lib/components/NavbarComponent.svelte";
+  import SrComponent from "$lib/components/SrComponent.svelte";
   import { isLoggedIn } from '$lib/components/backend';
-	import { onMount } from 'svelte';
-	import { goto } from '$app/navigation';
-	import { PUBLIC_POCKETBASE_URL } from "$env/static/public";
-  
+  import { onMount } from 'svelte';
+  import { goto } from '$app/navigation';
+  import { PUBLIC_POCKETBASE_URL } from "$env/static/public";
+  import { page } from '$app/stores';
+
 let scheduledTokens: {[key: string]: any} = {}
 let usedTokens: {[key: string]: string[]} = {}
 let seenTokens: {[key: string]: string[]} = {}
@@ -38,7 +39,7 @@ async function loadVocabLists() {
   seenTokens = {}
 
   // load lists
-  const user_lang = await getUserLang($username, $targetLang.id)
+  const user_lang = await getUserLang($username, $page.data?.targetLang.id)
   scheduledTokens = user_lang.sr_words
   usedTokens = user_lang.used_words
   seenTokens = user_lang.seen_words

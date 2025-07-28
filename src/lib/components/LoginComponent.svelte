@@ -1,12 +1,13 @@
 <script lang="ts" defer>
-    import { getGamesByLang, getLangById, login, loginWithGoogle, newUserLang, signup } from '$lib/components/backend';
+    import { login, loginWithGoogle, newUserLang, signup } from '$lib/components/backend';
     import { goto } from '$app/navigation';
-	import { reviews, targetLang, nativeLang, username } from '$lib/stores';
+	import { reviews, nativeLang, username } from '$lib/stores';
 	import { ClientResponseError } from 'pocketbase';
 	import TitleWithBackgroundImageComponent from './TitleWithBackgroundImageComponent.svelte';
 	import { onMount } from 'svelte';
 	import SignInWithGoogleButton from './SignInWithGoogleButton.svelte';
     import { PUBLIC_LANG } from '$env/static/public';
+    import { page } from '$app/stores';
     let umami: any; // Umami is initialized in the +layout.svelte from script tag
   
     export let isSignup: boolean
@@ -50,11 +51,11 @@
             } else if (!$nativeLang && user_obj.native_lang) { // same user, but his lang preference was lost
                 $nativeLang = user_obj.native_lang
             }
-            $targetLang = isSignup ? (await newUserLang(PUBLIC_LANG)).expand.target_lang : await getLangById(PUBLIC_LANG)
+            if (isSignup) await newUserLang(PUBLIC_LANG)
 
             umami?.track((isSignup ? 'Signup' : 'Login'), {id: $username, method: 'password'})
             let advanceLevelAfterSignup = new URLSearchParams(window.location.search).get('advanceLevelAfterSignup')
-            goto('/game?gameId=' + (await getGamesByLang($targetLang.id))[0].id + (advanceLevelAfterSignup ? `&advanceLevelAfterSignup=${advanceLevelAfterSignup}` : ''))
+            goto('/game' + (advanceLevelAfterSignup ? `?advanceLevelAfterSignup=${advanceLevelAfterSignup}` : ''))
         } catch (e) {
             if (!isSignup && e instanceof ClientResponseError) { // login was rejected
                 showValidationError('password', 'Email or password are wrong.')
@@ -87,11 +88,11 @@
             } else if (!$nativeLang && user_obj.native_lang) { // same user, but his lang preference was lost
                 $nativeLang = user_obj.native_lang
             }
-            $targetLang = isSignup ? (await newUserLang(PUBLIC_LANG)).expand.target_lang : await getLangById(PUBLIC_LANG)
+            if (isSignup) await newUserLang(PUBLIC_LANG)
 
             umami?.track((isSignup ? 'Signup' : 'Login'), {id: $username, method: 'google'})
             let advanceLevelAfterSignup = new URLSearchParams(window.location.search).get('advanceLevelAfterSignup')
-            goto('/game?gameId=' + (await getGamesByLang($targetLang.id))[0].id + (advanceLevelAfterSignup ? `&advanceLevelAfterSignup=${advanceLevelAfterSignup}` : ''))
+            goto('/game' + (advanceLevelAfterSignup ? `?advanceLevelAfterSignup=${advanceLevelAfterSignup}` : ''))
         } catch (e) {
             showValidationError('submit', 'Connection error, please try again.')
         } finally {

@@ -1,6 +1,6 @@
 <script lang="ts" defer>
 	import '../global.css';
-	import { username, targetLang } from '$lib/stores';
+	import { username } from '$lib/stores';
 	import { goto } from '$app/navigation';
 	import { onMount } from 'svelte';
 	import GameComponent from '$lib/components/GameComponent.svelte';
@@ -11,6 +11,7 @@
 	import { getDue } from '$lib/components/backend';
 	import HelpPopup from '$lib/components/HelpPopup.svelte';
 	import { PUBLIC_POCKETBASE_URL } from '$env/static/public';
+    import { page } from '$app/stores';
 
 	let dueWords: any[];
 
@@ -18,9 +19,9 @@
 		// after 1 second, check for SR words
 		setTimeout(async () => {
 			if ($username) {
-				dueWords = await getDue($targetLang.id)
+				dueWords = await getDue($page.data?.targetLang.id)
 				setInterval(async () => {
-					dueWords = await getDue($targetLang.id)				
+					dueWords = await getDue($page.data?.targetLang.id)				
 				}, 300000); // refresh every 5 minutes
 			}
 		}, 1000);
