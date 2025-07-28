@@ -12,3 +12,4 @@ vite.config.ts.timestamp-*
 static/freqLists/PL.txt
 static/freqLists/freqListToJson.py
 /src/config.js
+/test-results
