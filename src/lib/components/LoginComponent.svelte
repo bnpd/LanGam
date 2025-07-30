@@ -59,8 +59,10 @@
         } catch (e) {
             if (!isSignup && e instanceof ClientResponseError) { // login was rejected
                 showValidationError('password', 'Email or password are wrong.')
-            } else if (isSignup && (e as Error).status === 409) {// signup email was rejected
-                showValidationError('email', 'The email is invalid or already in use.')
+            } else if (isSignup && (e as ClientResponseError).data?.data?.email?.code === 'validation_is_email') {// signup email was rejected
+                showValidationError('email', 'This is not a valid email.')
+            } else if (isSignup && (e as ClientResponseError).status === 409) {// signup email was rejected
+                showValidationError('email', 'The email is already in use.')
             } else {   
                 showValidationError('submit', 'Connection error, please try again.')
             }
@@ -70,10 +72,20 @@
     }
   
     async function onLoginWithGoogle() {
+        // Add a focus event listener in case user does not complete the login (cause loginWithGoogle will not return immediately)
+        const unsetLoadingOnFocusReturn = () => {
+            if (loading) loading = false;
+            window.removeEventListener('focus', unsetLoadingOnFocusReturn);
+        };
+
         try {
             loading = true
+            window.addEventListener('focus', unsetLoadingOnFocusReturn);
 
-            let oauthResult = await loginWithGoogle()
+            let oauthResult = await loginWithGoogle();
+
+            window.removeEventListener('focus', unsetLoadingOnFocusReturn);
+
 
             isSignup = oauthResult.meta!.isNew
             let user_obj = oauthResult.record
@@ -94,6 +106,7 @@
             let advanceLevelAfterSignup = new URLSearchParams(window.location.search).get('advanceLevelAfterSignup')
             goto('/game' + (advanceLevelAfterSignup ? `?advanceLevelAfterSignup=${advanceLevelAfterSignup}` : ''))
         } catch (e) {
+            window.removeEventListener('focus', unsetLoadingOnFocusReturn);
             showValidationError('submit', 'Connection error, please try again.')
         } finally {
             loading = false
@@ -124,9 +137,9 @@
     }
 </style>
 
-<TitleWithBackgroundImageComponent height='40dvh'><h2 style="height: 15dvh; line-height: 20dvh; font-size: xxx-large; overflow: hidden;">
+<TitleWithBackgroundImageComponent height='40dvh'><span style="height: 15dvh; line-height: 20dvh; font-size: xxx-large; overflow: hidden;">
     {isSignup ? 'Welcome' : 'Welcome back'}
-</h2></TitleWithBackgroundImageComponent>
+</span></TitleWithBackgroundImageComponent>
 <div style="text-align: center">
     <div class="card" style="--padding-card: 10%; margin-left: 5vw; margin-right: 5vw;">
         <form on:submit|preventDefault={onSubmit} bind:this={formElement}>
