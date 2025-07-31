@@ -1,7 +1,8 @@
 <script lang="ts" defer>
 	import type DocumentC from "$lib/DocumentC";
-	import { isSoundOn, targetLang, ttsSpeed } from "$lib/stores";
+	import { isSoundOn, ttsSpeed } from "$lib/stores";
 	import { onMount } from "svelte";
+    import { page } from '$app/stores';
 
     export let text: DocumentC | undefined = undefined
     let voice: SpeechSynthesisVoice
@@ -57,7 +58,7 @@
         const allVoices = speechSynthesis.getVoices()
         if (allVoices?.length) {
             const separator = allVoices[0].lang.includes('-') ? '-' : '_'
-            let voices_in_lang = allVoices.filter(voice=>{return voice.lang.split(separator)[0].toLowerCase()===$targetLang.id})
+            let voices_in_lang = allVoices.filter(voice=>{return voice.lang.split(separator)[0].toLowerCase()===$page.data?.targetLang.id})
             if (voices_in_lang.length) {
                 voice = voices_in_lang[0]
             }

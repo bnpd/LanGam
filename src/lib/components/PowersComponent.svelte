@@ -3,6 +3,7 @@
 	import { createEventDispatcher } from 'svelte';
 	import { updatePlayer } from "./backend";
 	import Popup from './Popup.svelte';
+    let umami: any; // Umami is initialized in the +layout.svelte from script tag
 
     let isOpen = false
 
@@ -22,7 +23,7 @@
 	}
 </script>
 
-<Popup closeButtonText="Done" bind:isOpen={isOpen} on:closed={() => {try {umami.track('Powers closed')} catch (_undef) {}}}>
+<Popup closeButtonText="Done" bind:isOpen={isOpen} on:closed={() => {umami?.track('Powers closed')}}>
     <h1>Stats and Powers</h1>
     <table>
         <tr><th>Stat</th><th>Strength</th></tr>

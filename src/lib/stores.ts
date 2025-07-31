@@ -4,7 +4,6 @@ import type DocumentC from './DocumentC';
 /* Global Stores */
 export const username = createPersistentStore('username', null);
 export const player = createPersistentStore('player', null);
-export const targetLang = createPersistentStore('target_lang', null);
 export const nativeLang = createPersistentStore('native_lang', null);
 export const loadingTask: Writable<boolean> = writable()
 

@@ -2,7 +2,7 @@
     import { onMount } from 'svelte';
     import ReaderComponent from './ReaderComponent.svelte';
     import { completeLevel, completeLevelAnon, getLevel, getPlayer, getPlayerLevel, getUserLang, updatePlayer } from './backend';
-    import { username, targetLang, currentTask, currentSolution, currentlyScrolledParagraphIndex, loadingTask, gameChatHistory, player, chatOutcome, currentGameId, morphHighlightFilter, currentTaskNParagraphs, desiredSimplificationLevel, actualSimplificationLevel, nativeLang } from '$lib/stores';
+    import { username, currentTask, currentSolution, currentlyScrolledParagraphIndex, loadingTask, gameChatHistory, player, chatOutcome, currentGameId, morphHighlightFilter, currentTaskNParagraphs, desiredSimplificationLevel, actualSimplificationLevel, nativeLang } from '$lib/stores';
 	import { goto } from '$app/navigation';
 	import Toast from './Toast.svelte';
 	import ChatComponent from './ChatComponent.svelte';
@@ -14,6 +14,7 @@
 	import WebPushSubscription from './WebPushSubscription.svelte';
 	import Popup from './Popup.svelte';
     import { page } from '$app/stores';
+    let umami: any; // Umami is initialized in the +layout.svelte from script tag
 
     const DEFAULT_CONGRATS_MESSAGE = 'Well done, keep up the pace!'
     const DEFAULT_CONGRATS_TITLE = 'Level complete 🙌'
@@ -23,7 +24,6 @@
     const TRACKED_POS = new Set([...STUDIED_POS, 85, 87, 89, 90, 91, 94, 95, 98])
 
     $: fallbackGameId = $page.data?.gameId;
-    $: anonLang = $page.data?.lang;
 
     function GET_ANON_PLAYER(gameId: string){return {
         "collectionId": $page.data?.collectionId,
@@ -39,7 +39,6 @@
         "user_lang": null
     }}
 
-    let toast: string | undefined;
     let readerComponent: ReaderComponent;
     let nNewForms: number | undefined;
     let congratsTitle: string | undefined;
@@ -53,24 +52,18 @@
     let finishedGame = false
     let showSignupPrompt = false
 
-    $: if($currentlyScrolledParagraphIndex >= $currentTaskNParagraphs-1) try {umami.track('Scroll 100%')} catch (_undef) {}
+    $: if($currentlyScrolledParagraphIndex >= $currentTaskNParagraphs-1) umami?.track('Scroll 100%')
 
     onMount(async () => {
         if (!$username && !$player) { // new user, not logged in -> trial mode
-            //goto('/signup')
             $player = GET_ANON_PLAYER($currentGameId ?? new URLSearchParams(window.location.search).get('gameId') ?? fallbackGameId)
-            $targetLang = anonLang
             await prevTask($player.level);
             return
         }
         
         if ($username && !$player?.id) { // user is logged in, but does not have a player for this game yet
             // load gameId from URL if not set
-            $currentGameId = $currentGameId ?? new URLSearchParams(window.location.search).get('gameId')
-            if (!$currentGameId) {
-                goto('/games')
-                return
-            }
+            $currentGameId = $currentGameId ?? new URLSearchParams(window.location.search).get('gameId') ?? fallbackGameId
 
             $player = await getPlayer($currentGameId, $player)
         }
@@ -183,17 +176,17 @@
         grammarChapter = level.expand?.grammar
         $morphHighlightFilter = level.expand?.grammar?.morphHighlightFilter
 
-        if (!$username && $player.level_history?.order.length % 2 === 0 && $player.level_history?.order.length > 0) { // show the signup prompt at third, fifth, etc. level
+        if (!$username && $player?.level_history?.order?.length % 2 === 0 && $player?.level_history?.order?.length > 0) { // show the signup prompt at third, fifth, etc. level
             // player advanced two levels, time to consider signing up
             showSignupPrompt = true
-            try {umami.track('Signup Prompt shown')} catch (_undef) {}
+            umami?.track('Signup Prompt shown')
         }
 
         // the following calculation of new word count runs async in the background if the player stays for more than 5 seconds on the level
         const docIdBeforeMaybeNavigateToDifferentLevel = $currentTask?.docId
         setTimeout(async () => {
             if ($username && $currentTask?.docId === docIdBeforeMaybeNavigateToDifferentLevel) {
-                const user_lang = await getUserLang($username, $targetLang.id).catch(_offline => {
+                const user_lang = await getUserLang($username, $page.data?.targetLang.id).catch(_offline => {
                     nNewForms = undefined
                 })
                 if (!user_lang?.seen_words) return
@@ -284,7 +277,7 @@
     footnote={nNewForms ? `You just encountered ${nNewForms} new words!\n` : ''} 
     onClose={statsClosedPromiseResolve}
 />
-<Popup closeButtonText="Later" bind:isOpen={showSignupPrompt} on:closed={() => {try {umami.track('Signup Prompt dismissed')} catch (_undef) {}}}>
+<Popup closeButtonText="Later" bind:isOpen={showSignupPrompt} on:closed={() => {umami?.track('Signup Prompt dismissed')}}>
     <h1>📂 Save your progress!</h1>
 	<p style="line-height: 200%; margin-bottom: 0.4em">Create a free account now.</p>
     <button on:click={()=>goto('/signup')} class="highlighted" data-umami-event="Signup Prompt accepted">Sign up</button>

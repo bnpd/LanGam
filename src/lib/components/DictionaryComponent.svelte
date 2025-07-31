@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { targetLang, dictionaryToken, freqList, username } from "$lib/stores";
+	import { dictionaryToken, freqList, username } from "$lib/stores";
 	import { onMount, tick } from "svelte";
 	import Popup from "./Popup.svelte";
 	import BadgeComponent from "./BadgeComponent.svelte";
@@ -9,6 +9,8 @@
 	import Toast from "./Toast.svelte";
 	import TtsComponent from "./TtsComponent.svelte";
 	import DocumentC from "$lib/DocumentC";
+    import { page } from '$app/stores';
+    let umami: any; // Umami is initialized in the +layout.svelte from script tag
 
     const ERROR_MSG_NOT_LOGGED_IN = 'To save cards, please create an account.'
 
@@ -41,8 +43,7 @@
     $: if (dictionaryCurrentWord) onWordChanged()
     async function onTokenChanged(){ // this might cause problems
         dictionaryCurrentWord = $dictionaryToken!.word
-        try {umami.track('Dictionary opened')} catch (_undef) {}
-        //if (trySpeak) trySpeak(dictionaryCurrentWord)
+        umami?.track('Dictionary opened')
     }
 
     function onWordChanged() {
@@ -80,7 +81,7 @@
 
     onMount(async () => {
         if (!$freqList) {
-            const response = await fetch(`/freqLists/${$targetLang.id}.json`);
+            const response = await fetch(`/freqLists/${$page.data.targetLang.id}.json`);
             $freqList = await response.json();
         }
     })
@@ -88,7 +89,7 @@
     function addToSpacedRepetition(formdata: { [x: string]: string | undefined; }, isReversed: boolean) {
         successMessage = undefined
         formError = undefined
-        addSrWord($targetLang.id, formdata, isReversed)
+        addSrWord($page.data?.targetLang.id, formdata, isReversed)
         .then(res=>{
             if (res) {
                 successMessage = 'Saved!'
@@ -114,7 +115,7 @@
 <Popup on:closed={onClose} isOpen={$dictionaryToken !== undefined} onPopstate={onPopstate} outsideclose={false}>
     <div id="dictionary-container">
         <h2>
-            <TtsComponent text={DocumentC.partialDocument($dictionaryToken?.word, $targetLang, {}, {})} bind:trySpeak={trySpeak}/>
+            <TtsComponent text={DocumentC.partialDocument($dictionaryToken?.word, $page.data?.targetLang, {}, {})} bind:trySpeak={trySpeak}/>
             <form 
                 id="formDictionaryCurrentWord"
                 on:click={async e => {

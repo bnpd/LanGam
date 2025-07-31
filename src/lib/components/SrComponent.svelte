@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { nativeLang, srShowGenus, srShowIPA, targetLang } from "$lib/stores";
+	import { nativeLang, srShowGenus, srShowIPA } from "$lib/stores";
 	import { Rating, type Grade } from "ts-fsrs";
 	import { deleteSrCard, getDue, updateSrCard } from "./backend";
 	import type { VocabCard } from "$lib/fsrs";
@@ -8,6 +8,7 @@
 	import Toast from "./Toast.svelte";
 	import Popup from "./Popup.svelte";
 	import FormComponent from "./FormComponent.svelte";
+    import { page } from '$app/stores';
 
     let showSolution = false
     let dueWords: VocabCard[]
@@ -29,7 +30,7 @@
     ])}
 
     onMount(async ()=>{
-        dueWords = await getDue($targetLang?.id)
+        dueWords = await getDue($page.data?.targetLang?.id)
     })
 
     async function onSubmitRating(card: VocabCard, rating: Grade) {
@@ -40,7 +41,7 @@
         dueWords = dueWords
         if (!dueWords?.length) { // we are done, check once again whether we really are
             await updatedPromise
-            dueWords = await getDue($targetLang?.id)
+            dueWords = await getDue($page.data?.targetLang?.id)
         }
     }
 
@@ -81,9 +82,9 @@
 {#if dueWords?.length}
     {@const card = dueWords[0]}
     <div class="card" style="line-height: 2em;">
-        <BadgeComponent text={(card.reversed ? $targetLang.id : $nativeLang ?? 'meaning').toUpperCase()}/>&nbsp;{card.reversed ? card.word : card.meaning} {#if showSolution && card.reversed && card.genus && $srShowGenus}&nbsp;&nbsp;<em>{card.genus}</em>{/if} <br>
+        <BadgeComponent text={(card.reversed ? $page.data?.targetLang.id : $nativeLang ?? 'meaning').toUpperCase()}/>&nbsp;{card.reversed ? card.word : card.meaning} {#if showSolution && card.reversed && card.genus && $srShowGenus}&nbsp;&nbsp;<em>{card.genus}</em>{/if} <br>
         <hr>
-        <BadgeComponent text={(card.reversed ? $nativeLang ?? 'meaning' : $targetLang.id).toUpperCase()}/>&nbsp;
+        <BadgeComponent text={(card.reversed ? $nativeLang ?? 'meaning' : $page.data?.targetLang.id).toUpperCase()}/>&nbsp;
         <span class:hidden={!showSolution}>
             {card.reversed ? card.meaning : card.word} {#if !card.reversed && card.genus && $srShowGenus}&nbsp;&nbsp;<em>{card.genus}</em>{/if} <br>
             {#if card.notes}

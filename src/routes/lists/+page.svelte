@@ -1,17 +1,18 @@
 <script lang="ts" defer>
-import { getUserLang } from "$lib/components/backend.js"
-import { targetLang, username } from '$lib/stores';
-import '../global.css';
-import './lists.css';
-	import TitleWithBackgroundImageComponent from "$lib/components/TitleWithBackgroundImageComponent.svelte";
-	import VocabListItem from "$lib/components/VocabListItem.svelte";
-	import NavbarComponent from "$lib/components/NavbarComponent.svelte";
-	import SrComponent from "$lib/components/SrComponent.svelte";
+  import { getUserLang } from "$lib/components/backend.js"
+  import { username } from '$lib/stores';
+  import '../global.css';
+  import './lists.css';
+  import TitleWithBackgroundImageComponent from "$lib/components/TitleWithBackgroundImageComponent.svelte";
+  import VocabListItem from "$lib/components/VocabListItem.svelte";
+  import NavbarComponent from "$lib/components/NavbarComponent.svelte";
+  import SrComponent from "$lib/components/SrComponent.svelte";
   import { isLoggedIn } from '$lib/components/backend';
-	import { onMount } from 'svelte';
-	import { goto } from '$app/navigation';
-	import { PUBLIC_POCKETBASE_URL } from "$env/static/public";
-  
+  import { onMount } from 'svelte';
+  import { goto } from '$app/navigation';
+  import { PUBLIC_POCKETBASE_URL } from "$env/static/public";
+  import { page } from '$app/stores';
+
 let scheduledTokens: {[key: string]: any} = {}
 let usedTokens: {[key: string]: string[]} = {}
 let seenTokens: {[key: string]: string[]} = {}
@@ -38,7 +39,7 @@ async function loadVocabLists() {
   seenTokens = {}
 
   // load lists
-  const user_lang = await getUserLang($username, $targetLang.id)
+  const user_lang = await getUserLang($username, $page.data?.targetLang.id)
   scheduledTokens = user_lang.sr_words
   usedTokens = user_lang.used_words
   seenTokens = user_lang.seen_words
@@ -72,14 +73,14 @@ async function loadVocabLists() {
 <SrComponent />
 {#if showAllWords}
   <div class="flex-row">
-    <!-- {#if Object.keys(scheduledTokens)?.length}    
+    <!-- {#if Object.keys(scheduledTokens ?? {}).length}    
       <div class="vocab-column">
         <h3>
           Spaced Repetition
-          <span>{Object.keys(scheduledTokens).length ? "("+Object.keys(scheduledTokens).length+" words)" : ""}</span>
+          <span>{"("+Object.keys(scheduledTokens ?? {}).length+" words)"}</span>
         </h3>
         <div>
-          {#each Object.keys(scheduledTokens) as key}
+          {#each Object.keys(scheduledTokens ?? {}) as key}
             <VocabListItem title={scheduledTokens[key].word} >
               <BadgeComponent text='AI' tooltip="Estimate when you are likely to forget it, according to Spaced Repetition science. We'll try to show it before that day."/>
               Due: {Math.min(9999, scheduledTokens[key]?.interval)}&nbsp;d
@@ -91,10 +92,10 @@ async function loadVocabLists() {
     <div class="vocab-column">
       <h3>
         Used in chat
-        <span>{Object.keys(usedTokens).length ? "("+Object.keys(usedTokens).length+" words)" : ""}</span>
+        <span>{"("+Object.keys(usedTokens ?? {}).length+" words)"}</span>
       </h3>
       <div>
-        {#each Object.keys(usedTokens) as key}
+        {#each Object.keys(usedTokens ?? {}) as key}
           <VocabListItem>
             {usedTokens[key].join(', ')}
           </VocabListItem>
@@ -104,10 +105,10 @@ async function loadVocabLists() {
     <div class="vocab-column">
       <h3>
         Seen
-        <span>{Object.keys(seenTokens).length ? "("+Object.keys(seenTokens).length+" families)" : ""}</span>
+        <span>{"("+Object.keys(seenTokens ?? {}).length+" families)"}</span>
       </h3>
       <div>
-        {#each Object.keys(seenTokens) as key}
+        {#each Object.keys(seenTokens ?? {}) as key}
           <VocabListItem>
             {seenTokens[key].join(', ')}
           </VocabListItem>
