@@ -213,7 +213,7 @@ test.describe('Signup', () => {
 		await page.fill('input[name="passwordConfirm"]', 'passwOrd123!');
 		await page.check('input[name="acceptConditions"]');
 		await page.getByRole('button', { name: 'Register' }).click();
-		await page.waitForURL('/game', { timeout: 5000 });
+		await expect(page).toHaveURL('/game');
 	});
 
 	test('does not succeed for invalid email', async ({ page }) => {
@@ -276,10 +276,12 @@ test.describe('Login', () => {
 
 	test('when login form is submitted with valid data, we are redirected to the game page', async ({ page }) => {
 		let testUser = await createTestUser();
+		console.log(`Created test user: ${testUser.email}`);
+		
 		await page.fill('input[name="email"]', testUser.email);
 		await page.fill('input[name="password"]', testUser.password);
 		await page.getByRole('button', { name: 'Login' }).click();
-		await page.waitForURL('/game', { timeout: 5000 });
+		await expect(page).toHaveURL('/game');
 	});
 
 	test('does not succeed for invalid password', async ({ page }) => {

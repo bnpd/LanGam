@@ -1,5 +1,6 @@
 const TESTUSERPASSWORD = 'testpassword123!';
-const POCKETBASE_URL = 'http://127.0.0.1:8090'; // Use the test server URL
+
+import { testConfig } from "./playwright.setup";
 
 interface TestUser {
     email: string;
@@ -21,7 +22,7 @@ export async function createTestUser(): Promise<TestUser> {
 
     try {
         // Create new test user
-        const createResponse = await fetch(`${POCKETBASE_URL}/api/collections/users/records`, {
+        const createResponse = await fetch(`${testConfig.pocketbaseUrl}/api/collections/users/records`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -35,7 +36,7 @@ export async function createTestUser(): Promise<TestUser> {
         await createResponse.json(); // Ensure the response is consumed
 
         // Login to get the auth token
-        const loginResponse = await fetch(`${POCKETBASE_URL}/api/collections/users/auth-with-password`, {
+        const loginResponse = await fetch(`${testConfig.pocketbaseUrl}/api/collections/users/auth-with-password`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
