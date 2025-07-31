@@ -81,7 +81,7 @@
 
     onMount(async () => {
         if (!$freqList) {
-            const response = await fetch(`/freqLists/${$page.data?.targetLang.id}.json`);
+            const response = await fetch(`/freqLists/${$page.data.targetLang.id}.json`);
             $freqList = await response.json();
         }
     })

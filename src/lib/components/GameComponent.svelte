@@ -176,7 +176,7 @@
         grammarChapter = level.expand?.grammar
         $morphHighlightFilter = level.expand?.grammar?.morphHighlightFilter
 
-        if (!$username && $player.level_history?.order.length % 2 === 0 && $player.level_history?.order.length > 0) { // show the signup prompt at third, fifth, etc. level
+        if (!$username && $player?.level_history?.order?.length % 2 === 0 && $player?.level_history?.order?.length > 0) { // show the signup prompt at third, fifth, etc. level
             // player advanced two levels, time to consider signing up
             showSignupPrompt = true
             umami?.track('Signup Prompt shown')
