@@ -238,26 +238,36 @@
     {#if grammarChapter && !finishedGame}
         <GrammarBookComponent content={grammarChapter}/>
     {/if}
-    <button class="gameNavBtn" disabled={$loadingTask} on:click={onLevelBackbtnClick} hidden={!$player?.level_history?.order?.length}>
+    <button class="gameNavBtn nav-back" disabled={$loadingTask} on:click={onLevelBackbtnClick} hidden={!$player?.level_history?.order?.length}>
         ◀
     </button>
     {#if !finishedGame}
         <PowersComponent on:use_power={e => usePower(e.detail.power)}/>
         {#each (Object.entries($currentTask?.outcomes ?? {})) as [outcome, obj]}
             {#if $player?.level_history?.[obj.goto] || $chatOutcome == outcome} <!--TODO: fix if there are two outcomes with same seq_id -->
-                <button class="gameNavBtn" class:flash={$currentlyScrolledParagraphIndex >= $currentTaskNParagraphs-1} disabled={$loadingTask} on:click={()=>onAnswbtnClick(outcome)} data-umami-event="Forward Button">
+                <button class="gameNavBtn nav-forward" class:flash={$currentlyScrolledParagraphIndex >= $currentTaskNParagraphs-1} disabled={$loadingTask} on:click={()=>onAnswbtnClick(outcome)} data-umami-event="Forward Button">
                     ▶
                 </button>
             {:else}
                 <div style="display: inline-block;">
                     <button 
-                        class="gameNavBtn" 
+                        class="gameNavBtn nav-locked" 
                         on:click={()=>{
                             readerComponent.scrollToBottom();
-                            lockedLevelToast=`There is a hidden outcome here that you can unlock by chatting with ${$currentTask.character}`
+                            if (document.querySelector('.nav-forward')) {
+                                lockedLevelToast=`There is a hidden chat outcome here that you can unlock by talking with ${$currentTask.character}`
+                            } else {
+                                lockedLevelToast=`To unlock the next level, talk to ${$currentTask.character}`
+                            }
                         }} 
                         data-umami-event="Forward Button (locked)"
-                    >🔒</button>
+                        style="position: relative;"
+                    >
+                        <span style="position: absolute; left: 5px; top: 5px; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; pointer-events: none;">
+                            🔒
+                        </span>
+                        ▶
+                    </button>
                 </div>
             {/if}
         {/each}
