@@ -95,6 +95,7 @@
         $currentTask = undefined
         $loadingTask = true
         $gameChatHistory = []
+        $chatOutcome = null
 
         try {
             $player = await completeLevelPromise
@@ -165,7 +166,7 @@
         $currentTask = level
         if (translations) $currentSolution = translations.find(t => t.field === 'title')?.text + '\n\n' + translations.find(t => t.field === 'text')?.text
 
-        if ($gameChatHistory.length > 1) {         
+        if ($gameChatHistory.length > 1 && !$chatOutcome) {
             // we have a saved state from last session to restore
             $currentlyScrolledParagraphIndex = 0
         } else {
@@ -202,7 +203,7 @@
 
     function initChatHistory(firstMsgTranslation: string | undefined = undefined) {
         $gameChatHistory = $currentTask?.question?.text ? [{role: 'assistant', content: DocumentC.partialDocument($currentTask?.question?.text, $currentTask?.lang, firstMsgTranslation, $currentTask?.question?.tokens)}] : [];
-        $chatOutcome = !($gameChatHistory?.length) ? 'default' : null // if AI is NOT starting a chat with us, chatOutcome = default so that forward button is enabled
+        $chatOutcome = null
     }
 
 
@@ -244,7 +245,7 @@
     {#if !finishedGame}
         <PowersComponent on:use_power={e => usePower(e.detail.power)}/>
         {#each (Object.entries($currentTask?.outcomes ?? {})) as [outcome, obj]}
-            {#if $player?.level_history?.[obj.goto] || $chatOutcome == outcome} <!--TODO: fix if there are two outcomes with same seq_id -->
+            {#if outcome == 'default' || $player?.level_history?.[obj.goto] || $chatOutcome == outcome} <!--TODO: fix if there are two outcomes with same seq_id -->
                 <button class="gameNavBtn nav-forward" class:flash={$currentlyScrolledParagraphIndex >= $currentTaskNParagraphs-1} disabled={$loadingTask} on:click={()=>onAnswbtnClick(outcome)} data-umami-event="Forward Button">
                     ▶
                 </button>
