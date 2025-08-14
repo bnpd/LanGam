@@ -158,10 +158,10 @@ test.describe('Game, not signed in', () => {
 		await page.getByRole('button', { name: 'Close' }).click();
 
 		await expect(page.getByText('#2')).toBeVisible();
-		await expect(page.getByRole('button', { name: '▶' })).toHaveCount(0);
-		await expect(page.getByRole('button', { name: '🔒' })).toHaveCount(2);
+		await expect(page.locator('.gameNavBtn:not(.nav-locked)', {hasText: '▶'})).toHaveCount(0);
+		await expect(page.locator('.gameNavBtn.nav-locked', {hasText: '▶'})).toHaveCount(2);
 
-		await page.getByRole('button', { name: '🔒' }).first().click();
+		await page.locator('.gameNavBtn.nav-locked', {hasText: '▶'}).first().click();
 		await expect(page.locator('#toast')).toBeVisible();
 
 		await expect(page.locator('#divTask #messageHistoryContainer')).toBeVisible();
@@ -170,8 +170,10 @@ test.describe('Game, not signed in', () => {
 		await page.locator('#divTask #iChat').fill('Ready!');
 		await page.getByRole('button', { name: '➥' }).click();
 
-		await expect(page.getByRole('button', { name: '▶' })).toBeVisible();
-		await page.getByRole('button', { name: '▶' }).click();
+		let enabledForwardBtn = page.locator('.gameNavBtn:not(.nav-locked)', {hasText: '▶'});
+		await expect(enabledForwardBtn).toHaveCount(1);
+		await expect(enabledForwardBtn).toBeVisible();
+		await enabledForwardBtn.click();
 
 		await page.getByRole('button', { name: 'Close' }).click();
 		await expect(page.getByText('Save your progress!')).toBeVisible();
