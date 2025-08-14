@@ -29,7 +29,7 @@
     
     export let readerComponent: ReaderComponent;
     export let inline: boolean;
-    export let chatBoxTitle: string | undefined = undefined;
+    export let chatBoxTitle: string | undefined = undefined; // if this is undefined, only the previous messages will be shown, not the input box and prompt suggestions
     export let chatHistory: Writable<{role: string, content: DocumentC}[]> = new writable([]);
     export let translationLang: string = 'original'
     export let srWords: Set<string> | undefined = undefined
@@ -270,7 +270,7 @@
         {/if}
     </div>
     {#if chatBoxTitle != undefined && (!inline || !$chatOutcome)}
-        {#if !inline}   
+        {#if !inline}
             <div class="promptSuggestions">
                 <button class="promptSuggestion" on:click={onClickChatSuggestion} disabled={loading}>
                     How is the past tense formed?
@@ -309,6 +309,13 @@
                 AI            
                 {/if}
             </em></b></button>
+        </div>
+    {:else if $chatOutcome}
+        <div class="flex-row">
+            <div style="margin: auto 1rem;">▶</div>
+            <div style="flex: 1; min-width: 1px; font-size: medium; line-height: 1.3em;">
+                <em>Chat finished! Continue your journey in the next level.</em>
+            </div>
         </div>
     {/if}
 </div>

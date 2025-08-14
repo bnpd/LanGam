@@ -131,7 +131,7 @@
         $currentTask = level
         if (translations) $currentSolution = translations.find(t => t.field === 'title')?.text + '\n\n' + translations.find(t => t.field === 'text')?.text
         $currentlyScrolledParagraphIndex = 0
-        showGameChatSuggestions = false
+        showGameChatSuggestions = level.docId < 3 // show chat suggestions for first chat
         grammarChapter = level.expand?.grammar
         $morphHighlightFilter = level.expand?.grammar?.morphHighlightFilter
         initChatHistory(translations?.find(t => t.field === 'question')?.text)
@@ -171,7 +171,7 @@
         } else {
             initChatHistory(translations?.find(t => t.field === 'question')?.text)
         }
-        showGameChatSuggestions = false
+        showGameChatSuggestions = level.docId < 3 // show chat suggestions for first chat
 
         grammarChapter = level.expand?.grammar
         $morphHighlightFilter = level.expand?.grammar?.morphHighlightFilter
