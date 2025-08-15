@@ -230,11 +230,25 @@
     .card.user, .card.correction {
         margin-inline-start: auto;
         margin-inline-end: 0;
+        border-start-end-radius: 0;
     }
 
     .card.internal {
         margin-inline-start: auto;
         margin-inline-end: auto;
+    }
+
+    .card.assistant {
+        border-start-start-radius: 0;
+    }
+
+    .chatAvatar {
+        width: 5rem;
+        height: 5rem;
+        border-radius: 45%;
+        margin-right: 8px;
+        box-shadow: var(--box-shadow-strong);
+        margin-top: var(--padding-card);
     }
 </style>
 
@@ -242,21 +256,26 @@
     <div id="messageHistoryContainer" bind:this={messageHistoryContainer} class:chatHistoryHidden={!chatFocussed && !loading && !inline} class:floatAboveParent={!inline} class:inline={inline}>
         {#each $chatHistory as msg, i}
                 {#if msg.role === 'assistant' || msg.role === 'user' || msg.role === 'correction'}
-                    <div class={"card "+msg.role}>
-                        <em><strong>
-                            <BadgeComponent 
-                                text={msg.role === 'user' ? 'You' : msg.role === 'assistant' ? (inline && $currentTask?.character ? $currentTask?.character : 'AI') : (translationLang === 'original' ? 'You+AI' : 'You')} 
-                                tooltip={msg.role === 'user' ? "Your response" : msg.role === 'assistant' ? "AI character" : (translationLang === 'original' ? 'Your response, corrected by AI. Feel free to ask, why AI wrote it like this.' : 'Your original response.')}/>
-                        </strong></em>&nbsp;
-                        {#if translationLang === 'original'}
-                            {#if msg.content.text?.tokens}
-                                <TaskComponent task={msg.content} srWords={srWords}/>
-                            {:else}
-                                <p class="chatMessage">{msg.content.text.text.trim()}</p>
-                            {/if}
-                        {:else if msg.content.text?.translation}
-                            <p class="chatMessage">{msg.content.text.translation.trim()}</p>
+                    <div style="display: flex; flex-direction: row;">
+                        {#if msg.role === 'assistant' && inline && $currentTask?.character}
+                            <img src={`/images/characters/${$currentTask.docId}.jpg`} alt={$currentTask?.character} class="chatAvatar"/>
                         {/if}
+                        <div class={"card "+msg.role}>
+                            <em><strong>
+                                <BadgeComponent 
+                                    text={msg.role === 'user' ? 'You' : msg.role === 'assistant' ? (inline && $currentTask?.character ? $currentTask?.character : 'AI') : (translationLang === 'original' ? 'You+AI' : 'You')} 
+                                    tooltip={msg.role === 'user' ? "Your response" : msg.role === 'assistant' ? "AI character" : (translationLang === 'original' ? 'Your response, corrected by AI. Feel free to ask, why AI wrote it like this.' : 'Your original response.')}/>
+                            </strong></em>&nbsp;
+                            {#if translationLang === 'original'}
+                                {#if msg.content.text?.tokens}
+                                    <TaskComponent task={msg.content} srWords={srWords}/>
+                                {:else}
+                                    <p class="chatMessage">{msg.content.text.text.trim()}</p>
+                                {/if}
+                            {:else if msg.content.text?.translation}
+                                <p class="chatMessage">{msg.content.text.translation.trim()}</p>
+                            {/if}
+                        </div>
                     </div>
                 {:else if msg.role === 'internal' && i == $chatHistory.length-1}
                     <div class="card internal">
