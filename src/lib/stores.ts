@@ -65,7 +65,7 @@ function createPersistentStore(key: string, initialValue: any): Writable<any> {
             store.subscribe((value) => {
                 if (value instanceof Array && value.length > 0 && value[0] instanceof Set) {            
                     localStorage.setItem(key, JSON.stringify(value.map(el => Array.from(el)))); 
-                } else if (value != null) {
+                } else {
                     localStorage.setItem(key, JSON.stringify(value));
                 }
             });
