@@ -74,9 +74,9 @@ test.describe('Game, not signed in', () => {
 	  await expect(popup).not.toBeVisible();
 	});
 	
-	test('when signup button is clicked, we navigate to the login page', async ({ page }) => {
+	test('when register button is clicked, we navigate to the signup page', async ({ page }) => {
 		await waitForChapterLoad(page);
-		await page.getByRole('button', { name: 'Sign up' }).click();
+		await page.getByRole('button', { name: 'Register' }).click();
 		await expect(page).toHaveURL('/signup');
 	});
 
@@ -191,7 +191,7 @@ test.describe('Game, not signed in', () => {
 		await page.getByRole('button', { name: '🪄' }).click();
 		await expect(page.getByText('Stats and Powers')).toBeVisible();
 		await page.getByRole('button', { name: 'Done' }).click();
-		await page.getByRole('button', { name: 'Sign up' }).click();
+		await page.getByRole('button', { name: 'Register' }).click();
 		await expect(page).toHaveURL('/signup');
 	});
 });

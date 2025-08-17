@@ -72,6 +72,6 @@
 		</button>
 		<!--<WebPushSubscription />-->
 	{:else}
-		<button on:click={() => goto('/signup')}><b>Sign up 👤</b></button>
+		<button on:click={() => goto('/signup')}><b>Register 👤</b></button>
 	{/if}
 </NavbarComponent>

@@ -15,7 +15,7 @@
   let solutionParagraphs: Array<{htmlTag: string, string: string}> = []
   let taskAndChatParagraphs: NodeListOf<Element>
   let solutionAndChatParagraphs: NodeListOf<Element>
-  let scrollRestored = false
+  let scrollRestoringDone = false
 
   let solutionShown: boolean = false
   export let srWords: Set<String> | undefined
@@ -27,13 +27,13 @@
     await tick();    
     taskAndChatParagraphs = divTask?.querySelectorAll('p, h1, h2, h3, h4, h5, h6, h7')
     solutionAndChatParagraphs = solutionField?.querySelectorAll('p, h1, h2, h3, h4, h5, h6, h7')
-    if (!scrollRestored     
+    if (!scrollRestoringDone     
       && taskAndChatParagraphs?.length > 0 
       && taskAndChatParagraphs?.length >= $currentlyScrolledParagraphIndex 
       && (!$nativeLang || (solutionAndChatParagraphs?.length > 0
       && solutionAndChatParagraphs?.length >= $currentlyScrolledParagraphIndex))
     ) {      
-      scrollRestored = true
+      scrollRestoringDone = true
       console.log('scroll restored');
       
       // on first time we added all paragraphs, restore scroll position      
@@ -184,7 +184,7 @@
 </script>
 
 <div class="card" id="contentbox">
-  {#if !solutionShown && scrollRestored}
+  {#if !solutionShown && scrollRestoringDone} <!-- we wait for scrollRestoringDone (is set on page init whether any scroll was actually restored or not) to avoid showing the button before the solution is loaded -->
     <button on:click={onShowSolution} style="margin-left: 50%; transform: translateX(-50%)" data-umami-event="Show Translation">Show translation</button>
   {:else if solutionParagraphs?.length}
     <div id="solutionField" bind:this={solutionField}>
