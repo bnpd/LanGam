@@ -10,7 +10,7 @@ const __dirname = dirname(__filename);
 // Test PocketBase instance
 let pbProcess: ChildProcess | null = null;
 const TEST_PORT = 8091;
-const TEST_BASE_URL = `http://127.0.0.1:${TEST_PORT}`;
+const TEST_BASE_URL = process.env.TEST_ENV == 'dev' ? `http://127.0.0.1:${TEST_PORT}` : 'https://langam.pockethost.io' ;
 
 // Dev server process
 let frontend: ChildProcess | null = null;

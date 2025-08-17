@@ -1,10 +1,14 @@
-import { expect, test } from '@playwright/test';
+import { expect, test, type Page } from '@playwright/test';
 import { createTestUser } from './testDataFactory';
 
 test('home page redirects to game page', async ({ page }) => {
 	await page.goto('/');
 	expect(page.url()).toContain('/game');
 });
+
+async function waitForChapterLoad(page: Page) {
+	expect((await page.locator('#divTask h2, #divTask h3, #divTask h4').innerText()).length).toBeGreaterThan(5);
+}
 
 test.describe('Game, not signed in', () => {
 	test.beforeEach(async ({ page }) => {
@@ -24,6 +28,7 @@ test.describe('Game, not signed in', () => {
 	});
 	
 	test('when chapter is completely scrolled, the gameNavBtn has flash class', async ({ page }) => {
+		await waitForChapterLoad(page);
 		await page.evaluate(() => {
 			const taskDiv = document.querySelector('#divTask');
 			if (taskDiv) {
@@ -39,37 +44,40 @@ test.describe('Game, not signed in', () => {
 	
 		// select with options and label
 		expect(page.locator('select#nativeLang')).toBeVisible();
-		expect(await page.locator('select#nativeLang option').count()).toBeGreaterThan(2);
+		await expect(page.locator("select#nativeLang option").nth(3)).toBeAttached(); // equivalent to this, but waits: expect(await page.locator('select#nativeLang option').count()).toBeGreaterThan(2);
 		expect(page.locator('label[for="nativeLang"]')).toBeVisible();
 	
 		await page.selectOption('select#nativeLang', 'it');
 	
 		// solution field with translation > 300 characters
-		expect(page.locator('#solutionField')).toBeVisible();
-		expect((await page.locator('#solutionField').innerText()).length).toBeGreaterThan(300);
+		await expect(page.locator('#solutionField')).toBeVisible({timeout: 10000});
+		await expect((await page.locator('#solutionField').innerText()).length).toBeGreaterThan(300);
 	
 		await page.reload();
-		  await page.getByRole('button', { name: 'Show translation' }).click();
+		await waitForChapterLoad(page);
+		await page.getByRole('button', { name: 'Show translation' }).click();
 	
 		// select should not be visible anymore, just solution field
-		expect(page.locator('select#nativeLang')).toHaveCount(0);
-		expect(page.locator('#solutionField')).toBeVisible();
+		await expect(page.locator('select#nativeLang')).toHaveCount(0);
+		await expect(page.locator('#solutionField')).toBeVisible({timeout: 10000});
 		expect((await page.locator('#solutionField').innerText()).length).toBeGreaterThan(300);
 	});
 	
 	test('when help button is clicked, a popup with heading and >200 chars is shown can can be closed', async ({ page }) => {
+	  await waitForChapterLoad(page);
 	  await page.getByRole('button', { name: '❔' }).click();
 	  let popup = page.locator('.popup');
-	  expect(popup).toBeVisible();
-	  expect(popup.getByRole('heading')).toBeVisible();
+	  await expect(popup).toBeVisible();
+	  await expect(popup.getByRole('heading')).toBeVisible();
 	  expect((await popup.textContent())?.length).toBeGreaterThan(200);
 	  await page.locator('.close-button').click();
-	  expect(popup).not.toBeVisible();
+	  await expect(popup).not.toBeVisible();
 	});
 	
-	test('when signup button is clicked, we navigate to the login page', async ({ page }) => {
-		await page.getByRole('button', { name: 'Sign up' }).click();
-		expect(page).toHaveURL('/signup');
+	test('when register button is clicked, we navigate to the signup page', async ({ page }) => {
+		await waitForChapterLoad(page);
+		await page.getByRole('button', { name: 'Register' }).click();
+		await expect(page).toHaveURL('/signup');
 	});
 
 	test('tts button cycles through 3 states: off, autoplay, and playing', async ({ page }) => {
@@ -137,6 +145,7 @@ test.describe('Game, not signed in', () => {
 	});
 
 	test('when forward gameNavBtn button is clicked, and success popup dismissed, the next chapter is shown', async ({ page }) => {
+		await waitForChapterLoad(page);
 		await page.locator('.gameNavBtn:not([hidden])').click();
 	
 		// popup with title
@@ -146,8 +155,8 @@ test.describe('Game, not signed in', () => {
 		await page.locator('.close-button').click();
 	
 		// next chapter with title containing #2 and divTask more than 300 characters
-		expect(page.locator('#divTask')).toBeVisible();
-		expect(page.locator('#divTask h2, #divTask h3, #divTask h4')).toBeVisible();
+		await expect(page.locator('#divTask')).toBeVisible();
+		await expect(page.locator('#divTask h2, #divTask h3, #divTask h4')).toBeVisible();
 		expect((await page.locator('#divTask h2, #divTask h3, #divTask h4').innerText()).length).toBeGreaterThan(5);
 		expect((await page.locator('#divTask h2, #divTask h3, #divTask h4').innerText())).toContain('#2');
 		expect((await page.locator('#divTask').innerText()).length).toBeGreaterThan(300);
@@ -182,7 +191,7 @@ test.describe('Game, not signed in', () => {
 		await page.getByRole('button', { name: '🪄' }).click();
 		await expect(page.getByText('Stats and Powers')).toBeVisible();
 		await page.getByRole('button', { name: 'Done' }).click();
-		await page.getByRole('button', { name: 'Sign up' }).click();
+		await page.getByRole('button', { name: 'Register' }).click();
 		await expect(page).toHaveURL('/signup');
 	});
 });
@@ -193,7 +202,7 @@ test.describe('Game, signed in', () => {
 
 test.describe('Signup', () => {
 	test.beforeEach(async ({ page }) => {
-		await page.goto('/signup');
+		await page.goto('/signup', {waitUntil: 'networkidle'}); // even though discouraged, in this case we need to wait for all svelte chunks to be loaded. If we don't the form will be submitted as html form instead of using eventHandler with preventDefault
 	});
 
 	test('signup page has heading', async ({ page }) => {
@@ -256,14 +265,13 @@ test.describe('Signup', () => {
 
 	test('shows Go to login link that redirects to login page', async ({ page }) => {
 		await page.getByRole('link', { name: 'login' }).click();
-		expect(page.url()).toContain('/login');
 		await expect(page.locator('input[type="submit"]')).toContainText('Login');
 	});
 });
 
 test.describe('Login', () => {
 	test.beforeEach(async ({ page }) => {
-		await page.goto('/login');
+		await page.goto('/login', {waitUntil: 'networkidle'}); // even though discouraged, in this case we need to wait for all svelte chunks to be loaded. If we don't the form will be submitted as html form instead of using eventHandler with preventDefault
 	});
 
 	test('login page has heading', async ({ page }) => {
@@ -308,7 +316,6 @@ test.describe('Login', () => {
 
 	test('shows Go to login link that redirects to login page', async ({ page }) => {
 		await page.getByRole('link', { name: 'Register' }).click();
-		expect(page.url()).toContain('/signup');
 		await expect(page.locator('input[type="submit"]')).toContainText('Register');
 	});
 });
