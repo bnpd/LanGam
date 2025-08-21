@@ -23,7 +23,7 @@
 	}
 </script>
 
-<Popup closeButtonText="Done" bind:isOpen={isOpen} on:closed={() => {umami?.track('Powers closed')}}>
+<Popup closeButtonText="Done" bind:isOpen={isOpen} on:closed={() => {window.umami?.track('Powers closed')}}>
     <h1>Stats and Powers</h1>
     <table>
         <tr><th>Stat</th><th>Strength</th></tr>

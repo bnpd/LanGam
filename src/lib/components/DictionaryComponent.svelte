@@ -43,7 +43,7 @@
     $: if (dictionaryCurrentWord) onWordChanged()
     async function onTokenChanged(){ // this might cause problems
         dictionaryCurrentWord = $dictionaryToken!.word
-        umami?.track('Dictionary opened')
+        window.umami?.track('Dictionary opened')
     }
 
     function onWordChanged() {

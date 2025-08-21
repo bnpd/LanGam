@@ -53,7 +53,7 @@
             }
             if (isSignup) await newUserLang(PUBLIC_LANG)
 
-            umami?.track((isSignup ? 'Signup' : 'Login'), {id: $username, method: 'password'})
+            window.umami?.track((isSignup ? 'Signup' : 'Login'), {id: $username, method: 'password'})
             let advanceLevelAfterSignup = new URLSearchParams(window.location.search).get('advanceLevelAfterSignup')
             goto('/game' + (advanceLevelAfterSignup ? `?advanceLevelAfterSignup=${advanceLevelAfterSignup}` : ''))
         } catch (e) {
@@ -102,7 +102,7 @@
             }
             if (isSignup) await newUserLang(PUBLIC_LANG)
 
-            umami?.track((isSignup ? 'Signup' : 'Login'), {id: $username, method: 'google'})
+            window.umami?.track((isSignup ? 'Signup' : 'Login'), {id: $username, method: 'google'})
             let advanceLevelAfterSignup = new URLSearchParams(window.location.search).get('advanceLevelAfterSignup')
             goto('/game' + (advanceLevelAfterSignup ? `?advanceLevelAfterSignup=${advanceLevelAfterSignup}` : ''))
         } catch (e) {

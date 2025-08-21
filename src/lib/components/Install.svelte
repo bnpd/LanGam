@@ -6,13 +6,13 @@
     let installButtonVisible = false;
     
     async function handleInstallClick() {
-      umami?.track('Install Button');
+      window.umami?.track('Install Button');
       if (deferredPrompt) {
         // Show the install prompt
         deferredPrompt.prompt();
         // Wait for the user's response
         const { outcome } = await deferredPrompt.userChoice;
-        umami?.track(`Install ${outcome}`);
+        window.umami?.track(`Install ${outcome}`);
         // Clear the deferred prompt variable
         deferredPrompt = null;
         // Hide the install button after the prompt
