@@ -247,7 +247,7 @@
         <PowersComponent on:use_power={e => usePower(e.detail.power)}/>
         {#each (Object.entries($currentTask?.outcomes ?? {})) as [outcome, obj]}
             {#if outcome == 'default' || $player?.level_history?.[obj.goto] || $chatOutcome == outcome} <!--TODO: fix if there are two outcomes with same seq_id -->
-                <button class="gameNavBtn nav-forward" class:flash={$currentlyScrolledParagraphIndex >= $currentTaskNParagraphs-1} disabled={$loadingTask} on:click={()=>onAnswbtnClick(outcome)} data-umami-event="Forward Button">
+                <button class="gameNavBtn nav-forward" class:flash={$currentlyScrolledParagraphIndex >= $currentTaskNParagraphs-1} disabled={$loadingTask} on:click={()=>onAnswbtnClick(outcome)} data-umami-event="Forward Button" data-umami-event-level={$currentTask?.docId}>
                     ▶
                 </button>
             {:else}
@@ -263,6 +263,7 @@
                             }
                         }} 
                         data-umami-event="Forward Button (locked)"
+                        data-umami-event-level={$currentTask?.docId}
                         style="position: relative;"
                     >
                         <span style="position: absolute; left: 5px; top: 5px; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; pointer-events: none;">

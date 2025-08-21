@@ -88,6 +88,7 @@
                     $username ? await sendGameChat(messageHistoryForChatGpt($chatHistory.concat([newMessage])), $player.id)
                     : await sendGameChatAnon(messageHistoryForChatGpt($chatHistory.concat([newMessage])), $player));
                 $chatOutcome = end_conversation ? outcome : null
+                if ($chatOutcome) window.umami?.track('Game chat outcome', {outcome: $chatOutcome, level: $currentTask?.docId})
                 if (updatedPlayerMaybe) $player = updatedPlayerMaybe
             } else {
                 response = await sendTutorChat(messageHistoryForChatGpt($chatHistory.concat([newMessage])), readerComponent.getVisibleParagraphs())                    
@@ -308,7 +309,14 @@
         {:else if $currentTask?.suggested_replies?.length && showGameChatSuggestions}
             <div class="promptSuggestions">
                 {#each $currentTask?.suggested_replies as suggestion}
-                    <button class="promptSuggestion" on:click={onClickChatSuggestion} disabled={loading}>
+                    <button 
+                        class="promptSuggestion" 
+                        on:click={onClickChatSuggestion} 
+                        disabled={loading}
+                        data-umami-event={inline ? "Game chat sent" : "Tutor chat sent"}
+                        data-umami-event-from-suggestion={suggestion}
+                        data-umami-event-level={$currentTask?.docId}
+                        >
                         {suggestion}
                     </button>                    
                 {/each}
@@ -321,7 +329,15 @@
             {:else if $chatHistory?.length > 1}
                 <button id="restartChat" on:click={()=> messageRestartChat='Restart chat?'} class="chat-circle-btn">↺</button>  
             {/if}    
-            <button id="submitChat" on:click={onSubmitChatField} disabled={loading} class="chat-circle-btn"><b><em>
+            <button 
+                id="submitChat" 
+                on:click={onSubmitChatField} 
+                disabled={loading} 
+                class="chat-circle-btn" 
+                data-umami-event={inline ? "Game chat sent" : "Tutor chat sent"}
+                data-umami-event-from-suggestion={"-"}
+                data-umami-event-level={$currentTask?.docId}
+                ><b><em>
                 {#if chatPrompt?.trim()?.length}
                 ➥
                 {:else}
