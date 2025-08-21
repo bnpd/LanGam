@@ -2,7 +2,14 @@
 	import { PUBLIC_UMAMI_URL } from '$env/static/public';
 	import { PUBLIC_UMAMI_WEBSITE_ID } from '$env/static/public';
 	import { PUBLIC_UMAMI_SCRIPT_INTEGRITY } from '$env/static/public';
-	export declare const umami: any; 
+
+    declare global {
+        interface Window {
+            umami?: {
+                track: (event: string, data?: Record<string, any>) => void
+            }
+        }
+    }
 </script>
 
 <svelte:head>

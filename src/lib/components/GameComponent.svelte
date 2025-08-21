@@ -14,7 +14,6 @@
 	import WebPushSubscription from './WebPushSubscription.svelte';
 	import Popup from './Popup.svelte';
     import { page } from '$app/stores';
-    let umami: any; // Umami is initialized in the +layout.svelte from script tag
 
     const DEFAULT_CONGRATS_MESSAGE = 'Well done, keep up the pace!'
     const DEFAULT_CONGRATS_TITLE = 'Level complete 🙌'
@@ -52,7 +51,9 @@
     let finishedGame = false
     let showSignupPrompt = false
 
-    $: if($currentlyScrolledParagraphIndex >= $currentTaskNParagraphs-1) umami?.track('Scroll 100%')
+    $: if($currentlyScrolledParagraphIndex >= $currentTaskNParagraphs-1){
+        window.umami?.track('Scroll 100%');
+    }
 
     onMount(async () => {
         if (!$username && !$player) { // new user, not logged in -> trial mode
@@ -180,7 +181,7 @@
         if (!$username && $player?.level_history?.order?.length % 2 === 0 && $player?.level_history?.order?.length > 0) { // show the signup prompt at third, fifth, etc. level
             // player advanced two levels, time to consider signing up
             showSignupPrompt = true
-            umami?.track('Signup Prompt shown')
+            window.umami?.track('Signup Prompt shown')
         }
 
         // the following calculation of new word count runs async in the background if the player stays for more than 5 seconds on the level
@@ -246,7 +247,7 @@
         <PowersComponent on:use_power={e => usePower(e.detail.power)}/>
         {#each (Object.entries($currentTask?.outcomes ?? {})) as [outcome, obj]}
             {#if outcome == 'default' || $player?.level_history?.[obj.goto] || $chatOutcome == outcome} <!--TODO: fix if there are two outcomes with same seq_id -->
-                <button class="gameNavBtn nav-forward" class:flash={$currentlyScrolledParagraphIndex >= $currentTaskNParagraphs-1} disabled={$loadingTask} on:click={()=>onAnswbtnClick(outcome)} data-umami-event="Forward Button">
+                <button class="gameNavBtn nav-forward" class:flash={$currentlyScrolledParagraphIndex >= $currentTaskNParagraphs-1} disabled={$loadingTask} on:click={()=>onAnswbtnClick(outcome)} data-umami-event="Forward Button" data-umami-event-level={$currentTask?.docId}>
                     ▶
                 </button>
             {:else}
@@ -262,6 +263,7 @@
                             }
                         }} 
                         data-umami-event="Forward Button (locked)"
+                        data-umami-event-level={$currentTask?.docId}
                         style="position: relative;"
                     >
                         <span style="position: absolute; left: 5px; top: 5px; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; pointer-events: none;">
@@ -288,7 +290,7 @@
     footnote={nNewForms ? `You just encountered ${nNewForms} new words!\n` : ''} 
     onClose={statsClosedPromiseResolve}
 />
-<Popup closeButtonText="Later" bind:isOpen={showSignupPrompt} on:closed={() => {umami?.track('Signup Prompt dismissed')}}>
+<Popup closeButtonText="Later" bind:isOpen={showSignupPrompt} on:closed={() => {window.umami?.track('Signup Prompt dismissed')}}>
     <h1>📂 Save your progress!</h1>
 	<p style="line-height: 200%; margin-bottom: 0.4em">Create a free account now.</p>
     <button on:click={()=>goto('/signup')} class="highlighted" data-umami-event="Signup Prompt accepted">Register</button>

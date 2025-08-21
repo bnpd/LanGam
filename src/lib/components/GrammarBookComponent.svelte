@@ -26,7 +26,7 @@
     }
 </style>
 
-<Popup closeButtonText="Done" bind:isOpen={isOpen} on:closed={()=> {$grammarBookOpened = true; umami?.track('Grammar Book closed')}}>
+<Popup closeButtonText="Done" bind:isOpen={isOpen} on:closed={()=> {$grammarBookOpened = true; window.umami?.track('Grammar Book closed')}}>
     <div class="grammar-container">
         <h1>{content.title_en}</h1>
         {#if !$grammarBookOpened}

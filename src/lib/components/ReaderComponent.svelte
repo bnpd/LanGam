@@ -50,7 +50,7 @@
   }
 
   function onScroll() {
-    // Scroll the solutionField to the same paragraph index as divTask
+    // Set $currentlyScrolledParagraphIndex & Scroll the solutionField to the same paragraph index as divTask
     const newScrollIndex = currentScrolledParagraphIndex()    
     if (newScrollIndex != $currentlyScrolledParagraphIndex) {
       $currentlyScrolledParagraphIndex = newScrollIndex
