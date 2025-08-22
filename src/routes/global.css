@@ -265,6 +265,7 @@ div:has(> input[type="checkbox"]) {
     flex-direction: row;
     flex-wrap: wrap;
     align-items: stretch;
+    gap: 0.5em;
 }
 
 .two-columns > * {
@@ -272,14 +273,7 @@ div:has(> input[type="checkbox"]) {
     box-sizing: border-box;
     padding: 5px;
     display: flex;
-}
-
-.two-columns .card {
-  flex: 1;
-  display: flex;
-  align-items: center; /* Center content vertically */
-  justify-content: center; /* Center content horizontally */
-  text-align: center; /* Center text */
+    flex: 1;
 }
 
 .chat-circle-btn {
