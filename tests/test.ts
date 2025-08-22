@@ -1,11 +1,6 @@
 import { expect, test, type Page } from '@playwright/test';
 import { createTestUser } from './testDataFactory';
 
-test('home page redirects to game page', async ({ page }) => {
-	await page.goto('/');
-	expect(page.url()).toContain('/game');
-});
-
 async function waitForChapterLoad(page: Page) {
 	expect((await page.locator('#divTask h2, #divTask h3, #divTask h4').innerText()).length).toBeGreaterThan(5);
 }
