@@ -46,7 +46,7 @@ test.describe('Landing page', () => {
     
     // Test Spanish
     await page.evaluate(() => localStorage.setItem('PARAGLIDE_LOCALE', 'es'));
-    await page.reload();
+    await page.reload({ waitUntil: 'networkidle'});
     //expect(await page.locator('html').getAttribute('lang')).toBe('es');
     const esPageTitle = await page.title();
     const esHeroText = await page.locator('.card h1').textContent();
@@ -55,7 +55,7 @@ test.describe('Landing page', () => {
     
     // Test Hindi
     await page.evaluate(() => localStorage.setItem('PARAGLIDE_LOCALE', 'hi'));
-    await page.reload();
+    await page.reload({ waitUntil: 'networkidle'});
     //expect(await page.locator('html').getAttribute('lang')).toBe('hi');
     const hiPageTitle = await page.title();
     const hiHeroText = await page.locator('.card h1').textContent();
