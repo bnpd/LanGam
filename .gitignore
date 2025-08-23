@@ -14,3 +14,6 @@ static/freqLists/freqListToJson.py
 /src/config.js
 /test-results
 /playwright-report
+
+# Paraglide
+src/lib/paraglide

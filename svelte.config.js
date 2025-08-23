@@ -30,7 +30,7 @@ const config = {
 		csp: {
 			directives: {
 				'default-src': ['self', 'https://*.langam.app'],
-				'connect-src': ['self', 'https://*.langam.app', 'https://langam.pockethost.io', 'https://*.wiktionary.org'],
+				'connect-src': ['self', 'https://*.langam.app', 'https://langam.pockethost.io', 'https://*.wiktionary.org'].concat(process.env.TEST_ENV == 'dev' ? ['http://127.0.0.1:8090', 'http://127.0.0.1:8091'] : []),
 				'script-src': ['self', 'https://*.langam.app'],
 				'media-src': ['self', 'data:', 'https:'],
 				'img-src': ['self', 'data:', 'https:'],

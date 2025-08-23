@@ -1,0 +1,21 @@
+{
+	"$schema": "https://inlang.com/schema/inlang-message-format",
+	"page_title": "Langam CYOA - Learn {targetLang} Through Adventure",
+	"hero_title": "Learn {targetLang} by Living the Story",
+	"hero_subtitle": "Immerse yourself in AI-powered adventures where your word shapes the story. Your journey begins now.",
+	"hero_cta": "Start Your Adventure",
+	"feature_1_title": "Choose Your Adventure",
+	"feature_1_desc": "Your decisions drive the story, making each learning session unique and engaging.",
+	"feature_2_title": "AI-Powered Chat",
+	"feature_2_desc": "Talk with characters in {targetLang} and get instant feedback to improve your skills.",
+	"feature_3_title": "Learn in Context",
+	"feature_3_desc": "Acquire {targetLang} skills intuitively, just like you learned your native tongue.",
+	"feature_4_title": "Track Your Progress",
+	"feature_4_desc": "Watch your vocabulary and skills grow as you conquer new challenges and complete stories.",
+	"final_cta_title": "Ready to Stop Memorizing and Start Exploring?",
+	"final_cta_subtitle": "A new world of language awaits. Your story begins with a single tap.",
+	"final_cta_button": "Start Learning Now",
+	"lang_en": "English",
+	"lang_pl": "Polish",
+	"lang_da": "Danish"
+}

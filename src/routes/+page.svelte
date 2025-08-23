@@ -1,17 +1,19 @@
 <svelte:head>
-  <title>Langam CYOA - Learn {$page.data?.targetLang.nameEN ?? 'Languages'} Through Adventure</title>
+  <title>{m.page_title({ targetLang: targetLangLocalized ?? 'Languages' })}</title>
 </svelte:head>
 
 <svelte:window bind:scrollY={y} />
 
 <script lang="ts">
 	import { page } from '$app/stores';
+  import { m } from '$lib/paraglide/messages.js';
   import FooterWithBackgroundImageComponent from '$lib/components/FooterWithBackgroundImageComponent.svelte';
   import './global.css';
 
 	let y = 0;
   let footerOpacity = 0.5; // Initial opacity for the footer
   let hasBeenScrolledToBottom = false;
+  let targetLangLocalized = (m["lang_"+$page.data?.targetLang.id as keyof typeof m] as () => string)() ?? $page.data?.targetLang.nameEN;
 
   $: onScroll(y)
 
@@ -36,9 +38,9 @@
     - Prominent, thumb-friendly Call-to-Action (CTA) is immediately visible.
   -->
   <header class="card hero">
-    <h1>Learn {$page.data?.targetLang.nameEN ?? 'a Language'} by Living the Story</h1>
-    <p>Immerse yourself in AI-powered adventures where your word shapes the story. Your journey begins now.</p>
-    <a href="/game"><button data-umami-event="Landing Hero CTA" class="highlighted primary-cta">Start Your Adventure</button></a>
+    <h1>{m.hero_title({ targetLang: targetLangLocalized ?? 'a Language' })}</h1>
+    <p>{m.hero_subtitle()}</p>
+    <a href="/game"><button data-umami-event="Landing Hero CTA" class="highlighted primary-cta">{m.hero_cta()}</button></a>
   </header>
 
   <!-- 
@@ -49,7 +51,6 @@
   <section class="video-container card">
     <video width="100%" autoplay loop muted playsinline controls>
       <source src="/videos/demo.mp4" type="video/mp4">
-      Your browser does not support the video tag.
     </video>
   </section>
 
@@ -61,26 +62,26 @@
   <div class="two-columns">
     <div class="card">
       <div class="flex-column">
-        <h4>📖 Choose Your Adventure</h4>
-        <p>Your decisions drive the story, making each learning session unique and engaging.</p>
+        <h4>📖 {m.feature_1_title()}</h4>
+        <p>{m.feature_1_desc()}</p>
       </div>
     </div>
     <div class="card">
       <div class="flex-column">
-        <h4>🤖 AI-Powered Chat</h4>
-        <p>Talk with characters in {$page.data?.targetLang.nameEN ?? 'your target language'} and get instant feedback to improve your skills.</p>
+        <h4>🤖 {m.feature_2_title()}</h4>
+        <p>{m.feature_2_desc({ targetLang: targetLangLocalized ?? 'your target language' })}</p>
       </div>
     </div>
     <div class="card">
       <div class="flex-column">
-        <h4>🧠 Learn in Context</h4>
-        <p>Acquire {$page.data?.targetLang.nameEN ?? 'language'} skills intuitively, just like you learned your native tongue.</p>
+        <h4>🧠 {m.feature_3_title()}</h4>
+        <p>{m.feature_3_desc({ targetLang: targetLangLocalized ?? 'language' })}</p>
       </div>
     </div>
     <div class="card">
         <div class="flex-column">
-            <h4>📈 Track Your Progress</h4>
-            <p>Watch your vocabulary and skills grow as you conquer new challenges and complete stories.</p>
+            <h4>📈 {m.feature_4_title()}</h4>
+            <p>{m.feature_4_desc()}</p>
         </div>
     </div>
   </div>
@@ -91,9 +92,9 @@
     - Reinforces the main message.
   -->
   <section class="card cta-section">
-    <h2>Ready to Stop Memorizing and Start Exploring?</h2>
-    <p>A new world of language awaits. Your story begins with a single tap.</p>
-    <a href="/game"><button data-umami-event="Landing Footer CTA" class="highlighted">Start Learning Now</button></a>
+    <h2>{m.final_cta_title()}</h2>
+    <p>{m.final_cta_subtitle()}</p>
+    <a href="/game"><button data-umami-event="Landing Footer CTA" class="highlighted">{m.final_cta_button()}</button></a>
   </section>
 
   <div style="opacity: {footerOpacity}; z-index: -9999;">
