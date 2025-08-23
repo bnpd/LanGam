@@ -1,5 +1,5 @@
 <svelte:head>
-  <title>{m.page_title({ targetLang: $page.data?.targetLang.nameEN ?? 'Languages' })}</title>
+  <title>{m.page_title({ targetLang: targetLangLocalized ?? 'Languages' })}</title>
 </svelte:head>
 
 <svelte:window bind:scrollY={y} />
