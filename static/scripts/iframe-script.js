@@ -107,6 +107,9 @@ function extractCards() {
         }
         json.pronunciation=pronunciations.join('\n')
         meanings.push(json)
+
+        // style the ol to make it stand out
+        ol.classList.add('wiktionary-definition');
     }
     for (const child of document.children) {
         if (child?.previousElementSibling?.innerText?.includes('Etymology')) {
@@ -119,13 +122,19 @@ function extractCards() {
 }
 
 // Remove possibly copyrighted citations from Wiktionary in case it is not fair use
-setTimeout(() => removeElementsByClassName('HQToggle'), 500) // timeout because these elements are not loaded immediately
+setTimeout(() => removeElementsByQuery('.HQToggle'), 500) // timeout because these elements are not loaded immediately
 // Remove edit icons from Wiktionary for less clutter
-removeElementsByClassName('mw-editsection')
+removeElementsByQuery('.mw-editsection')
+// remove images
+removeElementsByQuery('figure')
+removeElementsByQuery('img')
 
-function removeElementsByClassName(className){
-    const elements = document.getElementsByClassName(className);
-    while(elements.length > 0){
-        elements[0].parentNode.removeChild(elements[0]);
+function removeElementsByQuery(query){
+    console.log(query);
+    const elements = document.querySelectorAll(query);
+    console.log(elements);
+
+    for (let i = elements.length-1; i >= 0; i--) {
+        elements[i]?.parentNode?.removeChild(elements[i]);
     }
 }
