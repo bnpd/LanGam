@@ -59,6 +59,16 @@
                     </div>
                 </div>
                 <script src="scripts/iframe-script.js"></` + `script>
+                <style>
+                    .wiktionary-definition {
+                        background-color: lightblue;
+                        border-radius: 1rem;
+                        padding-top: 1.5rem;
+                        padding-right: 1rem;
+                        padding-bottom: 1rem;
+                        font-size: large;
+                    }
+                </style>
             </body>
             </html>
         `;
