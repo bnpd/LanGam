@@ -9,6 +9,7 @@
   import { m } from '$lib/paraglide/messages.js';
   import FooterWithBackgroundImageComponent from '$lib/components/FooterWithBackgroundImageComponent.svelte';
   import './global.css';
+	import { onMount } from 'svelte';
 
 	let y = 0;
   let footerOpacity = 0.5; // Initial opacity for the footer
@@ -16,6 +17,10 @@
   let targetLangLocalized = (m["lang_"+$page.data?.targetLang.id as keyof typeof m] as () => string)() ?? $page.data?.targetLang.nameEN;
 
   $: onScroll(y)
+
+  onMount(()=>{
+    window.umami?.track('Landing localized', {targetLangLocalized});
+  })
 
   function onScroll(y: number) {
     if (typeof document === 'undefined' || !document.body) return;
