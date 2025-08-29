@@ -59,6 +59,29 @@
     </video>
   </section>
 
+  <!-- Why LanGam Section -->
+  <section class="card why-langam">
+    <h2>{m.why_langam_title()}</h2>
+    <div class="benefits-list">
+      <div class="benefit">
+        🚀
+        <p>{m.why_langam_point1()}</p>
+      </div>
+      <div class="benefit">
+        💬 
+        <p>{m.why_langam_point2()}</p>
+      </div>
+      <div class="benefit">
+        🧩
+        <p>{m.why_langam_point3()}</p>
+      </div>
+      <div class="benefit">
+        🎮
+        <p>{m.why_langam_point4()}</p>
+      </div>
+    </div>
+  </section>
+
   <!-- 
     Features/Benefits Section
     - Uses a two-column layout that stacks on mobile for easy scanning.
@@ -173,6 +196,23 @@
 
   .two-columns > div {
     min-width: 250px; /* Ensure cards don't get too squished on smaller screens */
+  }
+
+  .benefits-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-top: 2rem;
+  }
+
+  .benefit {
+    display: flex;
+    flex-direction: row;
+  }
+
+  .benefit p {
+    margin: 0 0 0 1rem;
+    font-size: 1.1rem;
   }
 
   /* Media query for slightly larger mobile screens to adjust hero text */
