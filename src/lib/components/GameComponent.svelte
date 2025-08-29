@@ -303,7 +303,7 @@
     footnote={nNewForms ? `You just encountered ${nNewForms} new words!\n` : ''} 
     onClose={statsClosedPromiseResolve}
 />
-<Popup closeButtonText="Later" bind:isOpen={showSignupPrompt} on:closed={() => {window.umami?.track('Signup Prompt dismissed')}}>
+<Popup closeButtonText="Later" bind:isOpen={showSignupPrompt} on:closed={() => {window.umami?.track('Signup Prompt dismissed')}} fullWidth={false}>
     <h1>📂 Save your progress!</h1>
 	<p style="line-height: 200%; margin-bottom: 0.4em">Create a free account now.</p>
     <button on:click={()=>goto('/signup')} class="highlighted" data-umami-event="Signup Prompt accepted">Register</button>

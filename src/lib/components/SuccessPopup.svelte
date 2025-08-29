@@ -18,10 +18,12 @@
 <!-- svelte-ignore a11y-no-static-element-interactions -->
 <!-- svelte-ignore a11y-click-events-have-key-events -->
 
-<Popup on:closed={() => closeSelf()} isOpen={message != undefined && title != undefined} closeButtonText={closeButtonText}>
-	<h1>{title}</h1>
-	<p style="white-space: pre-line; line-height: 200%; margin-bottom: 0.4em">{message}</p>
-	{#if footnote}
-		<div><small>{footnote}</small></div>
-	{/if}
+<Popup on:closed={() => closeSelf()} isOpen={message != undefined && title != undefined} closeButtonText={closeButtonText} fullWidth={false}>
+	<div style:padding="0 1rem">
+		<h1>{title}</h1>
+		<p style="white-space: pre-line; line-height: 200%; margin-bottom: 0.4em">{message}</p>
+		{#if footnote}
+			<div><small>{footnote}</small></div>
+		{/if}
+	</div>
 </Popup>
