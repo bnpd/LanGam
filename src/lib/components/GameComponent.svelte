@@ -13,9 +13,8 @@
 	import GrammarBookComponent from './GrammarBookComponent.svelte';
 	import WebPushSubscription from './WebPushSubscription.svelte';
 	import Popup from './Popup.svelte';
-    import { page } from '$app/stores';
-
-    const DEFAULT_CONGRATS_MESSAGE = 'Well done, keep up the pace!'
+    import QuizComponent from './QuizComponent.svelte';
+    import { page } from '$app/stores';    const DEFAULT_CONGRATS_MESSAGE = 'Well done!'
     const DEFAULT_CONGRATS_TITLE = 'Level complete 🙌'
 
     const UNKNOWN_POS = 0
@@ -72,8 +71,8 @@
         await nextTask();
     })
 
-    async function onAnswbtnClick(outcome: string) {
-        speechSynthesis?.cancel()
+    async function onAnswbtnClick(outcome: string, pointsGained?: number) {
+        window?.speechSynthesis?.cancel()
         statsClosedPromise = new Promise<boolean>((resolve, reject) => {
             statsClosedPromiseResolve = resolve
         })
@@ -81,9 +80,9 @@
         let completeLevelPromise
         if ($player.level == $currentTask.docId) { // player needs to be leveled up
             completeLevelPromise = $username ? 
-                completeLevel($player.id, $currentTask.docId, outcome)
-                : completeLevelAnon($player, $currentTask.docId, outcome)
-        } else { // player has alrready been leveled up by chat, just resolve the promise
+                completeLevel($player.id, $currentTask.docId, outcome, pointsGained)
+                : completeLevelAnon($player, $currentTask.docId, outcome, pointsGained)
+        } else { // player has alrready been leveled up by chat/quiz, just resolve the promise
             completeLevelPromise = Promise.resolve($player)
         }
 
@@ -114,11 +113,12 @@
     }
 
     async function onLevelBackbtnClick() {
-        speechSynthesis?.cancel()
+        window?.speechSynthesis?.cancel()
         let prevLevelSeqId = $player.level_history.order.pop()
         $player.level = prevLevelSeqId
         $player.stats = $player.level_history[prevLevelSeqId].stats
         $player.powers = $player.level_history[prevLevelSeqId].powers
+        $player.points = $player.level_history[prevLevelSeqId].points
         if ($username) updatePlayer($player) // this can just happen async (if it fails it would give room for cheating/frustration though)
         await prevTask(prevLevelSeqId)
     }
@@ -231,8 +231,22 @@
     </div>
 {:else}
     <ReaderComponent srWords={new Set()} bind:this={readerComponent}>
-        <span slot="afterTask" hidden={!$currentTask}>{#if $gameChatHistory?.length}<ChatComponent readerComponent={readerComponent} inline={true} chatBoxTitle="Your turn 🤙" chatHistory={gameChatHistory} srWords={new Set()} showGameChatSuggestions={showGameChatSuggestions}/>{/if}</span>
-        <span slot="afterSolution">{#if $gameChatHistory?.length}<ChatComponent readerComponent={readerComponent} inline={true} chatBoxTitle={undefined} chatHistory={gameChatHistory} translationLang={$nativeLang}/>{/if}</span>
+        <span slot="afterTask" hidden={!$currentTask}>
+            {#if $gameChatHistory?.length}
+                <ChatComponent readerComponent={readerComponent} inline={true} chatBoxTitle="Your turn 🤙" chatHistory={gameChatHistory} srWords={new Set()} showGameChatSuggestions={showGameChatSuggestions}/>
+            {:else if $currentTask?.docId == 1} <!-- TODO: implement quiz for later levels -->
+                <QuizComponent on:points={(e) => {
+                    $currentTask.outcomes["default"].text = "You've earned " + e.detail.points + " points!\n" + DEFAULT_CONGRATS_TITLE;
+                    $currentTask.outcomes["default"].title = "Correct!";
+                    onAnswbtnClick("default", e.detail.points)
+                }} />
+            {/if}
+        </span>
+        <span slot="afterSolution">
+            {#if $gameChatHistory?.length}
+                <ChatComponent readerComponent={readerComponent} inline={true} chatBoxTitle={undefined} chatHistory={gameChatHistory} translationLang={$nativeLang}/>
+            {/if}
+        </span>
     </ReaderComponent>
 {/if}
 <div style="text-align: center;">
@@ -290,7 +304,7 @@
     footnote={nNewForms ? `You just encountered ${nNewForms} new words!\n` : ''} 
     onClose={statsClosedPromiseResolve}
 />
-<Popup closeButtonText="Later" bind:isOpen={showSignupPrompt} on:closed={() => {window.umami?.track('Signup Prompt dismissed')}}>
+<Popup closeButtonText="Later" bind:isOpen={showSignupPrompt} on:closed={() => {window.umami?.track('Signup Prompt dismissed')}} fullWidth={false}>
     <h1>📂 Save your progress!</h1>
 	<p style="line-height: 200%; margin-bottom: 0.4em">Create a free account now.</p>
     <button on:click={()=>goto('/signup')} class="highlighted" data-umami-event="Signup Prompt accepted">Register</button>

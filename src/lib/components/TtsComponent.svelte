@@ -11,20 +11,20 @@
 
     onMount(() => {
         // run setVoice when voices are loaded (onvoiceschanged)
-        if (speechSynthesis?.onvoiceschanged !== undefined) {
-            speechSynthesis.onvoiceschanged = setVoice
+        if (window?.speechSynthesis?.onvoiceschanged !== undefined) {
+            window.speechSynthesis.onvoiceschanged = setVoice
         }
-        if (speechSynthesis?.getVoices()?.length) {
-            setVoice()  // if we were too slow and the voice has already been set before speechSynthesis.onvoiceschanged = setVoice, just call setVoice immediately
+        if (window?.speechSynthesis?.getVoices()?.length) {
+            setVoice()  // if we were too slow and the voice has already been set before window?.speechSynthesis.onvoiceschanged = setVoice, just call setVoice immediately
         }
-        if (text && voice && speechSynthesis && $isSoundOn){
+        if (text && voice && window?.speechSynthesis && $isSoundOn){
             trySpeakAssignedText()
         }
     })
     
     function onSoundClick() {
         if (currentlySpeaking && $isSoundOn) {
-			speechSynthesis.cancel()
+			window?.speechSynthesis.cancel()
             currentlySpeaking = false
         } else if ($isSoundOn) {
             $isSoundOn = false
@@ -43,19 +43,19 @@
     }
 
     export function trySpeak(str: string) {
-        if ($isSoundOn && voice && speechSynthesis) {
+        if ($isSoundOn && voice && window?.speechSynthesis) {
             currentlySpeaking = true
             let utterance = new SpeechSynthesisUtterance(str)
             utterance.voice = voice
             utterance.lang = voice.lang
             utterance.rate = $ttsSpeed
-            speechSynthesis.speak(utterance)
+            window?.speechSynthesis.speak(utterance)
             utterance.addEventListener('end', ()=>currentlySpeaking=false)
         }
     }
 
     function setVoice() {
-        const allVoices = speechSynthesis.getVoices()
+        const allVoices = window?.speechSynthesis.getVoices()
         if (allVoices?.length) {
             const separator = allVoices[0].lang.includes('-') ? '-' : '_'
             let voices_in_lang = allVoices.filter(voice=>{return voice.lang.split(separator)[0].toLowerCase()===$page.data?.targetLang.id})
@@ -80,6 +80,6 @@
     }
 </style>
 
-{#if text && voice && speechSynthesis}
+{#if text && voice && window?.speechSynthesis}
     <button id="btnSound" on:click={onSoundClick} class="tts-button" data-umami-event="TTS Toggle">{currentIcon}</button>
 {/if}

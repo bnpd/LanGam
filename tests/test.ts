@@ -2,7 +2,7 @@ import { expect, test, type Page } from '@playwright/test';
 import { createTestUser } from './testDataFactory';
 
 async function waitForChapterLoad(page: Page) {
-	expect((await page.locator('#divTask h2, #divTask h3, #divTask h4').innerText()).length).toBeGreaterThan(5);
+	expect((await page.locator('#divTask h2, #divTask h3, #divTask h4').first().innerText()).length).toBeGreaterThan(5);
 }
 
 test.describe('Game, not signed in', () => {
@@ -16,9 +16,9 @@ test.describe('Game, not signed in', () => {
 	
 	test('game page has #divTask containing title with #1 and more than 300 words', async ({ page }) => {
 		expect(page.locator('#divTask')).toBeVisible();
-		expect(page.locator('#divTask h2, #divTask h3, #divTask h4')).toBeVisible();
-		expect((await page.locator('#divTask h2, #divTask h3, #divTask h4').innerText()).length).toBeGreaterThan(5);
-		expect((await page.locator('#divTask h2, #divTask h3, #divTask h4').innerText())).toContain('#1');
+		expect(page.locator('#divTask h2, #divTask h3, #divTask h4').first()).toBeVisible();
+		expect((await page.locator('#divTask h2, #divTask h3, #divTask h4').first().innerText()).length).toBeGreaterThan(5);
+		expect((await page.locator('#divTask h2, #divTask h3, #divTask h4').first().innerText())).toContain('#1');
 		expect((await page.locator('#divTask').innerText()).length).toBeGreaterThan(300);
 	});
 	
@@ -88,7 +88,7 @@ test.describe('Game, not signed in', () => {
 	test('tutor chat can be opened and closed', async ({ page }) => {
 		await page.getByRole('button', { name: '🗨' }).click();
 		await expect(page.locator('#iChat')).toBeVisible();
-		await page.getByRole('button', { name: 'x' }).click();
+		await page.getByRole('button', { name: 'x', exact: true }).click();
 		await expect(page.locator('#iChat')).not.toBeVisible();
 	});
 
@@ -108,7 +108,7 @@ test.describe('Game, not signed in', () => {
 		await expect(page.locator('#messageHistoryContainer')).toContainText('AI'); // we need to clarify that the response is by AI
 
 		// Close the chat
-		await page.getByRole('button', { name: 'x' }).click();
+		await page.getByRole('button', { name: 'x', exact: true }).click();
 		await expect(page.locator('#iChat')).not.toBeVisible();
 
 		// Reopen the chat
@@ -135,7 +135,7 @@ test.describe('Game, not signed in', () => {
 		await expect(page.locator('#messageHistoryContainer')).toContainText('AI'); // we need to clarify that the response is by AI
 
 		// Close the chat
-		await page.getByRole('button', { name: 'x' }).click();
+		await page.getByRole('button', { name: 'x', exact: true }).click();
 		await expect(page.locator('#iChat')).not.toBeVisible();
 	});
 
@@ -151,9 +151,9 @@ test.describe('Game, not signed in', () => {
 	
 		// next chapter with title containing #2 and divTask more than 300 characters
 		await expect(page.locator('#divTask')).toBeVisible();
-		await expect(page.locator('#divTask h2, #divTask h3, #divTask h4')).toBeVisible();
-		expect((await page.locator('#divTask h2, #divTask h3, #divTask h4').innerText()).length).toBeGreaterThan(5);
-		expect((await page.locator('#divTask h2, #divTask h3, #divTask h4').innerText())).toContain('#2');
+		await expect(page.locator('#divTask h2, #divTask h3, #divTask h4').first()).toBeVisible();
+		expect((await page.locator('#divTask h2, #divTask h3, #divTask h4').first().innerText()).length).toBeGreaterThan(5);
+		expect((await page.locator('#divTask h2, #divTask h3, #divTask h4').first().innerText())).toContain('#2');
 		expect((await page.locator('#divTask').innerText()).length).toBeGreaterThan(300);
 	});
 

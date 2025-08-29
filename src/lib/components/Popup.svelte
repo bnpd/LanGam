@@ -9,6 +9,7 @@
 	export let isOpen: boolean = false;
 	export let onPopstate = closeSelf;
 	export let outsideclose = true
+	export let fullWidth = true
 
 	$: if (isOpen && browser) {
 		try {
@@ -30,7 +31,7 @@
 
 {#if isOpen}
 	<div class="popup-container" on:click|self={() => {if (outsideclose) closeSelf()}}>
-		<div class="popup">
+		<div class="popup" class:fullWidth={fullWidth}>
 			<slot></slot> <!-- The slot content needs to make sure that overflow-auto is set (cannot set it here cause we might need some special behavior for some components, e.g. DictionaryComponent)-->
 			{#if closeButtonText}
 				<button class="close-button" on:click={closeSelf}>{closeButtonText}</button>
@@ -67,8 +68,14 @@
 		box-sizing: border-box;
 		display: flex;
 		flex-direction: column;
-		width: 95vw;
+		width: fit-content;
+		max-width: 80vw;
 		max-height: 90dvh;
+	}
+
+	.popup.fullWidth {
+		width: 95vw;
+		max-width: 95vw;
 	}
 
 	@keyframes fadeIn {
