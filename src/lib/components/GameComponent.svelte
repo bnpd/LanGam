@@ -72,7 +72,7 @@
     })
 
     async function onAnswbtnClick(outcome: string) {
-        speechSynthesis?.cancel()
+        window?.speechSynthesis?.cancel()
         statsClosedPromise = new Promise<boolean>((resolve, reject) => {
             statsClosedPromiseResolve = resolve
         })
@@ -113,7 +113,7 @@
     }
 
     async function onLevelBackbtnClick() {
-        speechSynthesis?.cancel()
+        window?.speechSynthesis?.cancel()
         let prevLevelSeqId = $player.level_history.order.pop()
         $player.level = prevLevelSeqId
         $player.stats = $player.level_history[prevLevelSeqId].stats
