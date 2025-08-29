@@ -30,7 +30,7 @@
         answeredCorrectly = answer === answers[0]
         if ($player && answeredCorrectly) {
             // for correct answer, grant 100 points if first answer, 50 if had answered wrong before
-            dispatch('points', { points: !selectedAnswer ? 100 : 50 });
+            dispatch('correctAnswer', { points: !selectedAnswer ? 100 : 50 });
         }
         selectedAnswer = answer;
     }
@@ -47,6 +47,7 @@
                 class:correct={selectedAnswer === answer && answeredCorrectly}
                 class:incorrect={selectedAnswer === answer && !answeredCorrectly}
                 disabled={answeredCorrectly}
+                data-umami-event="Quiz answered"
             >
                 {answer}
             </button>
