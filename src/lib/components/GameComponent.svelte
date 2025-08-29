@@ -13,9 +13,8 @@
 	import GrammarBookComponent from './GrammarBookComponent.svelte';
 	import WebPushSubscription from './WebPushSubscription.svelte';
 	import Popup from './Popup.svelte';
-    import { page } from '$app/stores';
-
-    const DEFAULT_CONGRATS_MESSAGE = 'Well done, keep up the pace!'
+    import QuizComponent from './QuizComponent.svelte';
+    import { page } from '$app/stores';    const DEFAULT_CONGRATS_MESSAGE = 'Well done!'
     const DEFAULT_CONGRATS_TITLE = 'Level complete 🙌'
 
     const UNKNOWN_POS = 0
@@ -231,8 +230,22 @@
     </div>
 {:else}
     <ReaderComponent srWords={new Set()} bind:this={readerComponent}>
-        <span slot="afterTask" hidden={!$currentTask}>{#if $gameChatHistory?.length}<ChatComponent readerComponent={readerComponent} inline={true} chatBoxTitle="Your turn 🤙" chatHistory={gameChatHistory} srWords={new Set()} showGameChatSuggestions={showGameChatSuggestions}/>{/if}</span>
-        <span slot="afterSolution">{#if $gameChatHistory?.length}<ChatComponent readerComponent={readerComponent} inline={true} chatBoxTitle={undefined} chatHistory={gameChatHistory} translationLang={$nativeLang}/>{/if}</span>
+        <span slot="afterTask" hidden={!$currentTask}>
+            {#if $gameChatHistory?.length}
+                <ChatComponent readerComponent={readerComponent} inline={true} chatBoxTitle="Your turn 🤙" chatHistory={gameChatHistory} srWords={new Set()} showGameChatSuggestions={showGameChatSuggestions}/>
+            {:else if $currentTask?.docId == 1} <!-- TODO: implement quiz for later levels -->
+                <QuizComponent on:points={(e) => {
+                    $currentTask.outcomes["default"].text = "You've earned " + e.detail.points + " points!\n" + DEFAULT_CONGRATS_TITLE;
+                    $currentTask.outcomes["default"].title = "Correct!";
+                    onAnswbtnClick("default")
+                }} />
+            {/if}
+        </span>
+        <span slot="afterSolution">
+            {#if $gameChatHistory?.length}
+                <ChatComponent readerComponent={readerComponent} inline={true} chatBoxTitle={undefined} chatHistory={gameChatHistory} translationLang={$nativeLang}/>
+            {/if}
+        </span>
     </ReaderComponent>
 {/if}
 <div style="text-align: center;">
