@@ -49,9 +49,11 @@
     let lockedLevelToast: string | undefined
     let finishedGame = false
     let showSignupPrompt = false
+    let scroll100logged = false
 
-    $: if($currentlyScrolledParagraphIndex >= $currentTaskNParagraphs-1){
+    $: if(!scroll100logged && $currentlyScrolledParagraphIndex >= $currentTaskNParagraphs-1){
         window.umami?.track('Scroll 100%');
+        scroll100logged = true
     }
 
     onMount(async () => {
@@ -235,7 +237,8 @@
             {#if $gameChatHistory?.length}
                 <ChatComponent readerComponent={readerComponent} inline={true} chatBoxTitle="Your turn 🤙" chatHistory={gameChatHistory} srWords={new Set()} showGameChatSuggestions={showGameChatSuggestions}/>
             {:else if $currentTask?.docId == 1} <!-- TODO: implement quiz for later levels -->
-                <QuizComponent on:points={(e) => {
+                <QuizComponent on:correctAnswer={(e) => {
+                    window.umami?.track('Quiz correct answer', { points: e.detail.points, level: $currentTask?.docId });
                     $currentTask.outcomes["default"].text = "You've earned " + e.detail.points + " points!\n" + DEFAULT_CONGRATS_TITLE;
                     $currentTask.outcomes["default"].title = "Correct!";
                     onAnswbtnClick("default", e.detail.points)
