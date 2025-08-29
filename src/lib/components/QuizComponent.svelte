@@ -81,7 +81,7 @@
         display: flex;
         flex-direction: column;
         align-items: center;
-        padding: 1rem;
+        padding: 2rem min(2vw, 2rem) 0 min(2vw, 2rem);
         gap: 1rem;
     }
 
