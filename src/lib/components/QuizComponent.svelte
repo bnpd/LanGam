@@ -26,14 +26,11 @@
     import { createEventDispatcher } from 'svelte';
     const dispatch = createEventDispatcher();
 
-    function handleAnswer(answer: string) {
+    async function handleAnswer(answer: string) {
         answeredCorrectly = answer === answers[0]
         if ($player && answeredCorrectly) {
             // for correct answer, grant 100 points if first answer, 50 if had answered wrong before
-            const pointsGained = !selectedAnswer ? 100 : 50
-            $player.stats.points = $player?.stats?.points ? $player.stats.points + pointsGained : pointsGained
-            if ($player.id) updatePlayer($player)
-            dispatch('points', { points: pointsGained });
+            dispatch('points', { points: !selectedAnswer ? 100 : 50 });
         }
         selectedAnswer = answer;
     }

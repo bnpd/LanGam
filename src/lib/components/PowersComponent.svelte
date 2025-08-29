@@ -3,7 +3,6 @@
 	import { createEventDispatcher } from 'svelte';
 	import { updatePlayer } from "./backend";
 	import Popup from './Popup.svelte';
-    let umami: any; // Umami is initialized in the +layout.svelte from script tag
 
     let isOpen = false
 
@@ -23,8 +22,9 @@
 	}
 </script>
 
-<Popup closeButtonText="Done" bind:isOpen={isOpen} on:closed={() => {window.umami?.track('Powers closed')}}>
+<Popup closeButtonText="Done" bind:isOpen={isOpen} on:closed={() => {window.umami?.track('Powers closed')}} fullWidth={false}>
     <h1>Stats and Powers</h1>
+    <br>
     <table>
         <tr><th>Stat</th><th>Strength</th></tr>
         {#if Object.keys($player.stats).length}
@@ -40,8 +40,9 @@
                 {/if}
             {/each}
         {:else}
-            <em>- None yet -</em>
+            <tr><td><em>- None yet -</em></td><td>-</td></tr>
         {/if}
+        <br>
         <tr><th>Power</th><th>Uses available</th></tr>
         {#if Object.keys($player.powers).length}
             {#each Object.keys($player.powers) as power}
@@ -56,12 +57,15 @@
                 </tr>
             {/each}
         {:else}
-            <em>- None yet -</em>
+            <tr><td><em>- None yet -</em></td><td>-</td></tr>
         {/if}
     </table>
     <br>
+    <strong>Points</strong>
+    {$player.points}
+    <br><br>
 </Popup>
-{#if !isOpen && (Object.keys($player?.stats ?? {}).length || Object.keys($player?.powers ?? {}).length)}
+{#if !isOpen && $player?.points || (Object.keys($player?.stats ?? {}).length || Object.keys($player?.powers ?? {}).length)}
     <button class="gameNavBtn" on:click={toggleIsOpen} data-umami-event="Powers opened">
         🪄
     </button>

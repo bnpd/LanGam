@@ -112,22 +112,24 @@ export async function getTranslations(levelId: string, targetLang: string, actua
 /**
  * @returns {Promise<any>} The updated player
  */
-export async function completeLevel(playerId: string, seqId: number, outcome: string): Promise<any> {
+export async function completeLevel(playerId: string, seqId: number, outcome: string, pointsGained?: number): Promise<any> {
 	return pb.send(`/complete_level`, {method: 'POST', body: {
-		playerId: playerId, 
-		seqId: seqId, 
-		outcome: outcome
+		playerId, 
+		seqId, 
+		outcome,
+		pointsGained
 	}}).then(res => res.player)
 }
 
 /**
  * @returns {Promise<any>} The updated player
  */
-export async function completeLevelAnon(player: any, seqId: number, outcome: string): Promise<any> {
+export async function completeLevelAnon(player: any, seqId: number, outcome: string, pointsGained?: number): Promise<any> {
 	return pb.send(`/complete_level_anon`, {method: 'POST', body: {
-		player: player, 
-		seqId: seqId, 
-		outcome: outcome
+		player, 
+		seqId, 
+		outcome,
+		pointsGained
 	}}).then(res => res.player)
 }
 

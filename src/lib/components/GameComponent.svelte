@@ -71,7 +71,7 @@
         await nextTask();
     })
 
-    async function onAnswbtnClick(outcome: string) {
+    async function onAnswbtnClick(outcome: string, pointsGained?: number) {
         window?.speechSynthesis?.cancel()
         statsClosedPromise = new Promise<boolean>((resolve, reject) => {
             statsClosedPromiseResolve = resolve
@@ -80,9 +80,9 @@
         let completeLevelPromise
         if ($player.level == $currentTask.docId) { // player needs to be leveled up
             completeLevelPromise = $username ? 
-                completeLevel($player.id, $currentTask.docId, outcome)
-                : completeLevelAnon($player, $currentTask.docId, outcome)
-        } else { // player has alrready been leveled up by chat, just resolve the promise
+                completeLevel($player.id, $currentTask.docId, outcome, pointsGained)
+                : completeLevelAnon($player, $currentTask.docId, outcome, pointsGained)
+        } else { // player has alrready been leveled up by chat/quiz, just resolve the promise
             completeLevelPromise = Promise.resolve($player)
         }
 
@@ -118,6 +118,7 @@
         $player.level = prevLevelSeqId
         $player.stats = $player.level_history[prevLevelSeqId].stats
         $player.powers = $player.level_history[prevLevelSeqId].powers
+        $player.points = $player.level_history[prevLevelSeqId].points
         if ($username) updatePlayer($player) // this can just happen async (if it fails it would give room for cheating/frustration though)
         await prevTask(prevLevelSeqId)
     }
@@ -237,7 +238,7 @@
                 <QuizComponent on:points={(e) => {
                     $currentTask.outcomes["default"].text = "You've earned " + e.detail.points + " points!\n" + DEFAULT_CONGRATS_TITLE;
                     $currentTask.outcomes["default"].title = "Correct!";
-                    onAnswbtnClick("default")
+                    onAnswbtnClick("default", e.detail.points)
                 }} />
             {/if}
         </span>
