@@ -10,6 +10,7 @@
   import FooterWithBackgroundImageComponent from '$lib/components/FooterWithBackgroundImageComponent.svelte';
   import './global.css';
 	import { onMount } from 'svelte';
+	import { getLocale } from '$lib/paraglide/runtime';
 
 	let y = 0;
   let footerOpacity = 0.5; // Initial opacity for the footer
@@ -46,6 +47,7 @@
     <h1>{m.hero_title({ targetLang: targetLangLocalized ?? 'a Language' })}</h1>
     <p>{m.hero_subtitle()}</p>
     <a href="/game"><button data-umami-event="Landing Hero CTA" class="highlighted primary-cta">{m.hero_cta()}</button></a>
+    <p><em>{m.free_trial_duration({ date: new Intl.DateTimeFormat(getLocale()).format(new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)) })}</em></p>
   </header>
 
   <!-- 
@@ -132,7 +134,7 @@
 </main>
 
 <style>
-  .card h2, .card h3, .card h4, .card a {
+  .card h2, .card h3, .card h4, .card a, .card em {
     text-align: center;
     width: 100%;
     display: block;
